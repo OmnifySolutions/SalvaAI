@@ -13,17 +13,24 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 export type Business = {
   id: string;
   clerk_user_id: string;
-  business_name: string;
+  name: string;
+  slug: string;
   business_type: string;
   phone_number: string | null;
-  plan: "basic" | "pro" | "trial";
+  plan: "free" | "basic" | "pro";
+  plan_status: string;
   faqs: { question: string; answer: string }[];
-  hours: string;
-  services: string;
+  hours: Record<string, { open: string | null; close: string | null; enabled: boolean }> | string;
+  services: { name: string; description?: string }[] | string;
+  ai_name: string;
+  ai_greeting: string | null;
+  custom_prompt: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   interaction_count: number;
+  interaction_reset_date: string;
   created_at: string;
+  updated_at: string;
 };
 
 export type Conversation = {

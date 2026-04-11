@@ -101,12 +101,24 @@ export async function POST(req: NextRequest) {
           .join("\n\n")
       : "No FAQs configured yet.";
 
-  const systemPrompt = `You are a friendly AI receptionist for ${business.business_name}, a ${business.business_type}.
+  type HoursEntry = { open: string | null; close: string | null; enabled: boolean };
+  const hoursText = typeof business.hours === "string"
+    ? business.hours
+    : Object.entries(business.hours as Record<string, HoursEntry> ?? {})
+        .filter(([, v]) => v.enabled)
+        .map(([day, v]) => `${day}: ${v.open}–${v.close}`)
+        .join(", ") || "Please call us for our hours.";
+
+  const servicesText = Array.isArray(business.services)
+    ? business.services.map((s: { name: string }) => s.name).join(", ")
+    : (business.services as string) || "Please call us to learn about our services.";
+
+  const systemPrompt = `You are a friendly AI receptionist named ${business.ai_name ?? "Claire"} for ${business.name}, a ${business.business_type}.
 
 Your job is to help patients/clients by answering common questions, providing information, and helping them schedule appointments.
 
-Business Hours: ${business.hours || "Please call us for our hours."}
-Services: ${business.services || "Please call us to learn about our services."}
+Business Hours: ${hoursText}
+Services: ${servicesText}
 
 Frequently Asked Questions:
 ${faqText}

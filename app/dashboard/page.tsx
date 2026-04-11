@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
+import SignOutButton from "@/components/SignOutButton";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -39,8 +40,9 @@ export default async function DashboardPage() {
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <span className="font-bold text-blue-600 text-lg">HustleClaude</span>
         <div className="flex items-center gap-4 text-sm text-gray-600">
-          <span>{business.business_name}</span>
-          <Link href="/sign-out" className="text-gray-400 hover:text-gray-600">Sign out</Link>
+          <span>{business.name}</span>
+          <Link href="/settings" className="text-gray-500 hover:text-gray-700 text-sm">Settings</Link>
+          <SignOutButton />
         </div>
       </nav>
 
