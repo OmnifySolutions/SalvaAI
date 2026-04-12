@@ -42,47 +42,41 @@ Key column names — use exactly:
 - Icon style: Lucide, `size={20} strokeWidth={1.5}`, color `text-blue-600`
 
 ## Pricing (locked)
-- Free: $0, 50 interactions/month
-- Basic: $49/month, 500 interactions, chat only, no branding
-- Pro: $149/month (raised from $99), unlimited, chat + voice
-- Competitors: Arini $249, TrueLark/Weave $345 — we are cheapest with same features
+- Free: $0, 50 interactions/month, chat only, branded — demo/lead gen only
+- Basic: $49/month, unlimited chat, no voice, no branding
+- Pro: $189/month, unlimited chat + voice AI (up to 500 calls/month), 92.6% margin
+- Multi-Practice: $649/month, up to 5 locations, everything in Pro, 89.2% margin
+- Competitors: Arini $249, TrueLark/Weave $345 — Pro is $60 cheaper than Arini, $156 cheaper than TrueLark
+- Multi-Practice saves customers $296/month vs buying 5 individual Pro plans ($945)
+- `businesses.plan` values: `"free" | "basic" | "pro" | "multi"`
 
 ## Product decisions (locked)
-- Omnichannel: web chat (live) + voice/Twilio (Week 2) + email (post-launch) + SMS (post-launch, needs A2P 10DLC)
+- Omnichannel: web chat (live) + voice/Twilio (next) + email (post-launch) + SMS (post-launch, needs A2P 10DLC)
 - Voice works via phone forwarding — dental office forwards their number to a Twilio number we provision
+- Voice AI architecture: **Option B — full conversational Media Streams** (NOT IVR). Twilio Media Streams → Railway WebSocket server → Deepgram STT → Claude Haiku → ElevenLabs TTS → audio back to caller. Sub-second latency, natural conversation.
+- Voice infra: Railway hosts the WebSocket server (Next.js/Vercel can't do persistent WebSockets). ~$6/month.
+- Voice is the main product. Chat is a bonus. All homepage messaging should lead with voice/missed calls.
 - No mobile SDK for MVP
 - Free trial requires credit card (Stripe charges $0 now, auto-bills after 30 days) — messaging: "cancel anytime"
 - Cancel anytime policy: yes, keep it, it increases conversions
+- Competitor messaging: never on homepage (signals insecurity). Pricing page only. One soft nudge line on homepage: "Most practices save $60–160/month vs competitors."
 
-## Approved build queue (do these in order)
-1. **Landing page fixes:**
-   - Chat card carousel: slide mechanic (left exits left, right shifts left, new enters from right), always 2 cards side by side, 4 scenarios (insurance, after-hours, new patient, pricing), 6s interval
-   - Floating bubbles: increase size significantly (readable text)
-   - Feature icons: change color to `blue-600`
-   - Stats carousel: all 5 stats, 3 visible at a time, same slide mechanic, content below
+## Homepage messaging rules (locked)
+- Lead with pain: missed calls, lost patients, lost revenue ($150k/year stat is the headline)
+- Voice AI is the hero feature — chat is secondary
+- No competitor tables on homepage — pricing page only
+- One competitive nudge line only: "Most practices save $60–160/month vs competitors"
+- Don't oversell: no "revolutionary", no "best-in-class" — let the numbers speak
 
-2. **Stats copy (use these exactly):**
-   - 35% of dental calls go unanswered
-   - 78% hang up when they reach voicemail
-   - 65% of missed calls are potential new patients
-   - $8,000 lifetime value of a new patient
-   - $150,000 lost annually from missed calls
-
-3. **Pricing page updates:**
-   - Raise Pro price to $149/month
-   - Add competitor comparison table (HustleClaude vs Arini vs TrueLark)
-   - Add "upgrade anytime" messaging
-   - Logged-in users see "Upgrade to this plan" CTA instead of "Start free trial"
-
-4. **Setup guide page** (`/setup`) — step-by-step embed instructions for non-technical dental staff, tabs for Squarespace / Wix / WordPress / custom HTML
-
-5. **Phone forwarding guide** — how to forward calls by carrier (AT&T / Verizon / T-Mobile / RingCentral / Vonage), lives in setup guide or onboarding
-
-6. **Hours picker** — replace text input in settings/onboarding with structured day-by-day picker (Mon–Sun, open/close time, enabled toggle per day)
-
-7. **Stripe billing** — wire up Basic/Pro subscriptions, upgrade path from dashboard
-
-8. **Twilio voice AI** — Week 2
+## Approved build queue (next session, do in order)
+1. **Update pricing everywhere** — pricing page (Free/Basic/Pro/Multi-Practice), CLAUDE.md ✅, Stripe price ID placeholders, plan enum
+2. **Rewrite homepage hero** — voice AI + missed call pain leads, not chat. "$150,000 lost annually" is the headline stat.
+3. **Flip feature section order** — voice first, chat second throughout homepage
+4. **Pre-recorded audio demo section** — 3 scenarios (new patient, after-hours, insurance), simple MP3 player, $0 ongoing cost. Generate with ElevenLabs once.
+5. **Competitive nudge line** — one line near pricing on homepage
+6. **Update pricing page** — new 4-tier pricing, updated competitor table
+7. **Twilio voice AI** — Railway WebSocket server + Deepgram STT + Claude + ElevenLabs TTS + settings Voice AI section + schema (`twilio_number`, `voice_enabled` on businesses)
+8. **Browser voice demo** (Phase 2, after voice is live) — talk to AI in browser via WebRTC, no phone needed
 
 ## Key stats (verified, use in copy)
 - 35% of dental calls go unanswered (>50% during busy hours)
@@ -95,9 +89,11 @@ Key column names — use exactly:
 
 ## Unit economics
 - Basic margin: ~96% ($47 profit on $49)
-- Pro margin: ~94% ($140 profit on $149)
-- Main costs: Stripe 2.9%+$0.30, Claude Haiku API ~$0.001/msg, Twilio $1.15/number + $0.0085/min
+- Pro margin: ~92.6% ($175 profit on $189) — voice cost ~$14/customer/month
+- Multi-Practice margin: ~89.2% ($579 profit on $649) — voice cost ~$70 (5 locations)
+- Main costs: Stripe 2.9%+$0.30, Claude Haiku ~$0.001/msg, Twilio $1.15/number + $0.0085/min, Deepgram $0.0059/min, ElevenLabs ~$7-10/Pro customer/month, Railway ~$6/month flat
 - Infrastructure (Supabase/Vercel/Clerk) free until ~50-80 customers
+- Path to $20K MRR: ~106 Pro customers or ~80 Pro + a few Multi-Practice
 
 ## Workflow rules
 - **Git: no approval needed** — run all git commands (add, commit, push, branch, etc.) without asking for permission first. Just do it.
