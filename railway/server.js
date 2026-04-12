@@ -8,6 +8,9 @@ expressWs(app);
 const PORT = process.env.PORT || 8080;
 const DEEPGRAM_API_KEY    = process.env.DEEPGRAM_API_KEY;
 const ANTHROPIC_API_KEY   = process.env.ANTHROPIC_API_KEY;
+const GROQ_API_KEY        = process.env.GROQ_API_KEY;
+// Feature flag: set GROQ_API_KEY in Railway env to use Groq (testing). Remove to use Claude (production).
+const USE_GROQ            = !!GROQ_API_KEY;
 const ELEVENLABS_API_KEY  = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID;
 const SUPABASE_URL        = process.env.SUPABASE_URL;
@@ -133,8 +136,29 @@ function safeParse(s) {
 }
 
 // ============================================================================
-// Claude (direct HTTP, no SDK)
+// LLM helpers — Groq (testing) or Claude Haiku (production)
+// Switch by setting/removing GROQ_API_KEY in Railway env vars.
 // ============================================================================
+
+async function callGroq(systemPrompt, messages, signal) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 300,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+    }),
+    signal,
+  });
+  if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || '';
+}
+
 async function callClaude(systemPrompt, messages, signal) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -156,13 +180,25 @@ async function callClaude(systemPrompt, messages, signal) {
   return data.content?.[0]?.text?.trim() || '';
 }
 
+async function callLLM(systemPrompt, messages, signal) {
+  if (USE_GROQ) {
+    console.log('[LLM] Using Groq (testing mode)');
+    return callGroq(systemPrompt, messages, signal);
+  }
+  return callClaude(systemPrompt, messages, signal);
+}
+
 // Generate a post-call summary for SMS notification
 async function generateCallSummary(businessName, messages) {
   if (!messages.length) return null;
   const transcript = messages
     .map((m) => `${m.role === 'user' ? 'Caller' : 'AI'}: ${m.content}`)
     .join('\n');
+  const summarySystem = 'Summarise this dental office call in one short sentence. Note if an appointment or callback was requested. Be brief.';
   try {
+    if (USE_GROQ) {
+      return await callGroq(summarySystem, [{ role: 'user', content: transcript }]);
+    }
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -173,7 +209,7 @@ async function generateCallSummary(businessName, messages) {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 100,
-        system: 'Summarise this dental office call in one short sentence. Note if an appointment or callback was requested. Be brief.',
+        system: summarySystem,
         messages: [{ role: 'user', content: transcript }],
       }),
     });
@@ -370,7 +406,7 @@ app.ws('/media-stream', async (ws, req) => {
 
         abortController = new AbortController();
         try {
-          const reply = await callClaude(systemPrompt, messages, abortController.signal);
+          const reply = await callLLM(systemPrompt, messages, abortController.signal);
           if (!reply || abortController.signal.aborted) return;
 
           console.log(`[AI] ${reply}`);
