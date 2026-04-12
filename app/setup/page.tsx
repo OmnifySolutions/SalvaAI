@@ -5,18 +5,26 @@ import Link from "next/link";
 import { Check, Copy, ExternalLink, ChevronRight } from "lucide-react";
 
 type Platform = "squarespace" | "wix" | "wordpress" | "html";
+type Carrier  = "gsm" | "voip" | "us";
 
-const TABS: { id: Platform; label: string }[] = [
+const PLATFORM_TABS: { id: Platform; label: string }[] = [
   { id: "squarespace", label: "Squarespace" },
   { id: "wix",         label: "Wix" },
   { id: "wordpress",   label: "WordPress" },
   { id: "html",        label: "Custom HTML" },
 ];
 
+const CARRIER_TABS: { id: Carrier; label: string; sub: string }[] = [
+  { id: "gsm",  label: "Mobile / GSM",           sub: "Works worldwide" },
+  { id: "voip", label: "VoIP & Business Phones",  sub: "RingCentral, Vonage, 3CX…" },
+  { id: "us",   label: "US Mobile Carriers",      sub: "AT&T, Verizon, T-Mobile" },
+];
+
 const PLACEHOLDER_CODE = `<script src="https://app.hustleclaude.com/api/widget/embed?id=YOUR_ID"></script>`;
 
 export default function SetupPage() {
   const [platform, setPlatform] = useState<Platform>("squarespace");
+  const [carrier,  setCarrier]  = useState<Carrier>("gsm");
   const [copied, setCopied] = useState(false);
 
   function copyCode() {
@@ -106,7 +114,7 @@ export default function SetupPage() {
 
           {/* Platform tabs */}
           <div className="flex flex-wrap gap-2 mb-6">
-            {TABS.map((tab) => (
+            {PLATFORM_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setPlatform(tab.id)}
@@ -150,6 +158,98 @@ export default function SetupPage() {
             ))}
           </ol>
         </Step>
+
+        {/* ── Voice AI setup ────────────────────────────────────────────── */}
+        <div className="mt-16 pt-14 border-t border-gray-100">
+          <div className="flex items-center gap-3 mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Voice AI setup</h2>
+                <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">Pro</span>
+              </div>
+              <p className="text-gray-500 text-sm">
+                Forward your office phone to your HustleClaude number so the AI answers when your team can&apos;t.
+              </p>
+            </div>
+          </div>
+
+          {/* How it works */}
+          <div className="bg-gray-50 rounded-2xl p-5 mb-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
+            {[
+              { step: "Patient calls", sub: "your existing office number" },
+              { step: "No answer", sub: "after ~4 rings (20 sec)" },
+              { step: "AI picks up", sub: "on your HustleClaude number" },
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <div className="w-8 h-8 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700 flex items-center justify-center mb-1">
+                  {i + 1}
+                </div>
+                <span className="font-medium text-gray-800">{item.step}</span>
+                <span className="text-gray-500 text-xs">{item.sub}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Steps */}
+          <Step number={1} title="Find your forwarding number">
+            <p className="text-gray-500 text-sm mb-3">
+              Once you activate the Pro plan, HustleClaude provisions a dedicated phone number for your practice. You&apos;ll find it in your dashboard under <span className="font-medium text-gray-700">Settings → Voice AI</span>.
+            </p>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+              <span className="text-gray-400 text-xs font-mono">+1 (555) 000-0000</span>
+              <span className="text-gray-300">—</span>
+              <span className="text-xs">Your number will appear here after Pro activation</span>
+            </div>
+          </Step>
+
+          <Step number={2} title="Set up call forwarding on your office phone">
+            <p className="text-gray-500 text-sm mb-5">
+              Choose your phone type. We recommend <strong className="text-gray-700">forward when unanswered</strong> — your staff can still answer calls normally; the AI only kicks in when nobody picks up.
+            </p>
+
+            {/* Carrier tabs */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {CARRIER_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setCarrier(tab.id)}
+                  className={`flex flex-col items-start px-4 py-2.5 rounded-xl border text-left transition-colors ${
+                    carrier === tab.id
+                      ? "bg-gray-900 border-gray-900 text-white"
+                      : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  <span className="text-sm font-medium leading-tight">{tab.label}</span>
+                  <span className={`text-xs mt-0.5 ${carrier === tab.id ? "text-gray-400" : "text-gray-400"}`}>{tab.sub}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="border border-gray-200 rounded-2xl overflow-hidden">
+              {carrier === "gsm"  && <GsmSteps />}
+              {carrier === "voip" && <VoipSteps />}
+              {carrier === "us"   && <UsCarrierSteps />}
+            </div>
+          </Step>
+
+          <Step number={3} title="Test your forwarding" last>
+            <ol className="space-y-3">
+              {[
+                "Call your office number from a different phone.",
+                "Let it ring without answering — after about 20 seconds (4–5 rings), the AI should pick up.",
+                "You should hear your AI receptionist greet the caller.",
+                "If it goes to your old voicemail instead, double-check the forwarding number and repeat the setup steps.",
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </Step>
+        </div>
 
         {/* Help */}
         <div className="mt-12 bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -315,6 +415,150 @@ function WordPressSteps() {
             ))}
           </ol>
         </details>
+      </div>
+    </div>
+  );
+}
+
+// ─── Carrier content ──────────────────────────────────────────────────────────
+
+function ForwardCode({ label, code, note }: { label: string; code: string; note?: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-gray-100 last:border-0">
+      <div>
+        <p className="text-sm font-medium text-gray-700">{label}</p>
+        {note && <p className="text-xs text-gray-400 mt-0.5">{note}</p>}
+      </div>
+      <code className="shrink-0 bg-gray-900 text-green-400 text-xs font-mono px-3 py-1.5 rounded-lg">{code}</code>
+    </div>
+  );
+}
+
+function GsmSteps() {
+  return (
+    <div>
+      <div className="bg-gray-50 border-b border-gray-200 px-5 py-3">
+        <p className="text-xs font-medium text-gray-600 mb-0.5">Standard GSM codes — works on virtually all mobile carriers worldwide</p>
+        <p className="text-xs text-gray-400">Dial the code from your office phone keypad and press Call. Replace <span className="font-mono">+XXXXXXXXXXX</span> with your HustleClaude number (include country code, e.g. +44 for UK, +1 for US).</p>
+      </div>
+      <div className="px-5 pt-3 pb-1">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Activate forwarding</p>
+        <ForwardCode
+          label="Forward when unanswered (recommended)"
+          code="*61*+XXXXXXXXXXX#"
+          note="AI answers after ~4 rings. Your staff can still pick up first."
+        />
+        <ForwardCode
+          label="Forward when busy"
+          code="*67*+XXXXXXXXXXX#"
+          note="Forwards if the line is engaged."
+        />
+        <ForwardCode
+          label="Forward all calls"
+          code="*21*+XXXXXXXXXXX#"
+          note="Every call goes straight to the AI — staff cannot answer first."
+        />
+      </div>
+      <div className="px-5 pt-3 pb-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Deactivate forwarding</p>
+        <ForwardCode label="Cancel forward when unanswered" code="#61#" />
+        <ForwardCode label="Cancel forward when busy"       code="#67#" />
+        <ForwardCode label="Cancel all call forwarding"     code="#21#" />
+      </div>
+      <div className="bg-blue-50 border-t border-blue-100 px-5 py-3 text-xs text-blue-700">
+        These codes follow the 3GPP standard and work on mobile networks in 180+ countries including the EU, UK, US, Canada, Australia, and most of Asia. If your carrier uses different codes, check their website or call their business support line.
+      </div>
+    </div>
+  );
+}
+
+function VoipSteps() {
+  return (
+    <div>
+      <div className="bg-gray-50 border-b border-gray-200 px-5 py-3">
+        <p className="text-xs text-gray-400">Select your platform. All of these are available globally.</p>
+      </div>
+
+      {/* RingCentral */}
+      <div className="px-5 py-4 border-b border-gray-100">
+        <p className="text-sm font-semibold text-gray-800 mb-2">RingCentral</p>
+        <NavPath steps={["Admin Portal", "Phone System", "Users", "Select user", "Call Handling & Forwarding"]} />
+        <Instructions steps={[
+          <>In the <strong className="text-gray-800">Admin Portal</strong>, go to <strong className="text-gray-800">Phone System → Users</strong>.</>,
+          <>Click the user whose calls should forward (usually the main receptionist line).</>,
+          <>Open <strong className="text-gray-800">Call Handling &amp; Forwarding</strong>.</>,
+          <>Under <strong className="text-gray-800">If no one answers</strong>, select <strong className="text-gray-800">Forward to external number</strong> and enter your HustleClaude number.</>,
+          <>Set the ring time to <strong className="text-gray-800">20–25 seconds</strong> and save.</>,
+        ]} />
+      </div>
+
+      {/* Vonage */}
+      <div className="px-5 py-4 border-b border-gray-100">
+        <p className="text-sm font-semibold text-gray-800 mb-2">Vonage Business Communications</p>
+        <NavPath steps={["Admin Dashboard", "Phone Numbers", "Select number", "Call Forwarding"]} />
+        <Instructions steps={[
+          <>Log in to the <strong className="text-gray-800">Vonage Business Admin Dashboard</strong>.</>,
+          <>Go to <strong className="text-gray-800">Phone Numbers</strong> and click on your main office number.</>,
+          <>Select <strong className="text-gray-800">Call Forwarding</strong> and choose <strong className="text-gray-800">Forward when not answered</strong>.</>,
+          <>Enter your HustleClaude forwarding number and click <strong className="text-gray-800">Save</strong>.</>,
+        ]} />
+      </div>
+
+      {/* 3CX */}
+      <div className="px-5 py-4 border-b border-gray-100">
+        <p className="text-sm font-semibold text-gray-800 mb-2">3CX</p>
+        <NavPath steps={["Admin Console", "Users", "Select extension", "Forwarding Rules"]} />
+        <Instructions steps={[
+          <>In the <strong className="text-gray-800">3CX Admin Console</strong>, go to <strong className="text-gray-800">Users</strong>.</>,
+          <>Select the extension for your main reception line.</>,
+          <>Click <strong className="text-gray-800">Forwarding Rules</strong> and set <strong className="text-gray-800">No Answer</strong> to <strong className="text-gray-800">Forward to number</strong>.</>,
+          <>Enter your HustleClaude number (with country code) and save.</>,
+        ]} />
+      </div>
+
+      {/* Generic */}
+      <div className="px-5 py-4">
+        <p className="text-sm font-semibold text-gray-800 mb-2">Other VoIP / cloud PBX systems</p>
+        <p className="text-sm text-gray-500">
+          Look for <strong className="text-gray-700">Call Forwarding</strong> or <strong className="text-gray-700">No Answer rules</strong> in your admin dashboard. You want to forward to an <strong className="text-gray-700">external number</strong> when a call goes unanswered after 20–25 seconds. Contact your VoIP provider&apos;s support if you can&apos;t find the setting.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function UsCarrierSteps() {
+  return (
+    <div>
+      <div className="bg-gray-50 border-b border-gray-200 px-5 py-3">
+        <p className="text-xs text-gray-400">For US mobile carriers. Replace <span className="font-mono">10DIGITNUMBER</span> with your HustleClaude number (10 digits, no spaces).</p>
+      </div>
+
+      {/* AT&T */}
+      <div className="px-5 py-4 border-b border-gray-100">
+        <p className="text-sm font-semibold text-gray-800 mb-3">AT&T</p>
+        <ForwardCode label="Forward when unanswered" code="*61*10DIGITNUMBER#" note="Recommended — staff can still answer first" />
+        <ForwardCode label="Forward all calls"       code="*21*10DIGITNUMBER#" />
+        <ForwardCode label="Deactivate unanswered"   code="#61#" />
+        <p className="text-xs text-gray-400 mt-2">You can also manage call forwarding in the <strong className="text-gray-600">myAT&amp;T app</strong> under Phone → Call Forwarding.</p>
+      </div>
+
+      {/* Verizon */}
+      <div className="px-5 py-4 border-b border-gray-100">
+        <p className="text-sm font-semibold text-gray-800 mb-3">Verizon</p>
+        <ForwardCode label="Forward when unanswered" code="*61*10DIGITNUMBER#" note="Recommended" />
+        <ForwardCode label="Forward all calls"       code="*72 10DIGITNUMBER"  note="Dial, wait for confirmation tone, hang up" />
+        <ForwardCode label="Deactivate all"          code="*73"                note="Dial and wait for confirmation" />
+        <p className="text-xs text-gray-400 mt-2">You can also manage this in <strong className="text-gray-600">My Verizon</strong> under Account → Manage Services → Call Forwarding.</p>
+      </div>
+
+      {/* T-Mobile */}
+      <div className="px-5 py-4">
+        <p className="text-sm font-semibold text-gray-800 mb-3">T-Mobile</p>
+        <ForwardCode label="Forward when unanswered" code="**61*10DIGITNUMBER#" note="Recommended" />
+        <ForwardCode label="Forward all calls"       code="*21*10DIGITNUMBER#" />
+        <ForwardCode label="Deactivate unanswered"   code="##61#" />
+        <p className="text-xs text-gray-400 mt-2">You can also go to <strong className="text-gray-600">T-Mobile app → Account → More → Call Forwarding</strong>.</p>
       </div>
     </div>
   );
