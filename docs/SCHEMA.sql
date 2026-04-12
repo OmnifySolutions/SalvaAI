@@ -48,6 +48,9 @@ CREATE TABLE businesses (
   interaction_count INT DEFAULT 0,
   interaction_reset_date TIMESTAMPTZ DEFAULT (CURRENT_TIMESTAMP + INTERVAL '1 month'),
 
+  -- Voice AI
+  voice_enabled BOOLEAN DEFAULT false,
+
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
