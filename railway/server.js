@@ -667,13 +667,14 @@ app.ws('/media-stream', async (ws, req) => {
     try {
       console.log(`[AI] ${greeting}`);
       await speakToTwilio(greeting, ws, streamSid, abortController.signal);
-      // Only commit greeting to history + heardSentences if fully played
-      if (!abortController.signal.aborted) {
-        messages.push({ role: 'assistant', content: greeting });
-        heardSentences.push(greeting);
-        if (conversationId) {
-          saveMessage(conversationId, 'assistant', greeting).catch(() => {});
-        }
+      // Always push greeting to messages — even if interrupted the LLM still
+      // needs it as context. Don't put it in heardSentences: processTurn pushes
+      // heardSentences → messages on each turn, which would double-insert the
+      // greeting and produce invalid consecutive assistant messages (LLM rejects).
+      messages.push({ role: 'assistant', content: greeting });
+      heardSentences = []; // keep empty so processTurn skips the heardSentences block
+      if (conversationId) {
+        saveMessage(conversationId, 'assistant', greeting).catch(() => {});
       }
     } catch (e) {
       if (e.name !== 'AbortError') console.error('[Greeting]', e.message);
