@@ -37,7 +37,7 @@ export default function VoiceTestPage() {
         const { Device } = await import('@twilio/voice-sdk');
         const device = new Device(token, { logLevel: 'warn' });
 
-        device.on('ready', () => {
+        device.on('registered', () => {
           addLog('Device ready — microphone access granted');
           setReady(true);
         });
