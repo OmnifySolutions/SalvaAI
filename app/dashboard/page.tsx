@@ -79,7 +79,12 @@ export default async function DashboardPage() {
 
         {/* Embed code */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-800 mb-1">Embed Your Widget</h2>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-semibold text-gray-800">Embed Your Widget</h2>
+            <Link href="/setup" className="text-xs text-blue-500 hover:text-blue-600 transition-colors">
+              Setup guide →
+            </Link>
+          </div>
           <p className="text-sm text-gray-500 mb-3">
             Paste this one line of code before the{" "}
             <code className="bg-gray-100 px-1 rounded">&lt;/body&gt;</code> tag on your website.
