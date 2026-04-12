@@ -13,6 +13,7 @@ import {
 import ChatCardSpread from "@/components/ChatCardSpread";
 import FloatingBubbles from "@/components/FloatingBubbles";
 import StatsCarousel from "@/components/StatsCarousel";
+import AudioDemo from "@/components/AudioDemo";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -112,6 +113,9 @@ export default async function HomePage() {
           <StatsCarousel />
         </div>
       </section>
+
+      {/* Audio demo */}
+      <AudioDemo />
 
       {/* Features */}
       <section id="features" className="max-w-6xl mx-auto px-6 py-24">
