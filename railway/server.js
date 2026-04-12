@@ -221,7 +221,7 @@ async function generateCallSummary(businessName, messages) {
 }
 
 // ============================================================================
-// ElevenLabs streaming TTS → Twilio media frames (mulaw 8kHz, 160-byte/frame)
+// Deepgram TTS → Twilio media frames (mulaw 8kHz, 160-byte/frame)
 // Returns when audio is fully sent OR when abortSignal is triggered (barge-in)
 // ============================================================================
 const FRAME_SIZE = 160; // 20ms of mulaw 8kHz audio
@@ -230,24 +230,20 @@ async function speakToTwilio(text, ws, streamSid, signal) {
   if (!text || !streamSid || ws.readyState !== WebSocket.OPEN) return;
 
   const res = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}/stream?output_format=ulaw_8000`,
+    'https://api.deepgram.com/v1/speak?model=aura-asteria-en&encoding=mulaw&sample_rate=8000&container=none',
     {
       method: 'POST',
       headers: {
-        'xi-api-key': ELEVENLABS_API_KEY,
+        Authorization: `Token ${DEEPGRAM_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        text,
-        model_id: 'eleven_turbo_v2_5',
-        voice_settings: { stability: 0.5, similarity_boost: 0.75 },
-      }),
+      body: JSON.stringify({ text }),
       signal,
     }
   );
 
   if (!res.ok || !res.body) {
-    console.error('[ElevenLabs]', res.status);
+    console.error('[Deepgram TTS]', res.status, await res.text().catch(() => ''));
     return;
   }
 
@@ -277,7 +273,7 @@ async function speakToTwilio(text, ws, streamSid, signal) {
       }
     }
   } catch (e) {
-    if (e.name !== 'AbortError') console.error('[ElevenLabs stream]', e.message);
+    if (e.name !== 'AbortError') console.error('[Deepgram TTS stream]', e.message);
     return;
   }
 
