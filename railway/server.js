@@ -6,12 +6,14 @@ const app = express();
 expressWs(app);
 
 const PORT = process.env.PORT || 8080;
-const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+const DEEPGRAM_API_KEY    = process.env.DEEPGRAM_API_KEY;
+const ANTHROPIC_API_KEY   = process.env.ANTHROPIC_API_KEY;
+const ELEVENLABS_API_KEY  = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID;
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_URL        = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const TWILIO_ACCOUNT_SID  = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN   = process.env.TWILIO_AUTH_TOKEN;
 
 // ============================================================================
 // Supabase REST helpers (no SDK)
@@ -54,34 +56,48 @@ async function saveMessage(conversationId, role, content) {
   });
 }
 
-async function endConversation(conversationId) {
+async function endConversation(conversationId, summary = null) {
+  const update = { status: 'completed', ended_at: new Date().toISOString() };
+  if (summary) update.summary = summary;
   return supabaseRequest(`conversations?id=eq.${conversationId}`, {
     method: 'PATCH',
-    body: JSON.stringify({
-      status: 'completed',
-      ended_at: new Date().toISOString(),
-    }),
+    body: JSON.stringify(update),
     headers: { Prefer: 'return=minimal' },
   });
 }
 
 // ============================================================================
-// System prompt builder (phone-optimized)
+// Twilio SMS (raw REST, no SDK)
+// ============================================================================
+async function sendSms(to, from, body) {
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !to || !from) return;
+  const creds = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
+  const res = await fetch(
+    `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${creds}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: body }).toString(),
+    }
+  );
+  if (!res.ok) console.error('[SMS] Error:', res.status, await res.text().catch(() => ''));
+  else console.log(`[SMS] Sent to ${to}`);
+}
+
+// ============================================================================
+// System prompt builder (phone-optimised, no markdown/lists)
 // ============================================================================
 function buildSystemPrompt(business) {
-  const hours =
-    typeof business.hours === 'string'
-      ? safeParse(business.hours)
-      : business.hours || {};
-  const services =
-    typeof business.services === 'string'
-      ? safeParse(business.services)
-      : business.services || [];
-  const faqs = business.faqs || [];
+  const hours    = typeof business.hours    === 'string' ? safeParse(business.hours)    : (business.hours    || {});
+  const services = typeof business.services === 'string' ? safeParse(business.services) : (business.services || []);
+  const faqs     = business.faqs || [];
 
   const hoursText = Object.entries(hours)
     .filter(([, v]) => v?.enabled)
-    .map(([day, v]) => `${day}: ${v.open}-${v.close}`)
+    .map(([day, v]) => `${day}: ${v.open}–${v.close}`)
     .join(', ');
 
   const servicesText = Array.isArray(services)
@@ -94,37 +110,32 @@ function buildSystemPrompt(business) {
 
   return `You are ${business.ai_name || 'Claire'}, the AI receptionist for ${business.name}.
 
-You are answering a phone call. Speak naturally and conversationally — like a real receptionist, not a chatbot. Never use lists, bullet points, markdown, or formatting of any kind. Your responses will be read aloud by a text-to-speech engine, so write in complete spoken sentences.
+You are answering a live phone call. Be warm, natural, and concise — like a real receptionist, not a chatbot. Never use lists, bullet points, or any formatting. Your words will be spoken aloud by text-to-speech, so write exactly as you would speak.
 
-Keep responses SHORT — usually one to two sentences. Only give longer answers when directly asked a detailed question.
+Keep responses to one or two sentences. Give longer answers only when a caller asks a detailed question.
 
-Practice info:
+Practice information:
 - Name: ${business.name}
-- Hours: ${hoursText || 'See website'}
+- Hours: ${hoursText || 'See website for current hours'}
 - Services: ${servicesText || 'General dental care'}
+${business.custom_prompt ? `\nAdditional instructions:\n${business.custom_prompt}` : ''}
+${faqText ? `\nFrequently asked questions:\n${faqText}` : ''}
 
-${business.custom_prompt ? `Additional instructions:\n${business.custom_prompt}\n` : ''}
-${faqText ? `Frequently asked questions:\n${faqText}\n` : ''}
-
-Rules:
-- If asked anything clinical or medical, say you'll have a team member call back.
-- If you don't know the answer, offer to take a message for the office to follow up.
-- Sound warm, friendly, and professional. Never sound robotic.
-- Do not mention that you are an AI unless asked directly.`;
+Guidelines:
+- Never discuss clinical or medical specifics — say you'll have a team member call back.
+- If someone wants to schedule an appointment or be called back, get their name and confirm you'll pass it to the office.
+- If you don't know something, offer to have the office follow up.
+- Do not volunteer that you are an AI unless directly asked.`;
 }
 
 function safeParse(s) {
-  try {
-    return JSON.parse(s);
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(s); } catch { return {}; }
 }
 
 // ============================================================================
-// Claude (Anthropic API) — direct HTTP, no SDK
+// Claude (direct HTTP, no SDK)
 // ============================================================================
-async function callClaude(systemPrompt, messages) {
+async function callClaude(systemPrompt, messages, signal) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -138,21 +149,48 @@ async function callClaude(systemPrompt, messages) {
       system: systemPrompt,
       messages,
     }),
+    signal,
   });
-  if (!res.ok) {
-    throw new Error(`Anthropic ${res.status}: ${await res.text()}`);
-  }
+  if (!res.ok) throw new Error(`Anthropic ${res.status}: ${await res.text()}`);
   const data = await res.json();
   return data.content?.[0]?.text?.trim() || '';
 }
 
-// ============================================================================
-// ElevenLabs streaming TTS → Twilio media frames
-// Twilio expects mulaw 8kHz, 20ms frames (160 bytes each), base64-encoded
-// ============================================================================
-const FRAME_SIZE = 160;
+// Generate a post-call summary for SMS notification
+async function generateCallSummary(businessName, messages) {
+  if (!messages.length) return null;
+  const transcript = messages
+    .map((m) => `${m.role === 'user' ? 'Caller' : 'AI'}: ${m.content}`)
+    .join('\n');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 100,
+        system: 'Summarise this dental office call in one short sentence. Note if an appointment or callback was requested. Be brief.',
+        messages: [{ role: 'user', content: transcript }],
+      }),
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text?.trim() || null;
+  } catch {
+    return null;
+  }
+}
 
-async function speakToTwilio(text, ws, streamSid) {
+// ============================================================================
+// ElevenLabs streaming TTS → Twilio media frames (mulaw 8kHz, 160-byte/frame)
+// Returns when audio is fully sent OR when abortSignal is triggered (barge-in)
+// ============================================================================
+const FRAME_SIZE = 160; // 20ms of mulaw 8kHz audio
+
+async function speakToTwilio(text, ws, streamSid, signal) {
   if (!text || !streamSid || ws.readyState !== WebSocket.OPEN) return;
 
   const res = await fetch(
@@ -168,41 +206,47 @@ async function speakToTwilio(text, ws, streamSid) {
         model_id: 'eleven_turbo_v2_5',
         voice_settings: { stability: 0.5, similarity_boost: 0.75 },
       }),
+      signal,
     }
   );
 
   if (!res.ok || !res.body) {
-    console.error('[ElevenLabs]', res.status, await res.text().catch(() => ''));
+    console.error('[ElevenLabs]', res.status);
     return;
   }
 
   let buffer = Buffer.alloc(0);
   const reader = res.body.getReader();
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (!value) continue;
+  try {
+    while (true) {
+      if (signal?.aborted) break;
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
 
-    buffer = Buffer.concat([buffer, Buffer.from(value)]);
+      buffer = Buffer.concat([buffer, Buffer.from(value)]);
 
-    while (buffer.length >= FRAME_SIZE) {
-      const frame = buffer.subarray(0, FRAME_SIZE);
-      buffer = buffer.subarray(FRAME_SIZE);
-
-      if (ws.readyState !== WebSocket.OPEN) return;
-      ws.send(
-        JSON.stringify({
-          event: 'media',
-          streamSid,
-          media: { payload: frame.toString('base64') },
-        })
-      );
+      while (buffer.length >= FRAME_SIZE) {
+        if (signal?.aborted || ws.readyState !== WebSocket.OPEN) return;
+        const frame = buffer.subarray(0, FRAME_SIZE);
+        buffer = buffer.subarray(FRAME_SIZE);
+        ws.send(
+          JSON.stringify({
+            event: 'media',
+            streamSid,
+            media: { payload: frame.toString('base64') },
+          })
+        );
+      }
     }
+  } catch (e) {
+    if (e.name !== 'AbortError') console.error('[ElevenLabs stream]', e.message);
+    return;
   }
 
-  // Flush any remainder
-  if (buffer.length > 0 && ws.readyState === WebSocket.OPEN) {
+  // Flush remainder
+  if (!signal?.aborted && buffer.length > 0 && ws.readyState === WebSocket.OPEN) {
     ws.send(
       JSON.stringify({
         event: 'media',
@@ -214,7 +258,7 @@ async function speakToTwilio(text, ws, streamSid) {
 }
 
 // ============================================================================
-// Twilio webhook → TwiML (fallback; Next.js usually handles this)
+// Twilio fallback webhook (Next.js handles the real one)
 // ============================================================================
 app.post('/incoming-call', express.json(), (req, res) => {
   const railwayUrl = process.env.RAILWAY_URL || 'wss://localhost:8080';
@@ -229,7 +273,7 @@ app.post('/incoming-call', express.json(), (req, res) => {
 });
 
 // ============================================================================
-// Media Stream WebSocket handler — the main pipeline
+// Media Stream WebSocket — main AI pipeline
 // ============================================================================
 app.ws('/media-stream', async (ws, req) => {
   console.log('[Twilio] New Media Stream connection');
@@ -237,30 +281,36 @@ app.ws('/media-stream', async (ws, req) => {
   const url = new URL(req.url, 'http://localhost');
   const conversationId = url.searchParams.get('conversationId');
 
-  let streamSid = null;
-  let business = null;
-  let systemPrompt = '';
-  const messages = [];
-
-  let dgSocket = null;
-  let isSpeaking = false;
+  // Per-call state
+  let streamSid        = null;
+  let business         = null;
+  let systemPrompt     = '';
+  const messages       = [];   // { role, content }[]
+  let callerPhone      = null;
+  let dgSocket         = null;
+  let isSpeaking       = false;
   let pendingTranscript = '';
+  let abortController  = null; // for barge-in cancellation
+  let cleanedUp        = false;
 
-  // Load business config early (before Twilio start event arrives)
+  // Load business config before Twilio start event arrives
   if (conversationId) {
     try {
       business = await getBusinessByConversationId(conversationId);
       if (business) {
         systemPrompt = buildSystemPrompt(business);
-        console.log(`[Call] Loaded business: ${business.name}`);
+        console.log(`[Call] Business: ${business.name}`);
       } else {
-        console.warn('[Call] No business found for conversation', conversationId);
+        console.warn('[Call] No business for conversation', conversationId);
       }
     } catch (e) {
-      console.error('[Supabase] Load error:', e.message);
+      console.error('[Supabase]', e.message);
     }
   }
 
+  // ------------------------------------------------------------------
+  // Deepgram streaming STT setup
+  // ------------------------------------------------------------------
   function setupDeepgram() {
     const params = new URLSearchParams({
       encoding: 'mulaw',
@@ -277,8 +327,8 @@ app.ws('/media-stream', async (ws, req) => {
       headers: { Authorization: `Token ${DEEPGRAM_API_KEY}` },
     });
 
-    dgSocket.on('open', () => console.log('[Deepgram] Connected'));
-    dgSocket.on('error', (e) => console.error('[Deepgram] Error:', e.message));
+    dgSocket.on('open',  () => console.log('[Deepgram] Connected'));
+    dgSocket.on('error', (e) => console.error('[Deepgram]', e.message));
     dgSocket.on('close', () => console.log('[Deepgram] Closed'));
 
     dgSocket.on('message', async (raw) => {
@@ -294,81 +344,146 @@ app.ws('/media-stream', async (ws, req) => {
 
         const userText = pendingTranscript;
         pendingTranscript = '';
-        if (!userText || isSpeaking) return;
+        if (!userText) return;
+
+        // ── Barge-in: caller spoke while AI was talking ──────────────
+        if (isSpeaking && abortController) {
+          console.log('[Barge-in] Caller interrupted');
+          abortController.abort();
+          isSpeaking = false;
+          // Tell Twilio to stop playing buffered audio
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ event: 'clear', streamSid }));
+          }
+        }
+
+        if (isSpeaking) return; // still speaking after non-abortable path
+        isSpeaking = true;
 
         console.log(`[User] ${userText}`);
         messages.push({ role: 'user', content: userText });
         if (conversationId) {
           saveMessage(conversationId, 'user', userText).catch((e) =>
-            console.error('[DB]', e.message)
+            console.error('[DB save]', e.message)
           );
         }
 
-        isSpeaking = true;
+        abortController = new AbortController();
         try {
-          const reply = await callClaude(systemPrompt, messages);
-          if (!reply) return;
+          const reply = await callClaude(systemPrompt, messages, abortController.signal);
+          if (!reply || abortController.signal.aborted) return;
+
           console.log(`[AI] ${reply}`);
           messages.push({ role: 'assistant', content: reply });
           if (conversationId) {
             saveMessage(conversationId, 'assistant', reply).catch((e) =>
-              console.error('[DB]', e.message)
+              console.error('[DB save]', e.message)
             );
           }
-          await speakToTwilio(reply, ws, streamSid);
+
+          await speakToTwilio(reply, ws, streamSid, abortController.signal);
         } catch (e) {
-          console.error('[AI] Error:', e.message);
+          if (e.name !== 'AbortError') console.error('[AI]', e.message);
         } finally {
           isSpeaking = false;
+          abortController = null;
         }
       } catch (e) {
-        console.error('[Deepgram] Parse error:', e.message);
+        console.error('[Deepgram parse]', e.message);
       }
     });
   }
 
+  // ------------------------------------------------------------------
+  // Initial greeting
+  // ------------------------------------------------------------------
   async function sendGreeting() {
     if (!streamSid) return;
     const greeting = business?.ai_greeting
       ? business.ai_greeting
-      : `Hi, thank you for calling ${business?.name || 'our office'}. I'm ${
-          business?.ai_name || 'Claire'
-        }. How can I help you today?`;
+      : `Hi, thank you for calling ${business?.name || 'our office'}. I'm ${business?.ai_name || 'Claire'}. How can I help you today?`;
 
     isSpeaking = true;
+    abortController = new AbortController();
     try {
       messages.push({ role: 'assistant', content: greeting });
       if (conversationId) {
-        saveMessage(conversationId, 'assistant', greeting).catch((e) =>
-          console.error('[DB]', e.message)
-        );
+        saveMessage(conversationId, 'assistant', greeting).catch(() => {});
       }
       console.log(`[AI] ${greeting}`);
-      await speakToTwilio(greeting, ws, streamSid);
+      await speakToTwilio(greeting, ws, streamSid, abortController.signal);
     } catch (e) {
-      console.error('[Greeting] Error:', e.message);
+      if (e.name !== 'AbortError') console.error('[Greeting]', e.message);
     } finally {
       isSpeaking = false;
+      abortController = null;
     }
   }
 
+  // ------------------------------------------------------------------
+  // Post-call cleanup: summary + SMS
+  // ------------------------------------------------------------------
+  async function handleCallEnd() {
+    if (cleanedUp) return;
+    cleanedUp = true;
+
+    if (dgSocket) dgSocket.close();
+
+    // Abort any in-progress TTS
+    if (abortController) abortController.abort();
+
+    const userMessages = messages.filter((m) => m.role === 'user');
+    if (!userMessages.length) {
+      if (conversationId) endConversation(conversationId).catch(() => {});
+      return;
+    }
+
+    // Generate summary and send SMS notification to practice owner
+    let summary = null;
+    try {
+      summary = await generateCallSummary(business?.name || 'Practice', messages);
+      console.log(`[Summary] ${summary}`);
+    } catch (e) {
+      console.error('[Summary]', e.message);
+    }
+
+    if (conversationId) {
+      endConversation(conversationId, summary).catch((e) =>
+        console.error('[DB end]', e.message)
+      );
+    }
+
+    // SMS the practice owner if they have a phone number configured
+    const ownerPhone   = business?.phone_number;
+    const twilioNumber = business?.twilio_sid;
+    if (ownerPhone && twilioNumber && summary) {
+      const smsBody = `📞 New call${callerPhone ? ` from ${callerPhone}` : ''}\n${summary}`;
+      sendSms(ownerPhone, twilioNumber, smsBody).catch((e) =>
+        console.error('[SMS]', e.message)
+      );
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Twilio WebSocket message handler
+  // ------------------------------------------------------------------
   ws.on('message', async (data) => {
     try {
       const msg = JSON.parse(data);
 
       if (msg.event === 'start') {
-        streamSid = msg.start?.streamSid || msg.streamSid;
+        streamSid   = msg.start?.streamSid || msg.streamSid;
+        callerPhone = msg.start?.customParameters?.callerPhone || null;
         console.log(`[Twilio] Call started: ${streamSid}`);
         setupDeepgram();
-        // Give Deepgram a moment to connect, then greet
         setTimeout(() => sendGreeting(), 300);
         return;
       }
 
       if (msg.event === 'media' && msg.media?.payload) {
-        // Don't feed Deepgram while bot is speaking (prevents echo triggers)
-        if (isSpeaking) return;
-        if (dgSocket && dgSocket.readyState === WebSocket.OPEN) {
+        // Always forward audio to Deepgram — even while speaking, so barge-in works.
+        // Deepgram will detect the caller's voice and we abort the current TTS.
+        if (dgSocket?.readyState === WebSocket.OPEN) {
           dgSocket.send(Buffer.from(msg.media.payload, 'base64'));
         }
         return;
@@ -376,28 +491,25 @@ app.ws('/media-stream', async (ws, req) => {
 
       if (msg.event === 'stop') {
         console.log('[Twilio] Call ended');
-        if (dgSocket) dgSocket.close();
-        if (conversationId) {
-          endConversation(conversationId).catch((e) =>
-            console.error('[DB]', e.message)
-          );
-        }
+        await handleCallEnd();
         ws.close();
       }
     } catch (e) {
-      console.error('[Twilio] Message error:', e.message);
+      console.error('[Twilio msg]', e.message);
     }
   });
 
   ws.on('close', () => {
     console.log('[WebSocket] Closed');
-    if (dgSocket) dgSocket.close();
+    handleCallEnd().catch(() => {});
   });
 
-  ws.on('error', (e) => console.error('[WebSocket] Error:', e.message));
+  ws.on('error', (e) => console.error('[WebSocket]', e.message));
 });
 
+// ============================================================================
 // Health check
+// ============================================================================
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
