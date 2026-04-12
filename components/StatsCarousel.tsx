@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCarousel } from "@/hooks/useCarousel";
 
 const stats = [
   { number: "35%",      label: "of dental calls go unanswered" },
@@ -10,64 +10,34 @@ const stats = [
   { number: "$150,000", label: "lost annually from missed calls" },
 ];
 
-const N = stats.length; // 5
+const N = stats.length;
 const VISIBLE = 3;
-// Duplicate first VISIBLE items at end for seamless loop
 const items = [...stats, ...stats.slice(0, VISIBLE)];
 
 const CARD_W = 252;
 const GAP = 16;
-const CONTAINER_W = CARD_W * VISIBLE + GAP * (VISIBLE - 1); // 788px
-const STEP = CARD_W + GAP; // 268px per step
+const CONTAINER_W = CARD_W * VISIBLE + GAP * (VISIBLE - 1);
+const STEP = CARD_W + GAP;
+const TRACK_W = items.length * CARD_W + (items.length - 1) * GAP;
 
 export default function StatsCarousel() {
-  const [position, setPosition] = useState(0);
-  const [animate, setAnimate] = useState(true);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setAnimate(true);
-      setPosition((p) => p + 1);
-    }, 6000);
-    return () => clearInterval(t);
-  }, []);
-
-  // Snap back after reaching the cloned section
-  useEffect(() => {
-    if (position === N) {
-      const timeout = setTimeout(() => {
-        setAnimate(false);
-        setPosition(0);
-        setTimeout(() => setAnimate(true), 50);
-      }, 650);
-      return () => clearTimeout(timeout);
-    }
-  }, [position]);
+  const { position, animate } = useCarousel(N);
 
   return (
-    <div style={{ width: CONTAINER_W, margin: "0 auto" }}>
-      <div
-        className="overflow-hidden"
-        style={{ width: CONTAINER_W }}
-      >
+    <div className="mx-auto" style={{ width: CONTAINER_W }}>
+      <div className="overflow-hidden">
         <div
           style={{
             display: "flex",
-            width: items.length * STEP,
+            width: TRACK_W,
             transform: `translateX(${-position * STEP}px)`,
-            transition: animate
-              ? "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
-              : "none",
+            transition: animate ? "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
           }}
         >
           {items.map((stat, i) => (
             <div
               key={i}
-              style={{
-                width: CARD_W,
-                flexShrink: 0,
-                marginRight: GAP,
-              }}
+              style={{ width: CARD_W, flexShrink: 0, marginRight: GAP }}
               className="text-center py-6"
             >
               <div className="text-3xl font-bold text-gray-900 tracking-tight">

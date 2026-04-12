@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCarousel } from "@/hooks/useCarousel";
 
 const scenarios = [
   {
@@ -37,69 +37,36 @@ const scenarios = [
   },
 ];
 
-const N = scenarios.length; // 4
+const N = scenarios.length;
 const VISIBLE = 2;
-// Duplicate the first VISIBLE items at the end for seamless looping
 const items = [...scenarios, ...scenarios.slice(0, VISIBLE)];
 
 const CARD_W = 248;
 const GAP = 16;
-const CONTAINER_W = CARD_W * VISIBLE + GAP; // 512px
-const STEP = CARD_W + GAP; // 264px per slide step
+const CONTAINER_W = CARD_W * VISIBLE + GAP * (VISIBLE - 1);
+const STEP = CARD_W + GAP;
+const TRACK_W = items.length * CARD_W + (items.length - 1) * GAP;
 
 export default function ChatCardSpread() {
-  const [position, setPosition] = useState(0);
-  const [animate, setAnimate] = useState(true);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setAnimate(true);
-      setPosition((p) => p + 1);
-    }, 6000);
-    return () => clearInterval(t);
-  }, []);
-
-  // When we reach the cloned section, snap back to real start
-  useEffect(() => {
-    if (position === N) {
-      const timeout = setTimeout(() => {
-        setAnimate(false);
-        setPosition(0);
-        setTimeout(() => setAnimate(true), 50);
-      }, 650);
-      return () => clearTimeout(timeout);
-    }
-  }, [position]);
-
+  const { position, animate, jumpTo } = useCarousel(N);
   const activeIndex = position % N;
 
   return (
-    <div className="select-none" style={{ width: CONTAINER_W, margin: "0 auto" }}>
-      {/* Track */}
-      <div
-        className="overflow-hidden rounded-2xl"
-        style={{ width: CONTAINER_W, height: 380 }}
-      >
+    <div className="select-none mx-auto" style={{ width: CONTAINER_W }}>
+      <div className="overflow-hidden rounded-2xl" style={{ height: 380 }}>
         <div
           style={{
             display: "flex",
-            width: items.length * STEP,
+            width: TRACK_W,
             transform: `translateX(${-position * STEP}px)`,
-            transition: animate
-              ? "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
-              : "none",
+            transition: animate ? "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
             height: "100%",
           }}
         >
           {items.map((scenario, i) => (
             <div
               key={i}
-              style={{
-                width: CARD_W,
-                flexShrink: 0,
-                marginRight: GAP,
-                height: "100%",
-              }}
+              style={{ width: CARD_W, flexShrink: 0, marginRight: GAP, height: "100%" }}
             >
               <ChatCard scenario={scenario} />
             </div>
@@ -107,15 +74,11 @@ export default function ChatCardSpread() {
         </div>
       </div>
 
-      {/* Dot indicators */}
       <div className="flex justify-center gap-2 mt-5">
         {scenarios.map((_, i) => (
           <button
             key={i}
-            onClick={() => {
-              setAnimate(true);
-              setPosition(i);
-            }}
+            onClick={() => jumpTo(i)}
             className={`h-1.5 rounded-full transition-all ${
               activeIndex === i ? "bg-gray-700 w-4" : "bg-gray-300 w-1.5"
             }`}
@@ -130,7 +93,6 @@ export default function ChatCardSpread() {
 function ChatCard({ scenario }: { scenario: (typeof scenarios)[number] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/80 overflow-hidden h-full flex flex-col">
-      {/* Header */}
       <div className="bg-gray-900 px-4 py-3 flex items-center gap-3 shrink-0">
         <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
           AI
@@ -144,7 +106,6 @@ function ChatCard({ scenario }: { scenario: (typeof scenarios)[number] }) {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 p-4 space-y-3 bg-gray-50 overflow-hidden">
         {scenario.messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -161,7 +122,6 @@ function ChatCard({ scenario }: { scenario: (typeof scenarios)[number] }) {
         ))}
       </div>
 
-      {/* Input bar */}
       <div className="px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-2 shrink-0">
         <div className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm text-gray-400">
           Type a message...
