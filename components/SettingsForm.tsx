@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 
 type FAQ = { question: string; answer: string };
 type Business = {
@@ -23,11 +24,7 @@ export default function SettingsForm({ business }: { business: Business }) {
 
   const [name, setName] = useState(business.name);
   const [businessType, setBusinessType] = useState(business.business_type);
-  const [hours, setHours] = useState(
-    typeof business.hours === "string"
-      ? business.hours
-      : JSON.stringify(business.hours, null, 2)
-  );
+  const [hours, setHours] = useState<WeeklyHours>(() => parseHours(business.hours));
   const [services, setServices] = useState(
     typeof business.services === "string"
       ? business.services
@@ -113,13 +110,8 @@ export default function SettingsForm({ business }: { business: Business }) {
           </select>
         </Field>
 
-        <Field label="Office hours" hint="e.g. Mon-Fri 9am-5pm, Sat 9am-1pm">
-          <input
-            type="text"
-            value={hours}
-            onChange={(e) => setHours(e.target.value)}
-            className={inputCls}
-          />
+        <Field label="Office hours">
+          <HoursPicker value={hours} onChange={setHours} />
         </Field>
 
         <Field label="Services offered" hint="Comma-separated list">

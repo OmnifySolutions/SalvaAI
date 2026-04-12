@@ -2,15 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import HoursPicker, { type WeeklyHours, DEFAULT_HOURS } from "@/components/HoursPicker";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    businessName: string;
+    businessType: string;
+    hours: WeeklyHours;
+    services: string;
+  }>({
     businessName: "",
     businessType: "dental",
-    hours: "Mon-Fri 9am-5pm, Sat 9am-1pm, Closed Sunday",
+    hours: DEFAULT_HOURS,
     services: "General dentistry, cleanings, fillings, crowns, teeth whitening",
   });
 
@@ -74,14 +80,13 @@ export default function OnboardingPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Office hours</label>
-            <input
-              type="text"
-              placeholder="Mon-Fri 9am-5pm, Sat 9am-1pm"
-              value={form.hours}
-              onChange={(e) => set("hours", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Office hours</label>
+            <div className="border border-gray-300 rounded-lg px-3 py-1">
+              <HoursPicker
+                value={form.hours}
+                onChange={(h) => setForm((f) => ({ ...f, hours: h }))}
+              />
+            </div>
           </div>
 
           <div>
