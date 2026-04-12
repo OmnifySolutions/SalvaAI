@@ -34,13 +34,20 @@ Key column names — use exactly:
   - Railway WebSocket server (`railway/server.js`) — Deepgram STT → Groq LLM → Deepgram TTS → Twilio
   - TTS: Deepgram Aura (`aura-asteria-en`, mulaw 8kHz) — replaced ElevenLabs (free plan blocks API)
   - LLM: Groq `llama-3.3-70b-versatile` for testing; set `GROQ_API_KEY` in Railway to activate, remove to fall back to Claude Haiku
-  - Barge-in: AbortController + Twilio clear event
+  - Sentence streaming: LLM streams tokens → sentence boundaries → TTS fires per sentence (~600ms first audio)
+  - Barge-in: SpeechStarted VAD (~50ms) → AbortController abort + Twilio clear — instant stop
+  - Heard-sentence tracking: only fully-played sentences in message history on barge-in
+  - Pre-buffer 300ms (15 frames) then real-time pacing — no mid-sentence dropouts
+  - 20s silence auto-disconnect with farewell message
+  - Deepgram auto-reconnect + 10s keepalive + unhandledRejection guard
+  - AI tone: professional/efficient, uses practice name naturally — NOT warm/empathetic
   - Post-call SMS summary to business owner (requires `businesses.phone_number` set)
   - Twilio webhook (`/api/voice/incoming-call`) — creates conversation, returns TwiML with correct Railway URL
   - Browser call demo (`/voice-test`) — Twilio Client JS SDK, no phone needed
   - Token endpoint (`/api/voice/browser-token`) + TwiML App webhook (`/api/voice/browser-call`)
   - Auth: `/api/voice/(.*)` exempted from Clerk in `proxy.ts`
   - Twilio TwiML App SID: `APb69c7c65d2d8e75d4f55a416a3447b68`
+  - `vad_events=true` required in Deepgram params for SpeechStarted to fire
 - Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`, `AudioDemo`
 - Hooks: `useCarousel` — shared infinite-scroll logic
 
@@ -86,20 +93,23 @@ Key column names — use exactly:
 1. ✅ **Update pricing everywhere** — 4 tiers, Stripe price IDs, plan enum "multi" added
 2. ✅ **Rewrite homepage hero** — voice-first, "$150k lost" headline, pain stats strip
 3. ✅ **Flip feature section order** — voice first, chat second
-4. ✅ **Pre-recorded audio demo section** — AudioDemo component built, MP3s still need generating (scripts in memory)
+4. ✅ **Pre-recorded audio demo section** — AudioDemo component built, MP3s still need generating
 5. ✅ **Competitive nudge line** — added to homepage
 6. ✅ **Update pricing page** — 4-tier, updated competitor table
 7. ✅ **Voice AI pipeline** — Deepgram STT + Groq LLM + Deepgram TTS wired, barge-in, post-call SMS
 8. ✅ **Swap to Groq for testing** — GROQ_API_KEY env flag in Railway, falls back to Claude Haiku when removed
-9. ✅ **Fix TTS** — switched from ElevenLabs (free plan blocks API) to Deepgram Aura (`aura-asteria-en`)
+9. ✅ **Fix TTS** — switched from ElevenLabs to Deepgram Aura (`aura-asteria-en`)
 10. ✅ **Browser voice demo** — `/voice-test` page, Twilio Client JS SDK, tested and working
-11. **Sentence streaming** — latency improvement ~1.5s → ~600ms (stream LLM by sentence → pipe each to Deepgram TTS immediately)
-12. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
-13. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
+11. ✅ **Sentence streaming** — ~600ms first audio, streams LLM by sentence to TTS immediately
+12. ✅ **Barge-in overhaul** — SpeechStarted VAD, heard-context tracking, race condition fixes
+13. ✅ **Connection stability** — keepalive, Deepgram reconnect, pre-buffer, silence auto-disconnect
+14. **Settings — voice customization** — tone preset, emergency handling, deflection topics, scenario builder
+15. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
+16. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
 
 ## Blockers
 - **Anthropic credits** — out of credits; Groq is the active LLM until resolved
-- **Audio demo MP3s** — generate 3 files via Deepgram TTS, save to `/public/audio/` (scripts documented in memory/voice_infrastructure.md)
+- **Audio demo MP3s** — generate 3 files via Deepgram TTS, save to `/public/audio/`
 - **Twilio trial account** — plays watermark message before every call; upgrade account to remove
 
 ## Key stats (verified, use in copy)
