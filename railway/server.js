@@ -518,6 +518,26 @@ app.ws('/media-stream', async (ws, req) => {
   let turnId           = 0;    // increments each AI turn; guards stale finally blocks
   let heardSentences   = [];   // sentences the caller actually heard before any barge-in
   let keepAliveTimer   = null; // periodic mark event to prevent Twilio WebSocket idle drop
+  let silenceTimer     = null; // auto-disconnect after SILENCE_TIMEOUT_MS of no user speech
+
+  const SILENCE_TIMEOUT_MS = 15_000;
+
+  function resetSilenceTimer() {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(async () => {
+      if (cleanedUp) return;
+      console.log('[Silence] No speech for 15s — ending call');
+      // Abort any in-progress AI speech, then say a brief goodbye
+      if (abortController) { abortController.abort(); }
+      if (ws.readyState === WebSocket.OPEN && streamSid) {
+        ws.send(JSON.stringify({ event: 'clear', streamSid }));
+        const farewell = `It looks like you may have stepped away. Feel free to call us back anytime. Goodbye.`;
+        await speakToTwilio(farewell, ws, streamSid, new AbortController().signal);
+      }
+      await handleCallEnd();
+      ws.close();
+    }, SILENCE_TIMEOUT_MS);
+  }
 
   // Load business config before Twilio start event arrives
   if (conversationId) {
@@ -574,6 +594,7 @@ app.ws('/media-stream', async (ws, req) => {
         // ── Fix 1: Abort on SpeechStarted (VAD fires ~50ms after speech begins,
         //   before any transcript exists). This is what makes barge-in feel instant.
         if (data.type === 'SpeechStarted') {
+          resetSilenceTimer(); // user is speaking — reset the idle countdown
           if (isSpeaking && abortController) {
             console.log('[Barge-in] SpeechStarted — stopping AI immediately');
             abortController.abort();
@@ -620,6 +641,7 @@ app.ws('/media-stream', async (ws, req) => {
   // ------------------------------------------------------------------
   async function processTurn(userText) {
     if (isSpeaking) return; // SpeechStarted already cleared this; bail if still racing
+    resetSilenceTimer(); // confirmed speech — reset idle countdown
     isSpeaking = true;
 
     console.log(`[User] ${userText}`);
@@ -707,6 +729,7 @@ app.ws('/media-stream', async (ws, req) => {
         isSpeaking = false;
         abortController = null;
       }
+      resetSilenceTimer(); // start idle countdown once greeting is done
     }
   }
 
@@ -718,6 +741,7 @@ app.ws('/media-stream', async (ws, req) => {
     cleanedUp = true;
 
     if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+    if (silenceTimer)   { clearTimeout(silenceTimer);   silenceTimer   = null; }
     if (dgSocket) dgSocket.close();
 
     // Abort any in-progress TTS
