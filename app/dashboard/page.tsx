@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
 import SignOutButton from "@/components/SignOutButton";
+import UpgradeButton from "@/components/UpgradeButton";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -53,6 +54,85 @@ export default async function DashboardPage() {
           <StatCard label="Plan" value={business.plan.charAt(0).toUpperCase() + business.plan.slice(1)} />
           <StatCard label="Conversations" value={conversations?.length ?? 0} />
         </div>
+
+        {/* Billing */}
+        {business.plan_status === "past_due" && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-red-700 text-sm">Payment failed</p>
+              <p className="text-xs text-red-400 mt-0.5">Update your billing info to restore full access.</p>
+            </div>
+            <UpgradeButton
+              mode="portal"
+              className="shrink-0 text-sm bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              Update billing
+            </UpgradeButton>
+          </div>
+        )}
+
+        {business.plan === "free" && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-gray-800 text-sm">You&apos;re on the Free plan</p>
+              <p className="text-xs text-gray-500 mt-0.5">Upgrade to remove branding and unlock more interactions.</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <UpgradeButton
+                plan="basic"
+                className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Basic — $49/mo
+              </UpgradeButton>
+              <UpgradeButton
+                plan="pro"
+                className="text-sm border border-gray-300 text-gray-600 px-4 py-2 rounded-lg font-medium hover:border-gray-400 transition-colors disabled:opacity-50"
+              >
+                Pro — $149/mo
+              </UpgradeButton>
+            </div>
+          </div>
+        )}
+
+        {business.plan === "basic" && business.plan_status !== "past_due" && (
+          <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Basic plan</p>
+              <p className="text-xs text-gray-400 mt-0.5">Upgrade to Pro for unlimited interactions + voice AI</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <UpgradeButton
+                plan="pro"
+                className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                Upgrade to Pro
+              </UpgradeButton>
+              <UpgradeButton
+                mode="portal"
+                className="text-xs text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+              >
+                Manage subscription
+              </UpgradeButton>
+            </div>
+          </div>
+        )}
+
+        {business.plan === "pro" && business.plan_status !== "past_due" && (
+          <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Pro plan</span>
+              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                {business.plan_status === "trialing" ? "Trial" : "Active"}
+              </span>
+            </div>
+            <UpgradeButton
+              mode="portal"
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            >
+              Manage subscription
+            </UpgradeButton>
+          </div>
+        )}
 
         {/* Usage bar (basic plan only) */}
         {business.plan === "basic" && (

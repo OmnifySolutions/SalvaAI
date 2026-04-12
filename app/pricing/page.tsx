@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { Check, X } from "lucide-react";
+import { supabaseAdmin } from "@/lib/supabase";
+import UpgradeButton from "@/components/UpgradeButton";
 
 const plans = [
   {
@@ -111,6 +113,16 @@ export default async function PricingPage() {
   const { userId } = await auth();
   const isLoggedIn = !!userId;
 
+  let currentPlan: "free" | "basic" | "pro" = "free";
+  if (isLoggedIn) {
+    const { data } = await supabaseAdmin
+      .from("businesses")
+      .select("plan")
+      .eq("clerk_user_id", userId)
+      .maybeSingle();
+    currentPlan = (data?.plan as typeof currentPlan) ?? "free";
+  }
+
   return (
     <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
 
@@ -164,9 +176,12 @@ export default async function PricingPage() {
         {/* Plans */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {plans.map((plan) => {
-            const cta = isLoggedIn ? plan.ctaLoggedIn : plan.cta;
-            const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
             const isPaid = plan.name !== "Free";
+            const planKey = plan.name.toLowerCase() as "free" | "basic" | "pro";
+            const isCurrent = isLoggedIn && currentPlan === planKey;
+            const useUpgrade = isLoggedIn && isPaid && !isCurrent;
+            const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
+            const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
 
             return (
               <div
@@ -209,16 +224,32 @@ export default async function PricingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href={href}
-                  className={`block text-center py-3 rounded-xl text-sm font-semibold transition-colors ${
-                    plan.highlight
-                      ? "bg-white text-gray-900 hover:bg-gray-100"
-                      : "bg-gray-900 text-white hover:bg-gray-700"
-                  }`}
-                >
-                  {cta}
-                </Link>
+                {useUpgrade ? (
+                  <UpgradeButton
+                    plan={planKey as "basic" | "pro"}
+                    className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
+                      plan.highlight
+                        ? "bg-white text-gray-900 hover:bg-gray-100"
+                        : "bg-gray-900 text-white hover:bg-gray-700"
+                    }`}
+                  >
+                    {cta}
+                  </UpgradeButton>
+                ) : (
+                  <Link
+                    href={href}
+                    aria-disabled={isCurrent}
+                    className={`block text-center py-3 rounded-xl text-sm font-semibold transition-colors ${
+                      isCurrent
+                        ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none"
+                        : plan.highlight
+                          ? "bg-white text-gray-900 hover:bg-gray-100"
+                          : "bg-gray-900 text-white hover:bg-gray-700"
+                    }`}
+                  >
+                    {cta}
+                  </Link>
+                )}
 
                 {isPaid && (
                   <p className={`text-xs text-center mt-2.5 ${plan.highlight ? "text-gray-500" : "text-gray-400"}`}>
