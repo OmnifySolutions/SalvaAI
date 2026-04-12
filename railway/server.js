@@ -140,6 +140,7 @@ function safeParse(s) {
 // Switch by setting/removing GROQ_API_KEY in Railway env vars.
 // ============================================================================
 
+// Non-streaming versions — used only for post-call summary generation
 async function callGroq(systemPrompt, messages, signal) {
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -180,12 +181,178 @@ async function callClaude(systemPrompt, messages, signal) {
   return data.content?.[0]?.text?.trim() || '';
 }
 
-async function callLLM(systemPrompt, messages, signal) {
-  if (USE_GROQ) {
-    console.log('[LLM] Using Groq (testing mode)');
-    return callGroq(systemPrompt, messages, signal);
+// ── Streaming helpers ────────────────────────────────────────────────────────
+// Each calls onToken(string) for every token chunk, returns when stream ends.
+
+async function streamGroq(systemPrompt, messages, signal, onToken) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 300,
+      stream: true,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+    }),
+    signal,
+  });
+  if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
+
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let partial   = '';
+
+  while (true) {
+    if (signal?.aborted) break;
+    const { done, value } = await reader.read();
+    if (done) break;
+    partial += decoder.decode(value, { stream: true });
+
+    const lines = partial.split('\n');
+    partial = lines.pop(); // keep any incomplete line
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed === 'data: [DONE]') continue;
+      if (trimmed.startsWith('data: ')) {
+        try {
+          const json  = JSON.parse(trimmed.slice(6));
+          const token = json.choices?.[0]?.delta?.content;
+          if (token) onToken(token);
+        } catch { /* ignore malformed chunks */ }
+      }
+    }
   }
-  return callClaude(systemPrompt, messages, signal);
+}
+
+async function streamClaude(systemPrompt, messages, signal, onToken) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 300,
+      stream: true,
+      system: systemPrompt,
+      messages,
+    }),
+    signal,
+  });
+  if (!res.ok) throw new Error(`Anthropic ${res.status}: ${await res.text()}`);
+
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let partial   = '';
+
+  while (true) {
+    if (signal?.aborted) break;
+    const { done, value } = await reader.read();
+    if (done) break;
+    partial += decoder.decode(value, { stream: true });
+
+    const lines = partial.split('\n');
+    partial = lines.pop();
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith('data: ')) continue;
+      try {
+        const json = JSON.parse(trimmed.slice(6));
+        if (json.type === 'content_block_delta' && json.delta?.type === 'text_delta') {
+          onToken(json.delta.text);
+        }
+      } catch { /* ignore malformed chunks */ }
+    }
+  }
+}
+
+// ── Sentence-streaming pipeline ──────────────────────────────────────────────
+// Streams LLM tokens, detects sentence boundaries, fires each sentence to TTS
+// immediately — first audio begins ~600ms faster than waiting for full reply.
+//
+// Returns the complete reply text when both streaming and TTS are done.
+
+async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid) {
+  let tokenBuffer = ''; // accumulates streamed tokens
+  let fullReply   = '';
+  const sentenceQueue = [];
+  let ttsRunning  = false;
+  let drainPromise = Promise.resolve();
+
+  // Regex: sentence ends at .!? followed by whitespace or end-of-string.
+  // We intentionally keep it simple — the LLM is prompted to write short,
+  // plain spoken sentences with no abbreviations or lists.
+  const SENTENCE_END = /[.!?]+(?=\s|$)/;
+
+  function drainQueue() {
+    if (ttsRunning) return; // already draining
+    ttsRunning = true;
+    drainPromise = (async () => {
+      while (sentenceQueue.length > 0) {
+        if (signal?.aborted) break;
+        const sentence = sentenceQueue.shift();
+        console.log(`[TTS→] "${sentence}"`);
+        await speakToTwilio(sentence, ws, streamSid, signal);
+      }
+      ttsRunning = false;
+    })();
+  }
+
+  function flushTokenBuffer(forceFlush = false) {
+    // Pull complete sentences out of the buffer and enqueue them.
+    let match;
+    while ((match = SENTENCE_END.exec(tokenBuffer)) !== null) {
+      const boundaryEnd = match.index + match[0].length;
+      const sentence    = tokenBuffer.slice(0, boundaryEnd).trim();
+      tokenBuffer       = tokenBuffer.slice(boundaryEnd).trimStart();
+      if (sentence) {
+        sentenceQueue.push(sentence);
+        drainQueue();
+      }
+    }
+    // At end-of-stream, flush whatever remains (e.g. a sentence without punctuation)
+    if (forceFlush && tokenBuffer.trim()) {
+      sentenceQueue.push(tokenBuffer.trim());
+      tokenBuffer = '';
+      drainQueue();
+    }
+  }
+
+  function onToken(token) {
+    tokenBuffer += token;
+    fullReply   += token;
+    flushTokenBuffer(false);
+  }
+
+  // Stream from the active LLM
+  if (USE_GROQ) {
+    console.log('[LLM] Streaming via Groq (testing mode)');
+    await streamGroq(systemPrompt, messages, signal, onToken);
+  } else {
+    console.log('[LLM] Streaming via Claude Haiku');
+    await streamClaude(systemPrompt, messages, signal, onToken);
+  }
+
+  // Flush any trailing text after the stream closes
+  flushTokenBuffer(true);
+
+  // Wait for the TTS queue to drain completely
+  await drainPromise;
+  // drainPromise only covers the last drain cycle; if new sentences were added
+  // after the last cycle ended, we spin until truly empty.
+  while (ttsRunning || sentenceQueue.length > 0) {
+    if (signal?.aborted) break;
+    await new Promise((r) => setTimeout(r, 20));
+  }
+
+  return fullReply.trim();
 }
 
 // Generate a post-call summary for SMS notification
@@ -402,7 +569,11 @@ app.ws('/media-stream', async (ws, req) => {
 
         abortController = new AbortController();
         try {
-          const reply = await callLLM(systemPrompt, messages, abortController.signal);
+          // Sentence-streaming: first sentence fires to TTS as soon as the LLM
+          // produces it — no waiting for the full response (~600ms vs ~1.5s).
+          const reply = await streamLLMAndSpeak(
+            systemPrompt, messages, abortController.signal, ws, streamSid
+          );
           if (!reply || abortController.signal.aborted) return;
 
           console.log(`[AI] ${reply}`);
@@ -412,8 +583,6 @@ app.ws('/media-stream', async (ws, req) => {
               console.error('[DB save]', e.message)
             );
           }
-
-          await speakToTwilio(reply, ws, streamSid, abortController.signal);
         } catch (e) {
           if (e.name !== 'AbortError') console.error('[AI]', e.message);
         } finally {
