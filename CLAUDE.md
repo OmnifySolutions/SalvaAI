@@ -14,27 +14,30 @@
 Key column names — use exactly:
 - `businesses.name` (NOT `business_name`)
 - `businesses.slug` (NOT NULL, auto-generated on insert)
-- `businesses.plan` → `"free" | "basic" | "pro"`
+- `businesses.plan` → `"free" | "basic" | "pro" | "multi"`
+- `businesses.voice_enabled` (boolean)
+- `businesses.twilio_sid` (E.164 phone number string e.g. `+16626232482`)
+- `businesses.phone_number` (practice's real phone for SMS notifications)
 - See `docs/SCHEMA.sql` for full schema
 
 ## What's built
-- Landing page (`/`) — floating bubbles, 2-card slide carousel (4 scenarios), stats carousel (5 stats), features grid, CTA banner
-- Pricing page (`/pricing`) — Free/Basic/Pro, competitor table, auth-aware CTAs (UpgradeButton), current plan state
+- Landing page (`/`) — voice-first hero ("$150k lost" headline), pain stats strip, floating bubbles, chat card carousel, stats carousel, audio demo (3 scenarios), features grid (voice first), CTA banner, competitive nudge line
+- Pricing page (`/pricing`) — Free/Basic/Pro/Multi-Practice (4 tiers), competitor table, auth-aware CTAs (UpgradeButton)
 - Auth: sign-in, sign-up (Clerk), onboarding (`/onboarding`)
-- Dashboard (`/dashboard`) — stats, billing section (upgrade/manage), embed code, conversation list
-- Settings (`/settings`) — name, hours (HoursPicker), services, AI config, FAQs
-- Setup guide (`/setup`) — embed instructions (Squarespace/Wix/WordPress/HTML) + phone forwarding guide (GSM global-first, VoIP, US carriers)
+- Dashboard (`/dashboard`) — stats, billing section, voice AI card (status + forwarding number), embed code, conversation list
+- Settings (`/settings`) — name, hours (HoursPicker), services, AI config, FAQs, voice toggle (Pro/Multi only)
+- Setup guide (`/setup`) — embed instructions + phone forwarding guide
 - Chat widget (`/widget/[businessId]`) + embed script (`/api/widget/embed`)
-- Chat API (`/api/chat`) — real Claude or mock fallback if no API key
-- Stripe billing (`/api/stripe/checkout|portal|webhook`) — 30-day trial, plan sync
-- **Voice AI infrastructure** ✅
-  - Railway WebSocket server (`railway/server.js`) — listens for Twilio Media Streams
-  - Twilio webhook (`/api/voice/incoming-call`) — handles incoming calls, creates conversation records
-  - Schema: `businesses.voice_enabled` (boolean), `conversations.channel` supports 'voice', `conversations.twilio_call_sid`
+- Chat API (`/api/chat`) — real Claude Haiku or mock fallback if no API key
+- Stripe billing (`/api/stripe/checkout|portal|webhook`) — 30-day trial, plan sync, 4 plans
+- **Voice AI pipeline** ✅ (fully wired, blocked on API credits for testing)
+  - Railway WebSocket server (`railway/server.js`) — Deepgram STT → Claude Haiku → ElevenLabs TTS → Twilio
+  - Barge-in: AbortController + Twilio clear event
+  - Post-call SMS summary to business owner (requires `businesses.phone_number` set)
+  - Twilio webhook (`/api/voice/incoming-call`) — creates conversation, returns TwiML with correct Railway URL
   - Auth: `/api/voice/(.*)` exempted from Clerk in `proxy.ts`
-  - Env vars: `RAILWAY_URL`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`
-- Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`
-- Hooks: `useCarousel` — shared infinite-scroll logic used by ChatCardSpread + StatsCarousel
+- Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`, `AudioDemo`
+- Hooks: `useCarousel` — shared infinite-scroll logic
 
 ## Design system (locked — do not change)
 - Option B: clean, warm, Stripe-like
@@ -75,14 +78,24 @@ Key column names — use exactly:
 - Don't oversell: no "revolutionary", no "best-in-class" — let the numbers speak
 
 ## Approved build queue (next session, do in order)
-1. **Update pricing everywhere** — pricing page (Free/Basic/Pro/Multi-Practice), CLAUDE.md ✅, Stripe price ID placeholders, plan enum
-2. **Rewrite homepage hero** — voice AI + missed call pain leads, not chat. "$150,000 lost annually" is the headline stat.
-3. **Flip feature section order** — voice first, chat second throughout homepage
-4. **Pre-recorded audio demo section** — 3 scenarios (new patient, after-hours, insurance), simple MP3 player, $0 ongoing cost. Generate with ElevenLabs once.
-5. **Competitive nudge line** — one line near pricing on homepage
-6. **Update pricing page** — new 4-tier pricing, updated competitor table
-7. **Twilio voice AI** — ✅ DONE. Railway WebSocket server deployed + Twilio webhook working + schema updated + auth fixed. Still TODO: add voice settings UI to dashboard, integrate Deepgram + Claude + ElevenLabs into media stream handler
-8. **Browser voice demo** (Phase 2, after voice is live) — talk to AI in browser via WebRTC, no phone needed
+1. ✅ **Update pricing everywhere** — 4 tiers, Stripe price IDs, plan enum "multi" added
+2. ✅ **Rewrite homepage hero** — voice-first, "$150k lost" headline, pain stats strip
+3. ✅ **Flip feature section order** — voice first, chat second
+4. ✅ **Pre-recorded audio demo section** — AudioDemo component built, MP3s still need generating (scripts in memory)
+5. ✅ **Competitive nudge line** — added to homepage
+6. ✅ **Update pricing page** — 4-tier, updated competitor table
+7. ✅ **Voice AI pipeline** — Deepgram + Claude + ElevenLabs wired, barge-in, post-call SMS
+8. **Swap to Groq for testing** — 5-min code change, unblocks voice testing while Anthropic credits are pending
+9. **Fix ElevenLabs voice** — current voice ID needs paid plan; user selecting free voice
+10. **Browser voice demo** — Twilio Client SDK in browser (needs TwiML App SID + API Key SID/Secret from Twilio Console)
+11. **Sentence streaming** — latency improvement 1.5s → ~600ms (sentence-level Claude stream → ElevenLabs)
+12. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
+13. **Switch back to Claude Haiku** — before first real paying customer
+
+## Blockers (must resolve before voice works)
+- **Anthropic credits** — out of credits, waiting a few days
+- **ElevenLabs voice** — current voice (WZlYpi1yf6zJhNWXih74) requires paid plan; need free voice ID
+- **Audio demo MP3s** — generate 3 files via ElevenLabs Text to Speech, save to `/public/audio/` (scripts documented in memory/voice_infrastructure.md)
 
 ## Key stats (verified, use in copy)
 - 35% of dental calls go unanswered (>50% during busy hours)
