@@ -88,7 +88,7 @@ export default async function DashboardPage() {
                 plan="pro"
                 className="text-sm border border-gray-300 text-gray-600 px-4 py-2 rounded-lg font-medium hover:border-gray-400 transition-colors disabled:opacity-50"
               >
-                Pro — $149/mo
+                Pro — $189/mo
               </UpgradeButton>
             </div>
           </div>
@@ -183,6 +183,51 @@ export default async function DashboardPage() {
             </Link>
           </p>
         </div>
+
+        {/* Voice AI status */}
+        {(business.plan === "pro" || business.plan === "multi") ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold text-gray-800">Voice AI</h2>
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                business.voice_enabled
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-500"
+              }`}>
+                {business.voice_enabled ? "Active" : "Inactive"}
+              </span>
+            </div>
+            {business.twilio_sid ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Your forwarding number</p>
+                  <p className="text-sm font-mono text-gray-800">{business.twilio_sid}</p>
+                </div>
+                <Link href="/settings" className="text-xs text-blue-500 hover:text-blue-600">
+                  Configure →
+                </Link>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                Your dedicated phone number is being provisioned.{" "}
+                <Link href="/settings" className="text-blue-500 hover:underline">Configure in settings →</Link>
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-gray-800 text-sm">Unlock Voice AI</p>
+              <p className="text-xs text-gray-500 mt-0.5">Answer calls 24/7 automatically. Never miss a new patient.</p>
+            </div>
+            <UpgradeButton
+              plan="pro"
+              className="shrink-0 text-sm bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              Upgrade to Pro — $189/mo
+            </UpgradeButton>
+          </div>
+        )}
 
         {/* Conversations list */}
         <div className="bg-white rounded-xl border border-gray-200">

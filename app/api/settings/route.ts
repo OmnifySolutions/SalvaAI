@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { name, businessType, hours, services, aiName, aiGreeting, customPrompt, faqs } = body;
+  const { name, businessType, hours, services, aiName, aiGreeting, customPrompt, faqs, voiceEnabled } = body;
 
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
 
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       ai_greeting: aiGreeting,
       custom_prompt: customPrompt,
       faqs: faqs ?? [],
+      voice_enabled: voiceEnabled ?? false,
     })
     .eq("clerk_user_id", userId);
 

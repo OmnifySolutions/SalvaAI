@@ -14,6 +14,9 @@ type Business = {
   ai_greeting: string | null;
   custom_prompt: string | null;
   faqs: FAQ[];
+  plan: string;
+  voice_enabled: boolean;
+  twilio_sid: string | null;
 };
 
 export default function SettingsForm({ business }: { business: Business }) {
@@ -36,6 +39,9 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [aiGreeting, setAiGreeting] = useState(business.ai_greeting ?? "");
   const [customPrompt, setCustomPrompt] = useState(business.custom_prompt ?? "");
   const [faqs, setFaqs] = useState<FAQ[]>(business.faqs ?? []);
+  const [voiceEnabled, setVoiceEnabled] = useState(business.voice_enabled ?? false);
+
+  const hasVoice = business.plan === "pro" || business.plan === "multi";
 
   function addFaq() {
     setFaqs((f) => [...f, { question: "", answer: "" }]);
@@ -67,6 +73,7 @@ export default function SettingsForm({ business }: { business: Business }) {
           aiGreeting,
           customPrompt,
           faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
+          voiceEnabled,
         }),
       });
       const data = await res.json();
@@ -208,6 +215,70 @@ export default function SettingsForm({ business }: { business: Business }) {
             </div>
           </div>
         ))}
+      </section>
+
+      {/* Voice AI */}
+      <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-gray-800">Voice AI</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Answer phone calls automatically with AI</p>
+          </div>
+          {!hasVoice && (
+            <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
+              Pro plan required
+            </span>
+          )}
+        </div>
+
+        {hasVoice ? (
+          <>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Enable voice answering</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Forward your practice number to your assigned Twilio number to activate.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVoiceEnabled((v) => !v)}
+                className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                  voiceEnabled ? "bg-blue-600" : "bg-gray-200"
+                }`}
+                aria-label="Toggle voice AI"
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    voiceEnabled ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {business.twilio_sid ? (
+              <div className="bg-gray-50 rounded-lg px-4 py-3">
+                <p className="text-xs text-gray-500 mb-1 font-medium">Your Twilio number</p>
+                <p className="text-sm font-mono text-gray-800">{business.twilio_sid}</p>
+                <p className="text-xs text-gray-400 mt-1">Forward your practice number to this number to route calls to the AI.</p>
+              </div>
+            ) : (
+              <div className="bg-blue-50 rounded-lg px-4 py-3">
+                <p className="text-sm text-blue-700">
+                  Your dedicated phone number is being provisioned. Check back shortly or contact support.
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="bg-gray-50 rounded-lg px-4 py-3">
+            <p className="text-sm text-gray-500">
+              Voice AI is available on the{" "}
+              <a href="/pricing" className="text-blue-600 hover:underline font-medium">Pro plan ($189/mo)</a>.
+              {" "}Upgrade to answer calls automatically, 24/7.
+            </p>
+          </div>
+        )}
       </section>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
