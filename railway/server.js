@@ -279,7 +279,9 @@ async function streamClaude(systemPrompt, messages, signal, onToken) {
 //
 // Returns the complete reply text when both streaming and TTS are done.
 
-async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid) {
+// heardRef is an array passed by reference — we push each sentence into it
+// as soon as TTS finishes playing it, so callers know what was heard on barge-in.
+async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid, heardRef = []) {
   let tokenBuffer = ''; // accumulates streamed tokens
   let fullReply   = '';
   const sentenceQueue = [];
@@ -300,6 +302,8 @@ async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid) 
         const sentence = sentenceQueue.shift();
         console.log(`[TTS→] "${sentence}"`);
         await speakToTwilio(sentence, ws, streamSid, signal);
+        // Only mark as heard if the signal wasn't aborted mid-playback
+        if (!signal?.aborted) heardRef.push(sentence);
       }
       ttsRunning = false;
     })();
@@ -496,6 +500,7 @@ app.ws('/media-stream', async (ws, req) => {
   let abortController  = null; // for barge-in cancellation
   let cleanedUp        = false;
   let turnId           = 0;    // increments each AI turn; guards stale finally blocks
+  let heardSentences   = [];   // sentences the caller actually heard before any barge-in
 
   // Load business config before Twilio start event arrives
   if (conversationId) {
@@ -522,7 +527,8 @@ app.ws('/media-stream', async (ws, req) => {
       channels: '1',
       model: 'nova-2-phonecall',
       interim_results: 'true',
-      endpointing: '300',
+      endpointing: '200',       // was 300 — tighter end-of-turn detection
+      utterance_end_ms: '1000', // fire UtteranceEnd after 1s of silence as fallback
       smart_format: 'true',
       language: 'en-US',
     });
@@ -538,6 +544,32 @@ app.ws('/media-stream', async (ws, req) => {
     dgSocket.on('message', async (raw) => {
       try {
         const data = JSON.parse(raw.toString());
+
+        // ── Fix 1: Abort on SpeechStarted (VAD fires ~50ms after speech begins,
+        //   before any transcript exists). This is what makes barge-in feel instant.
+        if (data.type === 'SpeechStarted') {
+          if (isSpeaking && abortController) {
+            console.log('[Barge-in] SpeechStarted — stopping AI immediately');
+            abortController.abort();
+            isSpeaking = false;
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ event: 'clear', streamSid }));
+            }
+          }
+          return;
+        }
+
+        // UtteranceEnd fires after utterance_end_ms of silence — treat as speech_final
+        // so we don't drop the last utterance if the caller trails off without endpointing
+        if (data.type === 'UtteranceEnd') {
+          if (pendingTranscript) {
+            const userText = pendingTranscript;
+            pendingTranscript = '';
+            await processTurn(userText);
+          }
+          return;
+        }
+
         if (data.type !== 'Results') return;
 
         const transcript = data.channel?.alternatives?.[0]?.transcript || '';
@@ -550,60 +582,73 @@ app.ws('/media-stream', async (ws, req) => {
         pendingTranscript = '';
         if (!userText) return;
 
-        // ── Barge-in: caller spoke while AI was talking ──────────────
-        if (isSpeaking && abortController) {
-          console.log('[Barge-in] Caller interrupted');
-          abortController.abort();
-          isSpeaking = false;
-          // Tell Twilio to stop playing buffered audio
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ event: 'clear', streamSid }));
-          }
-        }
-
-        if (isSpeaking) return; // still speaking after non-abortable path
-        isSpeaking = true;
-
-        console.log(`[User] ${userText}`);
-        messages.push({ role: 'user', content: userText });
-        if (conversationId) {
-          saveMessage(conversationId, 'user', userText).catch((e) =>
-            console.error('[DB save]', e.message)
-          );
-        }
-
-        abortController = new AbortController();
-        const myTurn = ++turnId;
-        try {
-          // Sentence-streaming: first sentence fires to TTS as soon as the LLM
-          // produces it — no waiting for the full response (~600ms vs ~1.5s).
-          const reply = await streamLLMAndSpeak(
-            systemPrompt, messages, abortController.signal, ws, streamSid
-          );
-          if (!reply || abortController.signal.aborted) return;
-
-          console.log(`[AI] ${reply}`);
-          messages.push({ role: 'assistant', content: reply });
-          if (conversationId) {
-            saveMessage(conversationId, 'assistant', reply).catch((e) =>
-              console.error('[DB save]', e.message)
-            );
-          }
-        } catch (e) {
-          if (e.name !== 'AbortError') console.error('[AI]', e.message);
-        } finally {
-          // Only reset speaking state if we're still the current turn.
-          // Barge-in starts a new turn before this finally runs; without the
-          // guard the stale finally would zero out the new turn's state.
-          if (myTurn === turnId) {
-            isSpeaking = false;
-            abortController = null;
-          }
-        }
+        await processTurn(userText);
       } catch (e) {
         console.error('[Deepgram parse]', e.message);
       }
     });
+  }
+
+  // ------------------------------------------------------------------
+  // Process a completed user turn (called from both speech_final and UtteranceEnd)
+  // ------------------------------------------------------------------
+  async function processTurn(userText) {
+    if (isSpeaking) return; // SpeechStarted already cleared this; bail if still racing
+    isSpeaking = true;
+
+    console.log(`[User] ${userText}`);
+
+    // ── Fix 3+4: Build accurate message history based on what was actually heard.
+    // If barge-in fired mid-response, heardSentences contains only the sentences
+    // that fully played before the caller interrupted. We push only those to
+    // messages (not the full reply), so the LLM knows exactly what the caller heard.
+    if (heardSentences.length > 0) {
+      const heardText = heardSentences.join(' ');
+      messages.push({ role: 'assistant', content: heardText });
+      if (conversationId) {
+        saveMessage(conversationId, 'assistant', heardText).catch(() => {});
+      }
+      heardSentences = [];
+    }
+
+    // Annotate the user message if we know it's an interruption mid-thought
+    // (i.e., there was a prior AI turn that was cut off — we already handled
+    // the partial heard content above, so just save the user text normally)
+    messages.push({ role: 'user', content: userText });
+    if (conversationId) {
+      saveMessage(conversationId, 'user', userText).catch((e) =>
+        console.error('[DB save]', e.message)
+      );
+    }
+
+    heardSentences = []; // reset for this new turn
+    abortController = new AbortController();
+    const myTurn = ++turnId;
+    try {
+      const reply = await streamLLMAndSpeak(
+        systemPrompt, messages, abortController.signal, ws, streamSid, heardSentences
+      );
+      if (!reply || abortController.signal.aborted) return;
+
+      // Full reply completed without interruption — push the whole canonical reply.
+      // heardSentences was being populated by streamLLMAndSpeak; discard it since
+      // we're using the full reply text instead (avoids double-push on next turn).
+      console.log(`[AI] ${reply}`);
+      heardSentences = [];
+      messages.push({ role: 'assistant', content: reply });
+      if (conversationId) {
+        saveMessage(conversationId, 'assistant', reply).catch((e) =>
+          console.error('[DB save]', e.message)
+        );
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') console.error('[AI]', e.message);
+    } finally {
+      if (myTurn === turnId) {
+        isSpeaking = false;
+        abortController = null;
+      }
+    }
   }
 
   // ------------------------------------------------------------------
@@ -616,15 +661,20 @@ app.ws('/media-stream', async (ws, req) => {
       : `Hi, thank you for calling ${business?.name || 'our office'}. I'm ${business?.ai_name || 'Claire'}. How can I help you today?`;
 
     isSpeaking = true;
+    heardSentences = []; // reset before greeting
     abortController = new AbortController();
     const greetingTurn = ++turnId;
     try {
-      messages.push({ role: 'assistant', content: greeting });
-      if (conversationId) {
-        saveMessage(conversationId, 'assistant', greeting).catch(() => {});
-      }
       console.log(`[AI] ${greeting}`);
       await speakToTwilio(greeting, ws, streamSid, abortController.signal);
+      // Only commit greeting to history + heardSentences if fully played
+      if (!abortController.signal.aborted) {
+        messages.push({ role: 'assistant', content: greeting });
+        heardSentences.push(greeting);
+        if (conversationId) {
+          saveMessage(conversationId, 'assistant', greeting).catch(() => {});
+        }
+      }
     } catch (e) {
       if (e.name !== 'AbortError') console.error('[Greeting]', e.message);
     } finally {
