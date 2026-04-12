@@ -25,8 +25,8 @@ export default function VoiceTestPage() {
         addLog('Fetching access token…');
         const res = await fetch('/api/voice/browser-token');
         if (!res.ok) {
-          const err = await res.json();
-          addLog(`Token error: ${err.error}`);
+          const text = await res.text();
+          addLog(`Token error (${res.status}): ${text.slice(0, 200)}`);
           setStatus('error');
           return;
         }
