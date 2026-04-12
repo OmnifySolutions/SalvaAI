@@ -624,12 +624,13 @@ app.ws('/media-stream', async (ws, req) => {
 
     heardSentences = []; // reset for this new turn
     abortController = new AbortController();
-    const myTurn = ++turnId;
+    const mySignal = abortController.signal; // capture local ref — abortController may be
+    const myTurn   = ++turnId;               // overwritten by next turn before we check it
     try {
       const reply = await streamLLMAndSpeak(
-        systemPrompt, messages, abortController.signal, ws, streamSid, heardSentences
+        systemPrompt, messages, mySignal, ws, streamSid, heardSentences
       );
-      if (!reply || abortController.signal.aborted) return;
+      if (!reply || mySignal.aborted) return;
 
       // Full reply completed without interruption — push the whole canonical reply.
       // heardSentences was being populated by streamLLMAndSpeak; discard it since
@@ -662,21 +663,18 @@ app.ws('/media-stream', async (ws, req) => {
       : `Hi, thank you for calling ${business?.name || 'our office'}. I'm ${business?.ai_name || 'Claire'}. How can I help you today?`;
 
     isSpeaking = true;
-    heardSentences = []; // reset before greeting
+    heardSentences = [];
+    // Push greeting BEFORE the first await so it's always in messages before
+    // any other event (speech_final, SpeechStarted) can fire and push a user message.
+    messages.push({ role: 'assistant', content: greeting });
+    if (conversationId) {
+      saveMessage(conversationId, 'assistant', greeting).catch(() => {});
+    }
     abortController = new AbortController();
     const greetingTurn = ++turnId;
     try {
       console.log(`[AI] ${greeting}`);
       await speakToTwilio(greeting, ws, streamSid, abortController.signal);
-      // Always push greeting to messages — even if interrupted the LLM still
-      // needs it as context. Don't put it in heardSentences: processTurn pushes
-      // heardSentences → messages on each turn, which would double-insert the
-      // greeting and produce invalid consecutive assistant messages (LLM rejects).
-      messages.push({ role: 'assistant', content: greeting });
-      heardSentences = []; // keep empty so processTurn skips the heardSentences block
-      if (conversationId) {
-        saveMessage(conversationId, 'assistant', greeting).catch(() => {});
-      }
     } catch (e) {
       if (e.name !== 'AbortError') console.error('[Greeting]', e.message);
     } finally {
