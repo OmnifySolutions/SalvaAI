@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 const scenarios = [
   {
-    label: "Insurance question",
+    label: "Insurance",
     messages: [
       { role: "user", text: "Do you accept Delta Dental insurance?" },
       { role: "ai",   text: "Yes! We're in-network with Delta Dental, Cigna, and Aetna. Want to schedule a new patient exam?" },
@@ -12,7 +12,7 @@ const scenarios = [
     ],
   },
   {
-    label: "After-hours inquiry",
+    label: "After-hours",
     messages: [
       { role: "user", text: "Hi, it's 9pm and I have a toothache. Can I book tomorrow?" },
       { role: "ai",   text: "So sorry to hear that! We open at 8am — I'd suggest calling first thing. Need the number?" },
@@ -20,63 +20,104 @@ const scenarios = [
     ],
   },
   {
-    label: "New patient question",
+    label: "New patient",
     messages: [
       { role: "user", text: "How much is a teeth cleaning for a new patient?" },
       { role: "ai",   text: "New patient exams with X-rays and cleaning start at $149, often covered by insurance. Shall I check availability?" },
       { role: "user", text: "That sounds great, let's do it!" },
     ],
   },
+  {
+    label: "Pricing",
+    messages: [
+      { role: "user", text: "How much does Invisalign cost?" },
+      { role: "ai",   text: "Invisalign starts at $3,800 — we also offer 0% financing over 18 months. Want to book a free consult?" },
+      { role: "user", text: "Yes, that sounds perfect!" },
+    ],
+  },
 ];
 
+const N = scenarios.length; // 4
+const VISIBLE = 2;
+// Duplicate the first VISIBLE items at the end for seamless looping
+const items = [...scenarios, ...scenarios.slice(0, VISIBLE)];
+
+const CARD_W = 248;
+const GAP = 16;
+const CONTAINER_W = CARD_W * VISIBLE + GAP; // 512px
+const STEP = CARD_W + GAP; // 264px per slide step
+
 export default function ChatCardSpread() {
-  const [active, setActive] = useState(0);
+  const [position, setPosition] = useState(0);
+  const [animate, setAnimate] = useState(true);
 
   useEffect(() => {
     const t = setInterval(() => {
-      setActive((i) => (i + 1) % scenarios.length);
-    }, 4000);
+      setAnimate(true);
+      setPosition((p) => p + 1);
+    }, 6000);
     return () => clearInterval(t);
   }, []);
 
+  // When we reach the cloned section, snap back to real start
+  useEffect(() => {
+    if (position === N) {
+      const timeout = setTimeout(() => {
+        setAnimate(false);
+        setPosition(0);
+        setTimeout(() => setAnimate(true), 50);
+      }, 650);
+      return () => clearTimeout(timeout);
+    }
+  }, [position]);
+
+  const activeIndex = position % N;
+
   return (
-    <div className="relative w-80 h-[400px] mx-auto select-none">
-      {scenarios.map((scenario, i) => {
-        const offset = (i - active + scenarios.length) % scenarios.length;
-        const isActive = offset === 0;
-        const isBehindLeft = offset === 1;
-        const isBehindRight = offset === 2;
-
-        let style: React.CSSProperties = {
-          transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-          position: "absolute",
-          inset: 0,
-          willChange: "transform, opacity",
-        };
-
-        if (isActive) {
-          style = { ...style, transform: "translateY(0) scale(1) rotate(0deg)", opacity: 1, zIndex: 10 };
-        } else if (isBehindLeft) {
-          style = { ...style, transform: "translateY(14px) scale(0.91) rotate(-5deg)", opacity: 0.35, zIndex: 5 };
-        } else {
-          style = { ...style, transform: "translateY(20px) scale(0.84) rotate(5deg)", opacity: 0.18, zIndex: 1 };
-        }
-
-        return (
-          <div key={i} style={style}>
-            <ChatCard scenario={scenario} />
-          </div>
-        );
-      })}
+    <div className="select-none" style={{ width: CONTAINER_W, margin: "0 auto" }}>
+      {/* Track */}
+      <div
+        className="overflow-hidden rounded-2xl"
+        style={{ width: CONTAINER_W, height: 380 }}
+      >
+        <div
+          style={{
+            display: "flex",
+            width: items.length * STEP,
+            transform: `translateX(${-position * STEP}px)`,
+            transition: animate
+              ? "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
+              : "none",
+            height: "100%",
+          }}
+        >
+          {items.map((scenario, i) => (
+            <div
+              key={i}
+              style={{
+                width: CARD_W,
+                flexShrink: 0,
+                marginRight: GAP,
+                height: "100%",
+              }}
+            >
+              <ChatCard scenario={scenario} />
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Dot indicators */}
-      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="flex justify-center gap-2 mt-5">
         {scenarios.map((_, i) => (
           <button
             key={i}
-            onClick={() => setActive(i)}
-            className={`w-1.5 h-1.5 rounded-full transition-all ${
-              i === active ? "bg-gray-700 w-4" : "bg-gray-300"
+            onClick={() => {
+              setAnimate(true);
+              setPosition(i);
+            }}
+            className={`h-1.5 rounded-full transition-all ${
+              activeIndex === i ? "bg-gray-700 w-4" : "bg-gray-300 w-1.5"
             }`}
             aria-label={`Show scenario ${i + 1}`}
           />
@@ -86,7 +127,7 @@ export default function ChatCardSpread() {
   );
 }
 
-function ChatCard({ scenario }: { scenario: typeof scenarios[number] }) {
+function ChatCard({ scenario }: { scenario: (typeof scenarios)[number] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/80 overflow-hidden h-full flex flex-col">
       {/* Header */}
@@ -108,7 +149,7 @@ function ChatCard({ scenario }: { scenario: typeof scenarios[number] }) {
         {scenario.messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`text-sm px-3.5 py-2.5 rounded-2xl max-w-[88%] leading-relaxed ${
+              className={`text-sm px-3.5 py-2.5 rounded-2xl max-w-[90%] leading-relaxed ${
                 msg.role === "user"
                   ? "bg-gray-900 text-white rounded-br-sm"
                   : "bg-white border border-gray-200 text-gray-700 rounded-bl-sm shadow-sm"

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import ChatCardSpread from "@/components/ChatCardSpread";
 import FloatingBubbles from "@/components/FloatingBubbles";
+import StatsCarousel from "@/components/StatsCarousel";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -81,29 +82,16 @@ export default async function HomePage() {
 
       {/* Animated chat card spread */}
       <section className="pb-32 px-6">
-        <div className="max-w-sm mx-auto">
-          <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
-            Real conversations, handled automatically
-          </p>
-          <ChatCardSpread />
-        </div>
+        <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
+          Real conversations, handled automatically
+        </p>
+        <ChatCardSpread />
       </section>
 
       {/* Stats */}
-      <section className="border-y border-gray-100 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-6 py-12 grid grid-cols-3 gap-8 text-center">
-          <div>
-            <div className="text-3xl font-bold text-gray-900 tracking-tight">$200+</div>
-            <div className="text-sm text-gray-500 mt-1">value of a missed new patient</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-gray-900 tracking-tight">24/7</div>
-            <div className="text-sm text-gray-500 mt-1">always-on coverage</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-gray-900 tracking-tight">2 min</div>
-            <div className="text-sm text-gray-500 mt-1">to set up and go live</div>
-          </div>
+      <section className="border-y border-gray-100 bg-gray-50 overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <StatsCarousel />
         </div>
       </section>
 
@@ -121,7 +109,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((f) => (
             <div key={f.title} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all">
-              <div className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center mb-4 text-gray-700">
+              <div className="w-10 h-10 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600">
                 <f.icon size={20} strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
