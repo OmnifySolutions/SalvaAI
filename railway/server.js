@@ -527,6 +527,7 @@ app.ws('/media-stream', async (ws, req) => {
       channels: '1',
       model: 'nova-2-phonecall',
       interim_results: 'true',
+      vad_events: 'true',       // enables SpeechStarted event — required for instant barge-in
       endpointing: '200',       // was 300 — tighter end-of-turn detection
       utterance_end_ms: '1000', // fire UtteranceEnd after 1s of silence as fallback
       smart_format: 'true',
