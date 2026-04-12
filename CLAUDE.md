@@ -30,12 +30,17 @@ Key column names — use exactly:
 - Chat widget (`/widget/[businessId]`) + embed script (`/api/widget/embed`)
 - Chat API (`/api/chat`) — real Claude Haiku or mock fallback if no API key
 - Stripe billing (`/api/stripe/checkout|portal|webhook`) — 30-day trial, plan sync, 4 plans
-- **Voice AI pipeline** ✅ (fully wired, blocked on API credits for testing)
-  - Railway WebSocket server (`railway/server.js`) — Deepgram STT → Claude Haiku → ElevenLabs TTS → Twilio
+- **Voice AI pipeline** ✅ (fully working, tested end-to-end via browser)
+  - Railway WebSocket server (`railway/server.js`) — Deepgram STT → Groq LLM → Deepgram TTS → Twilio
+  - TTS: Deepgram Aura (`aura-asteria-en`, mulaw 8kHz) — replaced ElevenLabs (free plan blocks API)
+  - LLM: Groq `llama-3.3-70b-versatile` for testing; set `GROQ_API_KEY` in Railway to activate, remove to fall back to Claude Haiku
   - Barge-in: AbortController + Twilio clear event
   - Post-call SMS summary to business owner (requires `businesses.phone_number` set)
   - Twilio webhook (`/api/voice/incoming-call`) — creates conversation, returns TwiML with correct Railway URL
+  - Browser call demo (`/voice-test`) — Twilio Client JS SDK, no phone needed
+  - Token endpoint (`/api/voice/browser-token`) + TwiML App webhook (`/api/voice/browser-call`)
   - Auth: `/api/voice/(.*)` exempted from Clerk in `proxy.ts`
+  - Twilio TwiML App SID: `APb69c7c65d2d8e75d4f55a416a3447b68`
 - Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`, `AudioDemo`
 - Hooks: `useCarousel` — shared infinite-scroll logic
 
@@ -62,7 +67,7 @@ Key column names — use exactly:
 ## Product decisions (locked)
 - Omnichannel: web chat (live) + voice/Twilio (next) + email (post-launch) + SMS (post-launch, needs A2P 10DLC)
 - Voice works via phone forwarding — dental office forwards their number to a Twilio number we provision
-- Voice AI architecture: **Option B — full conversational Media Streams** (NOT IVR). Twilio Media Streams → Railway WebSocket server → Deepgram STT → Claude Haiku → ElevenLabs TTS → audio back to caller. Sub-second latency, natural conversation.
+- Voice AI architecture: **Option B — full conversational Media Streams** (NOT IVR). Twilio Media Streams → Railway WebSocket server → Deepgram STT → Groq/Claude LLM → Deepgram TTS → audio back to caller. Sub-second latency, natural conversation.
 - Voice infra: Railway hosts the WebSocket server (Next.js/Vercel can't do persistent WebSockets). ~$6/month.
 - Voice is the main product. Chat is a bonus. All homepage messaging should lead with voice/missed calls.
 - No mobile SDK for MVP
@@ -84,18 +89,18 @@ Key column names — use exactly:
 4. ✅ **Pre-recorded audio demo section** — AudioDemo component built, MP3s still need generating (scripts in memory)
 5. ✅ **Competitive nudge line** — added to homepage
 6. ✅ **Update pricing page** — 4-tier, updated competitor table
-7. ✅ **Voice AI pipeline** — Deepgram + Claude + ElevenLabs wired, barge-in, post-call SMS
-8. **Swap to Groq for testing** — 5-min code change, unblocks voice testing while Anthropic credits are pending
-9. **Fix ElevenLabs voice** — current voice ID needs paid plan; user selecting free voice
-10. **Browser voice demo** — Twilio Client SDK in browser (needs TwiML App SID + API Key SID/Secret from Twilio Console)
-11. **Sentence streaming** — latency improvement 1.5s → ~600ms (sentence-level Claude stream → ElevenLabs)
+7. ✅ **Voice AI pipeline** — Deepgram STT + Groq LLM + Deepgram TTS wired, barge-in, post-call SMS
+8. ✅ **Swap to Groq for testing** — GROQ_API_KEY env flag in Railway, falls back to Claude Haiku when removed
+9. ✅ **Fix TTS** — switched from ElevenLabs (free plan blocks API) to Deepgram Aura (`aura-asteria-en`)
+10. ✅ **Browser voice demo** — `/voice-test` page, Twilio Client JS SDK, tested and working
+11. **Sentence streaming** — latency improvement ~1.5s → ~600ms (stream LLM by sentence → pipe each to Deepgram TTS immediately)
 12. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
-13. **Switch back to Claude Haiku** — before first real paying customer
+13. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
 
-## Blockers (must resolve before voice works)
-- **Anthropic credits** — out of credits, waiting a few days
-- **ElevenLabs voice** — current voice (WZlYpi1yf6zJhNWXih74) requires paid plan; need free voice ID
-- **Audio demo MP3s** — generate 3 files via ElevenLabs Text to Speech, save to `/public/audio/` (scripts documented in memory/voice_infrastructure.md)
+## Blockers
+- **Anthropic credits** — out of credits; Groq is the active LLM until resolved
+- **Audio demo MP3s** — generate 3 files via Deepgram TTS, save to `/public/audio/` (scripts documented in memory/voice_infrastructure.md)
+- **Twilio trial account** — plays watermark message before every call; upgrade account to remove
 
 ## Key stats (verified, use in copy)
 - 35% of dental calls go unanswered (>50% during busy hours)
@@ -110,7 +115,8 @@ Key column names — use exactly:
 - Basic margin: ~96% ($47 profit on $49)
 - Pro margin: ~92.6% ($175 profit on $189) — voice cost ~$14/customer/month
 - Multi-Practice margin: ~89.2% ($579 profit on $649) — voice cost ~$70 (5 locations)
-- Main costs: Stripe 2.9%+$0.30, Claude Haiku ~$0.001/msg, Twilio $1.15/number + $0.0085/min, Deepgram $0.0059/min, ElevenLabs ~$7-10/Pro customer/month, Railway ~$6/month flat
+- Main costs: Stripe 2.9%+$0.30, Claude Haiku ~$0.001/msg, Twilio $1.15/number + $0.0085/min, Deepgram STT $0.0059/min, Deepgram TTS ~$1-2/customer/month, Railway ~$6/month flat
+- TTS decision: Deepgram Aura replaces ElevenLabs — ~$1-2/customer/month vs $7-10. Phone codec (mulaw 8kHz) is the quality bottleneck, not the TTS engine.
 - Infrastructure (Supabase/Vercel/Clerk) free until ~50-80 customers
 - Path to $20K MRR: ~106 Pro customers or ~80 Pro + a few Multi-Practice
 
