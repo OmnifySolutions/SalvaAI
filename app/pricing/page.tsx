@@ -29,7 +29,7 @@ const plans = [
     period: "/ month",
     description: "For growing practices that want to capture every opportunity.",
     features: [
-      "500 AI interactions / month",
+      "Unlimited AI interactions",
       "Chat widget — no branding",
       "Custom AI name & greeting",
       "FAQ management",
@@ -40,18 +40,18 @@ const plans = [
     ctaLoggedIn: "Upgrade to this plan",
     href: "/sign-up?plan=basic",
     hrefLoggedIn: "/dashboard?upgrade=basic",
-    highlight: true,
-    badge: "Most popular",
+    highlight: false,
+    badge: null,
   },
   {
     name: "Pro",
-    price: "$149",
+    price: "$189",
     period: "/ month",
     description: "For busy practices that can't afford to miss a single call.",
     features: [
-      "Unlimited AI interactions",
       "Everything in Basic",
       "AI voice phone answering",
+      "Up to 500 calls / month",
       "Custom AI instructions",
       "Priority support",
     ],
@@ -59,8 +59,27 @@ const plans = [
     ctaLoggedIn: "Upgrade to this plan",
     href: "/sign-up?plan=pro",
     hrefLoggedIn: "/dashboard?upgrade=pro",
+    highlight: true,
+    badge: "Most popular",
+  },
+  {
+    name: "Multi-Practice",
+    price: "$649",
+    period: "/ month",
+    description: "One AI platform across all your locations — at a fraction of buying 5 Pro plans.",
+    features: [
+      "Up to 5 locations",
+      "Everything in Pro",
+      "Up to 2,500 calls / month",
+      "Centralized dashboard",
+      "Dedicated onboarding support",
+    ],
+    cta: "Start free trial",
+    ctaLoggedIn: "Upgrade to this plan",
+    href: "/sign-up?plan=multi",
+    hrefLoggedIn: "/dashboard?upgrade=multi",
     highlight: false,
-    badge: null,
+    badge: "Best value",
   },
 ];
 
@@ -68,6 +87,12 @@ const comparison = [
   {
     feature: "Starting price",
     hustle: "$49 / mo",
+    arini: "$249 / mo",
+    truelark: "$345 / mo",
+  },
+  {
+    feature: "Voice AI answering",
+    hustle: "Pro · $189/mo",
     arini: "$249 / mo",
     truelark: "$345 / mo",
   },
@@ -84,10 +109,10 @@ const comparison = [
     truelark: true,
   },
   {
-    feature: "AI voice answering",
-    hustle: "Pro plan",
-    arini: true,
-    truelark: true,
+    feature: "Multi-location support",
+    hustle: "$649 / mo (5 locations)",
+    arini: false,
+    truelark: false,
   },
   {
     feature: "No vendor branding",
@@ -113,7 +138,7 @@ export default async function PricingPage() {
   const { userId } = await auth();
   const isLoggedIn = !!userId;
 
-  let currentPlan: "free" | "basic" | "pro" = "free";
+  let currentPlan: "free" | "basic" | "pro" | "multi" = "free";
   if (isLoggedIn) {
     const { data } = await supabaseAdmin
       .from("businesses")
@@ -174,10 +199,10 @@ export default async function PricingPage() {
         </div>
 
         {/* Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
           {plans.map((plan) => {
             const isPaid = plan.name !== "Free";
-            const planKey = plan.name.toLowerCase() as "free" | "basic" | "pro";
+            const planKey = (plan.name === "Multi-Practice" ? "multi" : plan.name.toLowerCase()) as "free" | "basic" | "pro" | "multi";
             const isCurrent = isLoggedIn && currentPlan === planKey;
             const useUpgrade = isLoggedIn && isPaid && !isCurrent;
             const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
@@ -226,7 +251,7 @@ export default async function PricingPage() {
 
                 {useUpgrade ? (
                   <UpgradeButton
-                    plan={planKey as "basic" | "pro"}
+                    plan={planKey as "basic" | "pro" | "multi"}
                     className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
                       plan.highlight
                         ? "bg-white text-gray-900 hover:bg-gray-100"

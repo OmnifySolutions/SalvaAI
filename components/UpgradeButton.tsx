@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 interface Props {
-  plan?: "basic" | "pro";
+  plan?: "basic" | "pro" | "multi";
   mode?: "checkout" | "portal";
   className?: string;
   children: React.ReactNode;

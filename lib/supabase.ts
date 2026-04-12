@@ -17,7 +17,7 @@ export type Business = {
   slug: string;
   business_type: string;
   phone_number: string | null;
-  plan: "free" | "basic" | "pro";
+  plan: "free" | "basic" | "pro" | "multi";
   plan_status: string;
   faqs: { question: string; answer: string }[];
   hours: Record<string, { open: string | null; close: string | null; enabled: boolean }> | string;
