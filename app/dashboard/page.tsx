@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <span className="font-bold text-blue-600 text-lg">HustleClaude</span>
+        <Link href="/dashboard" className="font-bold text-blue-600 text-lg">HustleClaude</Link>
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <span>{business.name}</span>
           <Link href="/settings" className="text-gray-500 hover:text-gray-700 text-sm">Settings</Link>

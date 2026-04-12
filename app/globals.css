@@ -11,3 +11,16 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+@keyframes float-up {
+  0%   { transform: translateY(0px) rotate(var(--r, 0deg)); opacity: var(--o-start, 0); }
+  15%  { opacity: var(--o-end, 1); }
+  85%  { opacity: var(--o-end, 1); }
+  100% { transform: translateY(-28px) rotate(var(--r, 0deg)); opacity: 0; }
+}
+
+@keyframes card-cycle {
+  0%, 100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); z-index: 10; }
+  33%       { opacity: 0.15; transform: translateY(6px) scale(0.93) rotate(-4deg); z-index: 1; }
+  66%       { opacity: 0.15; transform: translateY(6px) scale(0.93) rotate(4deg); z-index: 1; }
+}
