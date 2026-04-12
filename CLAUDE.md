@@ -8,7 +8,7 @@
 - Database: Supabase — use `supabaseAdmin` (service role, bypasses RLS) for all server routes
 - AI: Anthropic SDK (`claude-haiku-4-5-20251001`) via `/api/chat`
 - Icons: `lucide-react` — never use emoji as icons
-- Payments: Stripe (not yet wired)
+- Payments: Stripe (`lib/stripe.ts`) — checkout, portal, webhook wired
 
 ## Schema (Supabase)
 Key column names — use exactly:
@@ -18,14 +18,17 @@ Key column names — use exactly:
 - See `docs/SCHEMA.sql` for full schema
 
 ## What's built
-- Landing page (`/`) — animated floating bubble bg, 3-card carousel mockup, Lucide icons, stats bar, features grid, CTA banner
-- Pricing page (`/pricing`) — Free/Basic/Pro plans, FAQ section
+- Landing page (`/`) — floating bubbles, 2-card slide carousel (4 scenarios), stats carousel (5 stats), features grid, CTA banner
+- Pricing page (`/pricing`) — Free/Basic/Pro, competitor table, auth-aware CTAs (UpgradeButton), current plan state
 - Auth: sign-in, sign-up (Clerk), onboarding (`/onboarding`)
-- Dashboard (`/dashboard`) — stats, embed code, conversation list
-- Settings (`/settings`) — name, hours, services, AI config, FAQs
+- Dashboard (`/dashboard`) — stats, billing section (upgrade/manage), embed code, conversation list
+- Settings (`/settings`) — name, hours (HoursPicker), services, AI config, FAQs
+- Setup guide (`/setup`) — embed instructions (Squarespace/Wix/WordPress/HTML) + phone forwarding guide (GSM global-first, VoIP, US carriers)
 - Chat widget (`/widget/[businessId]`) + embed script (`/api/widget/embed`)
 - Chat API (`/api/chat`) — real Claude or mock fallback if no API key
-- Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`
+- Stripe billing (`/api/stripe/checkout|portal|webhook`) — 30-day trial, plan sync
+- Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`
+- Hooks: `useCarousel` — shared infinite-scroll logic used by ChatCardSpread + StatsCarousel
 
 ## Design system (locked — do not change)
 - Option B: clean, warm, Stripe-like
@@ -96,7 +99,7 @@ Key column names — use exactly:
 - Main costs: Stripe 2.9%+$0.30, Claude Haiku API ~$0.001/msg, Twilio $1.15/number + $0.0085/min
 - Infrastructure (Supabase/Vercel/Clerk) free until ~50-80 customers
 
-## Skill nudges
-Tell Daryll which skill to invoke at the right moment. Name the command and one sentence on what it does.
+## Workflow rules
+- **Git: no approval needed** — run all git commands (add, commit, push, branch, etc.) without asking for permission first. Just do it.
 - `/commit` is NOT available — use `git add -A && git commit` directly via Bash
 - After large feature builds → suggest `/simplify` for a code review pass
