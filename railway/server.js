@@ -437,6 +437,10 @@ async function speakToTwilio(text, ws, streamSid, signal) {
             media: { payload: frame.toString('base64') },
           })
         );
+        // Real-time pacing: each frame is 20ms of audio.
+        // Sending at this rate keeps Twilio's buffer shallow (~1 frame deep)
+        // so a barge-in 'clear' event cuts audio within one frame (~20ms).
+        await new Promise((r) => setTimeout(r, FRAME_SIZE / 8)); // 160 bytes / 8kHz = 20ms
       }
     }
   } catch (e) {
@@ -491,6 +495,7 @@ app.ws('/media-stream', async (ws, req) => {
   let pendingTranscript = '';
   let abortController  = null; // for barge-in cancellation
   let cleanedUp        = false;
+  let turnId           = 0;    // increments each AI turn; guards stale finally blocks
 
   // Load business config before Twilio start event arrives
   if (conversationId) {
@@ -568,6 +573,7 @@ app.ws('/media-stream', async (ws, req) => {
         }
 
         abortController = new AbortController();
+        const myTurn = ++turnId;
         try {
           // Sentence-streaming: first sentence fires to TTS as soon as the LLM
           // produces it — no waiting for the full response (~600ms vs ~1.5s).
@@ -586,8 +592,13 @@ app.ws('/media-stream', async (ws, req) => {
         } catch (e) {
           if (e.name !== 'AbortError') console.error('[AI]', e.message);
         } finally {
-          isSpeaking = false;
-          abortController = null;
+          // Only reset speaking state if we're still the current turn.
+          // Barge-in starts a new turn before this finally runs; without the
+          // guard the stale finally would zero out the new turn's state.
+          if (myTurn === turnId) {
+            isSpeaking = false;
+            abortController = null;
+          }
         }
       } catch (e) {
         console.error('[Deepgram parse]', e.message);
@@ -606,6 +617,7 @@ app.ws('/media-stream', async (ws, req) => {
 
     isSpeaking = true;
     abortController = new AbortController();
+    const greetingTurn = ++turnId;
     try {
       messages.push({ role: 'assistant', content: greeting });
       if (conversationId) {
@@ -616,8 +628,10 @@ app.ws('/media-stream', async (ws, req) => {
     } catch (e) {
       if (e.name !== 'AbortError') console.error('[Greeting]', e.message);
     } finally {
-      isSpeaking = false;
-      abortController = null;
+      if (greetingTurn === turnId) {
+        isSpeaking = false;
+        abortController = null;
+      }
     }
   }
 
