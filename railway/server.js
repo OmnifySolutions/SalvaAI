@@ -2,6 +2,12 @@ import express from 'express';
 import expressWs from 'express-ws';
 import WebSocket from 'ws';
 
+// Prevent unhandled promise rejections from crashing the Railway process.
+// All per-call errors are caught locally; this is a safety net for anything missed.
+process.on('unhandledRejection', (reason) => {
+  console.error('[UnhandledRejection]', reason);
+});
+
 const app = express();
 expressWs(app);
 
@@ -113,9 +119,12 @@ function buildSystemPrompt(business) {
 
   return `You are ${business.ai_name || 'Claire'}, the AI receptionist for ${business.name}.
 
-You are answering a live phone call. Be warm, natural, and concise — like a real receptionist, not a chatbot. Never use lists, bullet points, or any formatting. Your words will be spoken aloud by text-to-speech, so write exactly as you would speak.
+You are answering a live phone call. Be professional, efficient, and friendly — like a competent front-desk receptionist at a busy practice. Never use lists, bullet points, or any formatting. Your words will be spoken aloud, so write exactly as you would speak.
 
-Keep responses to one or two sentences. Give longer answers only when a caller asks a detailed question.
+Tone rules:
+- Direct and helpful. Skip the excessive empathy — no "Oh I'm so sorry to hear that", no "That's a great question!", no filler affirmations.
+- Friendly but not warm. Think busy front desk, not customer support script.
+- One or two sentences maximum. Longer only when a caller asks something detailed.
 
 Practice information:
 - Name: ${business.name}
@@ -501,6 +510,7 @@ app.ws('/media-stream', async (ws, req) => {
   let cleanedUp        = false;
   let turnId           = 0;    // increments each AI turn; guards stale finally blocks
   let heardSentences   = [];   // sentences the caller actually heard before any barge-in
+  let keepAliveTimer   = null; // periodic mark event to prevent Twilio WebSocket idle drop
 
   // Load business config before Twilio start event arrives
   if (conversationId) {
@@ -540,7 +550,15 @@ app.ws('/media-stream', async (ws, req) => {
 
     dgSocket.on('open',  () => console.log('[Deepgram] Connected'));
     dgSocket.on('error', (e) => console.error('[Deepgram]', e.message));
-    dgSocket.on('close', () => console.log('[Deepgram] Closed'));
+    dgSocket.on('close', () => {
+      console.log('[Deepgram] Closed');
+      // If the Deepgram socket drops mid-call (network blip), reconnect so STT keeps working.
+      // Without this the call stays connected but the AI goes deaf — no more transcripts.
+      if (!cleanedUp) {
+        console.log('[Deepgram] Reconnecting...');
+        setTimeout(() => { if (!cleanedUp) setupDeepgram(); }, 500);
+      }
+    });
 
     dgSocket.on('message', async (raw) => {
       try {
@@ -692,6 +710,7 @@ app.ws('/media-stream', async (ws, req) => {
     if (cleanedUp) return;
     cleanedUp = true;
 
+    if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
     if (dgSocket) dgSocket.close();
 
     // Abort any in-progress TTS
@@ -742,6 +761,13 @@ app.ws('/media-stream', async (ws, req) => {
         console.log(`[Twilio] Call started: ${streamSid}`);
         setupDeepgram();
         setTimeout(() => sendGreeting(), 300);
+        // Send a Twilio mark event every 10s to prevent WebSocket idle disconnection
+        // during long silences (e.g. caller is thinking, AI finished speaking).
+        keepAliveTimer = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN && streamSid) {
+            ws.send(JSON.stringify({ event: 'mark', streamSid, mark: { name: 'keepalive' } }));
+          }
+        }, 10_000);
         return;
       }
 
