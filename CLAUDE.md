@@ -27,6 +27,12 @@ Key column names — use exactly:
 - Chat widget (`/widget/[businessId]`) + embed script (`/api/widget/embed`)
 - Chat API (`/api/chat`) — real Claude or mock fallback if no API key
 - Stripe billing (`/api/stripe/checkout|portal|webhook`) — 30-day trial, plan sync
+- **Voice AI infrastructure** ✅
+  - Railway WebSocket server (`railway/server.js`) — listens for Twilio Media Streams
+  - Twilio webhook (`/api/voice/incoming-call`) — handles incoming calls, creates conversation records
+  - Schema: `businesses.voice_enabled` (boolean), `conversations.channel` supports 'voice', `conversations.twilio_call_sid`
+  - Auth: `/api/voice/(.*)` exempted from Clerk in `proxy.ts`
+  - Env vars: `RAILWAY_URL`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`
 - Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`
 - Hooks: `useCarousel` — shared infinite-scroll logic used by ChatCardSpread + StatsCarousel
 
@@ -75,7 +81,7 @@ Key column names — use exactly:
 4. **Pre-recorded audio demo section** — 3 scenarios (new patient, after-hours, insurance), simple MP3 player, $0 ongoing cost. Generate with ElevenLabs once.
 5. **Competitive nudge line** — one line near pricing on homepage
 6. **Update pricing page** — new 4-tier pricing, updated competitor table
-7. **Twilio voice AI** — Railway WebSocket server + Deepgram STT + Claude + ElevenLabs TTS + settings Voice AI section + schema (`twilio_number`, `voice_enabled` on businesses)
+7. **Twilio voice AI** — ✅ DONE. Railway WebSocket server deployed + Twilio webhook working + schema updated + auth fixed. Still TODO: add voice settings UI to dashboard, integrate Deepgram + Claude + ElevenLabs into media stream handler
 8. **Browser voice demo** (Phase 2, after voice is live) — talk to AI in browser via WebRTC, no phone needed
 
 ## Key stats (verified, use in copy)
