@@ -429,6 +429,12 @@ async function speakToTwilio(text, ws, streamSid, signal) {
 
   let buffer = Buffer.alloc(0);
   const reader = res.body.getReader();
+  // Pre-buffer: send the first PRE_BUFFER_FRAMES frames without delay so Twilio
+  // has a small cushion against Node.js event-loop jitter. After that, pace at
+  // real-time (20ms/frame) to keep the buffer shallow for responsive barge-in.
+  // 15 frames = 300ms buffer — small enough that clear still stops audio quickly.
+  const PRE_BUFFER_FRAMES = 15;
+  let framesSent = 0;
 
   try {
     while (true) {
@@ -450,10 +456,11 @@ async function speakToTwilio(text, ws, streamSid, signal) {
             media: { payload: frame.toString('base64') },
           })
         );
-        // Real-time pacing: each frame is 20ms of audio.
-        // Sending at this rate keeps Twilio's buffer shallow (~1 frame deep)
-        // so a barge-in 'clear' event cuts audio within one frame (~20ms).
-        await new Promise((r) => setTimeout(r, FRAME_SIZE / 8)); // 160 bytes / 8kHz = 20ms
+        framesSent++;
+        if (framesSent > PRE_BUFFER_FRAMES) {
+          // Real-time pacing after pre-buffer is established
+          await new Promise((r) => setTimeout(r, FRAME_SIZE / 8)); // 20ms
+        }
       }
     }
   } catch (e) {
