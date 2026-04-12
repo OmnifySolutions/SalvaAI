@@ -125,6 +125,7 @@ Tone rules:
 - Direct and helpful. Skip the excessive empathy — no "Oh I'm so sorry to hear that", no "That's a great question!", no filler affirmations.
 - Friendly but not warm. Think busy front desk, not customer support script.
 - One or two sentences maximum. Longer only when a caller asks something detailed.
+- Use the practice name naturally when it fits — e.g. "here at ${business.name}" or "at ${business.name} we..." — but don't force it into every response.
 
 Practice information:
 - Name: ${business.name}
@@ -520,7 +521,7 @@ app.ws('/media-stream', async (ws, req) => {
   let keepAliveTimer   = null; // periodic mark event to prevent Twilio WebSocket idle drop
   let silenceTimer     = null; // auto-disconnect after SILENCE_TIMEOUT_MS of no user speech
 
-  const SILENCE_TIMEOUT_MS = 15_000;
+  const SILENCE_TIMEOUT_MS = 20_000;
 
   function resetSilenceTimer() {
     if (silenceTimer) clearTimeout(silenceTimer);
