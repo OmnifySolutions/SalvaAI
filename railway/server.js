@@ -117,15 +117,58 @@ function buildSystemPrompt(business) {
     .map((f) => `Q: ${f.question}\nA: ${f.answer}`)
     .join('\n\n');
 
+  // ── Tone ────────────────────────────────────────────────────────────────────
+  const toneMap = {
+    professional: 'Direct and helpful. Skip the excessive empathy — no filler affirmations. Friendly but not warm. Think busy front desk.',
+    warm:         'Warm and approachable. You can show genuine care and take a moment to make callers feel at ease. Still efficient — do not ramble.',
+    clinical:     'Precise and efficient. Minimal small talk. Callers expect professionalism, not warmth. Get to the point quickly.',
+  };
+  const toneText = toneMap[business.voice_tone] || toneMap.professional;
+
+  // ── Emergency ───────────────────────────────────────────────────────────────
+  const emergencyText = (business.voice_emergency_number || business.voice_emergency_message)
+    ? `Emergency handling: If a caller describes a dental emergency, ${business.voice_emergency_message || 'direct them to seek immediate care.'} ${business.voice_emergency_number ? `Our emergency line is ${business.voice_emergency_number}.` : ''}`
+    : `If a caller describes a dental emergency, tell them you will flag it as urgent and have someone call them back immediately.`;
+
+  // ── Deflection (PRIORITY — injected before scenarios) ───────────────────────
+  const deflectLabels = {
+    appointments:        'appointment requests or scheduling',
+    insurance:           'insurance or billing questions',
+    cost:                'treatment cost or pricing questions',
+    clinical_advice:     'clinical or medical advice',
+    prescriptions:       'prescription refill requests',
+    doctor_availability: 'questions about specific doctor availability',
+  };
+  const deflectTopics = (business.voice_deflect_topics || [])
+    .map((t) => deflectLabels[t] || t)
+    .filter(Boolean);
+
+  const deflectText = deflectTopics.length
+    ? `PRIORITY RULE — Deflect the following topics immediately. Do not attempt to handle them yourself. Tell the caller a team member will follow up. This overrides all other instructions:\n- ${deflectTopics.join('\n- ')}`
+    : '';
+
+  // ── Scenarios (injected after deflection) ───────────────────────────────────
+  const scenarioMap = {
+    new_patient:    'If a caller is a new patient or asks about becoming a patient: collect their name and preferred contact method, and tell them the office will be in touch shortly.',
+    appointment:    'If a caller wants to book or change an appointment: acknowledge the request, collect their name and preferred time, and tell them the office will confirm.',
+    insurance:      'If a caller asks about insurance verification: acknowledge, tell them the billing team handles this, and collect their name and callback number.',
+    post_procedure: 'If a caller has a concern after a recent procedure: show care, tell them you are routing this to the clinical team right away, and provide the emergency line if available.',
+    after_hours:    'If the caller is reaching out outside office hours: acknowledge the office is currently closed, offer to take a callback request, and provide the emergency line if available.',
+  };
+  const activeScenarios = (business.voice_scenarios || [])
+    .map((s) => scenarioMap[s])
+    .filter(Boolean);
+
+  const scenarioText = activeScenarios.length
+    ? `Scenario guidance:\n${activeScenarios.join('\n')}`
+    : '';
+
   return `You are ${business.ai_name || 'Claire'}, the AI receptionist for ${business.name}.
 
-You are answering a live phone call. Be professional, efficient, and friendly — like a competent front-desk receptionist at a busy practice. Never use lists, bullet points, or any formatting. Your words will be spoken aloud, so write exactly as you would speak.
+You are answering a live phone call. Never use lists, bullet points, or any formatting. Your words will be spoken aloud, so write exactly as you would speak. One or two sentences maximum — longer only when a caller asks something detailed.
 
-Tone rules:
-- Direct and helpful. Skip the excessive empathy — no "Oh I'm so sorry to hear that", no "That's a great question!", no filler affirmations.
-- Friendly but not warm. Think busy front desk, not customer support script.
-- One or two sentences maximum. Longer only when a caller asks something detailed.
-- Use the practice name naturally when it fits — e.g. "here at ${business.name}" or "at ${business.name} we..." — but don't force it into every response.
+Tone: ${toneText}
+Use the practice name naturally when it fits — e.g. "here at ${business.name}" or "at ${business.name} we..." — but don't force it into every response.
 
 Practice information:
 - Name: ${business.name}
@@ -134,9 +177,11 @@ Practice information:
 ${business.custom_prompt ? `\nAdditional instructions:\n${business.custom_prompt}` : ''}
 ${faqText ? `\nFrequently asked questions:\n${faqText}` : ''}
 
-Guidelines:
-- Never discuss clinical or medical specifics — say you'll have a team member call back.
-- If someone wants to schedule an appointment or be called back, get their name and confirm you'll pass it to the office.
+${emergencyText}
+${deflectText ? `\n${deflectText}` : ''}
+${scenarioText ? `\n${scenarioText}` : ''}
+
+General guidelines:
 - If you don't know something, offer to have the office follow up.
 - Do not volunteer that you are an AI unless directly asked.`;
 }
