@@ -7,7 +7,12 @@ export async function POST(req: NextRequest) {
   if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { name, businessType, hours, services, aiName, aiGreeting, customPrompt, faqs, voiceEnabled } = body;
+  const {
+    name, businessType, hours, services,
+    aiName, aiGreeting, customPrompt, faqs, voiceEnabled,
+    voiceTone, voiceEmergencyNumber, voiceEmergencyMessage,
+    voiceDeflectTopics, voiceScenarios,
+  } = body;
 
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
 
@@ -23,6 +28,11 @@ export async function POST(req: NextRequest) {
       custom_prompt: customPrompt,
       faqs: faqs ?? [],
       voice_enabled: voiceEnabled ?? false,
+      voice_tone: voiceTone ?? "professional",
+      voice_emergency_number: voiceEmergencyNumber ?? null,
+      voice_emergency_message: voiceEmergencyMessage ?? null,
+      voice_deflect_topics: voiceDeflectTopics ?? [],
+      voice_scenarios: voiceScenarios ?? [],
     })
     .eq("clerk_user_id", userId);
 
