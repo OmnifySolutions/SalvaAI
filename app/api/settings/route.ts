@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     aiName, aiGreeting, customPrompt, faqs, voiceEnabled,
     voiceTone, voiceEmergencyNumber, voiceEmergencyMessage,
     voiceDeflectTopics, voiceScenarios,
+    openDentalServerUrl, openDentalApiKey, openDentalBookingMode, openDentalBookingWindow,
   } = body;
 
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
@@ -33,6 +34,10 @@ export async function POST(req: NextRequest) {
       voice_emergency_message: voiceEmergencyMessage ?? null,
       voice_deflect_topics: voiceDeflectTopics ?? [],
       voice_scenarios: voiceScenarios ?? [],
+      opendental_server_url: openDentalServerUrl ?? null,
+      opendental_api_key: openDentalApiKey ?? null,
+      opendental_booking_mode: openDentalBookingMode ?? 'autonomous',
+      opendental_booking_window: openDentalBookingWindow ?? 7,
     })
     .eq("clerk_user_id", userId);
 
