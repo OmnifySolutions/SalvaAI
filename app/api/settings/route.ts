@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
       voice_emergency_message: voiceEmergencyMessage ?? null,
       voice_deflect_topics: voiceDeflectTopics ?? [],
       voice_scenarios: voiceScenarios ?? [],
-      opendental_server_url: openDentalServerUrl ?? null,
-      opendental_api_key: openDentalApiKey ?? null,
+      opendental_server_url: openDentalServerUrl?.trim() || null,
+      opendental_api_key: openDentalApiKey?.trim() || null,
       opendental_booking_mode: openDentalBookingMode ?? 'autonomous',
       opendental_booking_window: openDentalBookingWindow ?? 7,
     })
