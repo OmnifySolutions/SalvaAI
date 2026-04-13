@@ -37,7 +37,7 @@ const DEFLECT_PRESETS: { key: string; label: string }[] = [
   { key: "appointments",        label: "Appointment requests" },
   { key: "insurance",           label: "Insurance & billing questions" },
   { key: "cost",                label: "Treatment cost estimates" },
-  { key: "clinical",            label: "Clinical / medical advice" },
+  { key: "clinical_advice",      label: "Clinical / medical advice" },
   { key: "prescriptions",       label: "Prescription refill requests" },
   { key: "doctor_availability", label: "Specific doctor availability" },
 ];
@@ -80,6 +80,7 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [voiceScenarios, setVoiceScenarios] = useState<string[]>(business.voice_scenarios ?? []);
   const [customDeflectInput, setCustomDeflectInput] = useState("");
   const [showCustomDeflectInput, setShowCustomDeflectInput] = useState(false);
+  const [customDeflectError, setCustomDeflectError] = useState("");
 
   const hasVoice = business.plan === "pro" || business.plan === "multi";
 
@@ -103,10 +104,14 @@ export default function SettingsForm({ business }: { business: Business }) {
 
   function addCustomDeflect() {
     const val = customDeflectInput.trim();
-    if (val && !voiceDeflectTopics.includes(val)) {
-      setVoiceDeflectTopics((prev) => [...prev, val]);
+    if (!val) return;
+    if (voiceDeflectTopics.includes(val)) {
+      setCustomDeflectError("Already added");
+      return;
     }
+    setVoiceDeflectTopics((prev) => [...prev, val]);
     setCustomDeflectInput("");
+    setCustomDeflectError("");
     setShowCustomDeflectInput(false);
   }
 
@@ -452,23 +457,26 @@ export default function SettingsForm({ business }: { business: Business }) {
                 </div>
               ))}
               {showCustomDeflectInput ? (
-                <div className="flex gap-2">
-                  <input
-                    autoFocus
-                    type="text"
-                    value={customDeflectInput}
-                    onChange={(e) => setCustomDeflectInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomDeflect(); } if (e.key === "Escape") setShowCustomDeflectInput(false); }}
-                    className={`${inputCls} flex-1`}
-                    placeholder="e.g. Questions about payment plans"
-                  />
-                  <button
-                    type="button"
-                    onClick={addCustomDeflect}
-                    className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shrink-0"
-                  >
-                    Add
-                  </button>
+                <div>
+                  <div className="flex gap-2">
+                    <input
+                      autoFocus
+                      type="text"
+                      value={customDeflectInput}
+                      onChange={(e) => { setCustomDeflectInput(e.target.value); setCustomDeflectError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomDeflect(); } if (e.key === "Escape") setShowCustomDeflectInput(false); }}
+                      className={`${inputCls} flex-1`}
+                      placeholder="e.g. Questions about payment plans"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomDeflect}
+                      className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {customDeflectError && <p className="text-xs text-red-500 mt-1">{customDeflectError}</p>}
                 </div>
               ) : (
                 <button
