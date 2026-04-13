@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Check, X, Plus } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 
 type FAQ = { question: string; answer: string };
+type VoiceTone = "professional" | "warm" | "clinical";
+
 type Business = {
   name: string;
   business_type: string;
@@ -17,7 +20,37 @@ type Business = {
   plan: string;
   voice_enabled: boolean;
   twilio_sid: string | null;
+  voice_tone: VoiceTone | null;
+  voice_emergency_number: string | null;
+  voice_emergency_message: string | null;
+  voice_deflect_topics: string[] | null;
+  voice_scenarios: string[] | null;
 };
+
+const TONES: { key: VoiceTone; label: string; subtitle: string }[] = [
+  { key: "professional", label: "Professional & Efficient", subtitle: "Busy front desk. Direct, no filler." },
+  { key: "warm",         label: "Warm & Friendly",          subtitle: "Approachable. Good for family or pediatric practices." },
+  { key: "clinical",     label: "Clinical & Precise",        subtitle: "Minimal small talk. Good for oral surgery or specialists." },
+];
+
+const DEFLECT_PRESETS: { key: string; label: string }[] = [
+  { key: "appointments",        label: "Appointment requests" },
+  { key: "insurance",           label: "Insurance & billing questions" },
+  { key: "cost",                label: "Treatment cost estimates" },
+  { key: "clinical",            label: "Clinical / medical advice" },
+  { key: "prescriptions",       label: "Prescription refill requests" },
+  { key: "doctor_availability", label: "Specific doctor availability" },
+];
+
+const PRESET_KEYS = new Set(DEFLECT_PRESETS.map((p) => p.key));
+
+const SCENARIOS: { key: string; label: string; description: string }[] = [
+  { key: "new_patient",    label: "New patient inquiry",     description: "Collect name + contact, tell them office will be in touch." },
+  { key: "appointment",    label: "Appointment scheduling",  description: "Acknowledge, collect name + preferred time, say office will confirm." },
+  { key: "insurance",      label: "Insurance verification",  description: "Route to billing team, collect callback info." },
+  { key: "post_procedure", label: "Post-procedure concern",  description: "Show care, route to clinical team immediately." },
+  { key: "after_hours",    label: "After-hours call",        description: "Acknowledge office closed, offer callback or emergency line." },
+];
 
 export default function SettingsForm({ business }: { business: Business }) {
   const router = useRouter();
@@ -40,6 +73,13 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [customPrompt, setCustomPrompt] = useState(business.custom_prompt ?? "");
   const [faqs, setFaqs] = useState<FAQ[]>(business.faqs ?? []);
   const [voiceEnabled, setVoiceEnabled] = useState(business.voice_enabled ?? false);
+  const [voiceTone, setVoiceTone] = useState<VoiceTone>(business.voice_tone ?? "professional");
+  const [voiceEmergencyNumber, setVoiceEmergencyNumber] = useState(business.voice_emergency_number ?? "");
+  const [voiceEmergencyMessage, setVoiceEmergencyMessage] = useState(business.voice_emergency_message ?? "");
+  const [voiceDeflectTopics, setVoiceDeflectTopics] = useState<string[]>(business.voice_deflect_topics ?? []);
+  const [voiceScenarios, setVoiceScenarios] = useState<string[]>(business.voice_scenarios ?? []);
+  const [customDeflectInput, setCustomDeflectInput] = useState("");
+  const [showCustomDeflectInput, setShowCustomDeflectInput] = useState(false);
 
   const hasVoice = business.plan === "pro" || business.plan === "multi";
 
@@ -53,6 +93,31 @@ export default function SettingsForm({ business }: { business: Business }) {
 
   function removeFaq(i: number) {
     setFaqs((f) => f.filter((_, idx) => idx !== i));
+  }
+
+  function toggleDeflect(key: string) {
+    setVoiceDeflectTopics((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  }
+
+  function addCustomDeflect() {
+    const val = customDeflectInput.trim();
+    if (val && !voiceDeflectTopics.includes(val)) {
+      setVoiceDeflectTopics((prev) => [...prev, val]);
+    }
+    setCustomDeflectInput("");
+    setShowCustomDeflectInput(false);
+  }
+
+  function removeCustomDeflect(topic: string) {
+    setVoiceDeflectTopics((prev) => prev.filter((t) => t !== topic));
+  }
+
+  function toggleScenario(key: string) {
+    setVoiceScenarios((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -74,6 +139,11 @@ export default function SettingsForm({ business }: { business: Business }) {
           customPrompt,
           faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
           voiceEnabled,
+          voiceTone,
+          voiceEmergencyNumber: voiceEmergencyNumber || null,
+          voiceEmergencyMessage: voiceEmergencyMessage || null,
+          voiceDeflectTopics,
+          voiceScenarios,
         }),
       });
       const data = await res.json();
@@ -155,13 +225,13 @@ export default function SettingsForm({ business }: { business: Business }) {
           />
         </Field>
 
-        <Field label="Custom instructions" hint="Extra guidance for the AI (optional)">
+        <Field label="Additional instructions" hint='Give the AI extra rules or promotions. Write naturally — one instruction per line works well.'>
           <textarea
             rows={4}
             value={customPrompt}
             onChange={(e) => setCustomPrompt(e.target.value)}
             className={`${inputCls} resize-none`}
-            placeholder="Always mention our free new patient exam offer..."
+            placeholder={`Always mention our free new patient exam for first-time callers.\nIf someone asks about whitening, mention our current promotion.\nNever quote prices — tell them billing will follow up.`}
           />
         </Field>
       </section>
@@ -280,6 +350,175 @@ export default function SettingsForm({ business }: { business: Business }) {
           </div>
         )}
       </section>
+
+      {/* Voice Customization — Pro/Multi only */}
+      {hasVoice && (
+        <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+          <div>
+            <h2 className="font-semibold text-gray-800">Voice Customization</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Personalise how your AI receptionist sounds and behaves.</p>
+          </div>
+
+          {/* Tone preset */}
+          <div className="border-t border-gray-100 pt-6 space-y-3">
+            <label className="block text-sm font-medium text-gray-700">AI tone</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {TONES.map((tone) => (
+                <button
+                  key={tone.key}
+                  type="button"
+                  onClick={() => setVoiceTone(tone.key)}
+                  className={`text-left rounded-lg border px-4 py-3 transition-colors ${
+                    voiceTone === tone.key
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${voiceTone === tone.key ? "text-blue-600" : "text-gray-700"}`}>
+                    {tone.label}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">{tone.subtitle}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Emergency handling */}
+          <div className="border-t border-gray-100 pt-6 space-y-3">
+            <label className="block text-sm font-medium text-gray-700">Emergency handling</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Emergency phone number">
+                <input
+                  type="tel"
+                  value={voiceEmergencyNumber}
+                  onChange={(e) => setVoiceEmergencyNumber(e.target.value)}
+                  className={inputCls}
+                  placeholder="+1 (555) 999-0000"
+                />
+              </Field>
+              <Field label="Emergency message">
+                <input
+                  type="text"
+                  value={voiceEmergencyMessage}
+                  onChange={(e) => setVoiceEmergencyMessage(e.target.value)}
+                  className={inputCls}
+                  placeholder="For dental emergencies after hours, please call our emergency line immediately."
+                />
+              </Field>
+            </div>
+            <p className="text-xs text-gray-400">The AI will read this number and message when a caller describes a dental emergency.</p>
+          </div>
+
+          {/* Deflection topics */}
+          <div className="border-t border-gray-100 pt-6 space-y-3">
+            <label className="block text-sm font-medium text-gray-700">Deflection topics</label>
+            <p className="text-xs text-gray-400 -mt-1">The AI will immediately redirect these topics to your team instead of answering.</p>
+            <div className="space-y-2">
+              {DEFLECT_PRESETS.map((preset) => {
+                const checked = voiceDeflectTopics.includes(preset.key);
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    onClick={() => toggleDeflect(preset.key)}
+                    className="flex items-center gap-3 w-full text-left group"
+                  >
+                    <span className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors ${
+                      checked ? "bg-blue-600 border-blue-600" : "border-gray-300 group-hover:border-gray-400"
+                    }`}>
+                      {checked && <Check size={10} className="text-white" strokeWidth={3} />}
+                    </span>
+                    <span className="text-sm text-gray-700">{preset.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom deflect topics */}
+            <div className="space-y-2 pt-1">
+              {voiceDeflectTopics.filter((t) => !PRESET_KEYS.has(t)).map((topic) => (
+                <div key={topic} className="flex items-center gap-2">
+                  <span className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700">
+                    {topic}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeCustomDeflect(topic)}
+                    className="text-gray-300 hover:text-red-400 transition-colors"
+                    aria-label={`Remove ${topic}`}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              {showCustomDeflectInput ? (
+                <div className="flex gap-2">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={customDeflectInput}
+                    onChange={(e) => setCustomDeflectInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomDeflect(); } if (e.key === "Escape") setShowCustomDeflectInput(false); }}
+                    className={`${inputCls} flex-1`}
+                    placeholder="e.g. Questions about payment plans"
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomDeflect}
+                    className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+                  >
+                    Add
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCustomDeflectInput(true)}
+                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  <Plus size={14} />
+                  Add your own topic
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Scenario toggles */}
+          <div className="border-t border-gray-100 pt-6 space-y-3">
+            <label className="block text-sm font-medium text-gray-700">Scenario guidance</label>
+            <p className="text-xs text-gray-400 -mt-1">
+              Turn on pre-built handling for common call types. If a topic also appears in Deflection above, deflection always takes priority.
+            </p>
+            <div className="space-y-3">
+              {SCENARIOS.map((scenario) => {
+                const active = voiceScenarios.includes(scenario.key);
+                return (
+                  <div key={scenario.key} className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">{scenario.label}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{scenario.description}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleScenario(scenario.key)}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                        active ? "bg-blue-600" : "bg-gray-200"
+                      }`}
+                      aria-label={`Toggle ${scenario.label}`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                          active ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
       {saved && <p className="text-sm text-green-600">Settings saved.</p>}
