@@ -2,8 +2,6 @@
 // Open Dental REST API v1 client.
 // All functions throw OpenDentalError on failure — server.js catches by .code.
 
-const DEVELOPER_KEY = process.env.OPENDENTAL_DEVELOPER_KEY;
-
 export class OpenDentalError extends Error {
   constructor(code, message) {
     super(message);
@@ -13,8 +11,10 @@ export class OpenDentalError extends Error {
 }
 
 function headers(customerKey) {
+  const key = process.env.OPENDENTAL_DEVELOPER_KEY;
+  if (!key) throw new OpenDentalError('INVALID_KEY', 'OPENDENTAL_DEVELOPER_KEY env var is not set');
   return {
-    'Authorization': `ODFHIR ${DEVELOPER_KEY}/${customerKey}`,
+    'Authorization': `ODFHIR ${key}/${customerKey}`,
     'Content-Type': 'application/json',
   };
 }
@@ -35,13 +35,18 @@ async function odFetch(serverUrl, customerKey, path, options = {}) {
     throw new OpenDentalError('UNREACHABLE', `Open Dental ${res.status}: ${body}`);
   }
   const text = await res.text();
-  return text ? JSON.parse(text) : null;
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    throw new OpenDentalError('UNREACHABLE', `Open Dental returned non-JSON: ${text.slice(0, 120)}`);
+  }
 }
 
 // Search for an existing patient by last name + first name + date of birth.
 // Returns the patient object { PatNum, LName, FName, Birthdate, HmPhone, ... } or null.
 // DOB format expected: 'YYYY-MM-DD'
-export async function findPatient(serverUrl, customerKey, { name, phone, dob }) {
+// phone is not used — Open Dental patient search matches on name + DOB only
+export async function findPatient(serverUrl, customerKey, { name, dob }) {
   const [firstName, ...rest] = name.trim().split(' ');
   const lastName = rest.join(' ') || '';
   const params = new URLSearchParams({ LName: lastName, FName: firstName });
@@ -60,7 +65,7 @@ export async function findPatient(serverUrl, customerKey, { name, phone, dob }) 
 // dob: 'YYYY-MM-DD', phone: any format (stored as-is)
 export async function createPatient(serverUrl, customerKey, { name, phone, dob, email, reason }) {
   const [firstName, ...rest] = name.trim().split(' ');
-  const lastName = rest.join(' ') || firstName;
+  const lastName = rest.join(' ') || '';
   const body = {
     LName: lastName,
     FName: firstName,
