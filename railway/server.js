@@ -843,7 +843,7 @@ app.ws('/media-stream', async (ws, req) => {
 
     try {
       // ── Check for booking intent when idle ───────────────────────────────
-      if (bookingState.stage === 'idle' && business?.opendental_booking_mode !== undefined) {
+      if (bookingState.stage === 'idle' && business?.opendental_api_key && business?.opendental_server_url) {
         const isBooking = await detectBookingIntent(userText);
         if (isBooking) {
           bookingState.stage = 'collecting';
@@ -996,7 +996,10 @@ app.ws('/media-stream', async (ws, req) => {
                 bookingState.chosenSlot = null;
                 const retryMsg = `It looks like that slot just filled up. Let me find you the next available time.`;
                 await speakToTwilio(retryMsg, ws, streamSid, mySignal);
-                // Fall through — LLM will offer new slots
+                messages.push({ role: 'assistant', content: retryMsg });
+                if (conversationId) saveMessage(conversationId, 'assistant', retryMsg).catch(() => {});
+                isSpeaking = false;
+                return;
               } catch {
                 await sendBookingCollectedSms(business, bookingState);
                 bookingState.stage = 'done';
