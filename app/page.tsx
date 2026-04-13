@@ -9,6 +9,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Zap,
+  Bell,
 } from "lucide-react";
 import ChatCardSpread from "@/components/ChatCardSpread";
 import StatsCarousel from "@/components/StatsCarousel";
@@ -145,6 +146,13 @@ export default async function HomePage() {
       </div>
       </section>
 
+      {/* PMS compatibility note */}
+      <div className="text-center py-6 bg-gray-50">
+        <p className="text-sm text-gray-400 max-w-lg mx-auto">
+          Works alongside your existing practice management software — no integrations required until you&apos;re ready.
+        </p>
+      </div>
+
       {/* Competitive nudge */}
       <div className="text-center pb-10">
         <p className="text-sm text-gray-400">Most practices save $60–160/month vs competitors.</p>
@@ -218,5 +226,10 @@ const features = [
     icon: Zap,
     title: "2-minute setup",
     description: "No developer needed. Sign up, answer a few questions about your practice, copy one line of code. Done.",
+  },
+  {
+    icon: Bell,
+    title: "Smart handoffs",
+    description: "If the AI can't answer, it takes a message and notifies your team immediately. No patient left without a response.",
   },
 ];

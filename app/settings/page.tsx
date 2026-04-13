@@ -24,7 +24,7 @@ export default async function SettingsPage() {
           ← Back to dashboard
         </Link>
       </nav>
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-3xl mx-auto px-6 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Settings</h1>
         <p className="text-sm text-gray-500 mb-8">Update your AI receptionist configuration.</p>
         <SettingsForm business={business} />

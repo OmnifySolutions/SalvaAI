@@ -446,4 +446,8 @@ const faqs = [
     q: "Can I cancel anytime?",
     a: "Yes. No contracts, no cancellation fees. Upgrade or cancel from your dashboard whenever you want.",
   },
+  {
+    q: "Is a Business Associate Agreement (BAA) available?",
+    a: "Yes. A BAA is available on Pro and Multi-Practice plans. Contact us after signing up and we'll send one over.",
+  },
 ];

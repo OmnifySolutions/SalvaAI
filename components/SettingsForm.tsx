@@ -592,7 +592,7 @@ export default function SettingsForm({ business }: { business: Business }) {
               value={odServerUrl}
               onChange={(e) => setOdServerUrl(e.target.value)}
               placeholder="https://your-practice.opendental.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
@@ -603,7 +603,7 @@ export default function SettingsForm({ business }: { business: Business }) {
                 value={odApiKey}
                 onChange={(e) => { setOdApiKey(e.target.value); setOdTestStatus("idle"); }}
                 placeholder="Your Open Dental customer key"
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition-colors"
               />
               <button
                 type="button"
@@ -682,7 +682,7 @@ export default function SettingsForm({ business }: { business: Business }) {
 }
 
 const inputCls =
-  "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500";
+  "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition-colors";
 
 function Field({
   label,
