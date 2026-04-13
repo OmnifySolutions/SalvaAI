@@ -148,6 +148,12 @@ export default async function PricingPage() {
     currentPlan = (data?.plan as typeof currentPlan) ?? "free";
   }
 
+  const multiPlan = plans.find((p) => p.name === "Multi-Practice")!;
+  const multiIsCurrent = (currentPlan as string) === "multi";
+  const multiUseUpgrade = isLoggedIn && !multiIsCurrent;
+  const multiCta = multiIsCurrent ? "Current plan" : isLoggedIn ? multiPlan.ctaLoggedIn : multiPlan.cta;
+  const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
+
   return (
     <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
 
@@ -186,7 +192,7 @@ export default async function PricingPage() {
         </nav>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-20">
+      <main className="max-w-6xl mx-auto px-6 py-20">
 
         {/* Header */}
         <div className="text-center mb-14">
@@ -198,11 +204,11 @@ export default async function PricingPage() {
           </p>
         </div>
 
-        {/* Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-          {plans.map((plan) => {
+        {/* Plans — Free / Basic / Pro row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {plans.filter((p) => p.name !== "Multi-Practice").map((plan) => {
             const isPaid = plan.name !== "Free";
-            const planKey = (plan.name === "Multi-Practice" ? "multi" : plan.name.toLowerCase()) as "free" | "basic" | "pro" | "multi";
+            const planKey = plan.name.toLowerCase() as "free" | "basic" | "pro";
             const isCurrent = isLoggedIn && currentPlan === planKey;
             const useUpgrade = isLoggedIn && isPaid && !isCurrent;
             const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
@@ -231,9 +237,7 @@ export default async function PricingPage() {
                     <span className={`text-4xl font-bold tracking-tight ${plan.highlight ? "text-white" : "text-gray-900"}`}>
                       {plan.price}
                     </span>
-                    <span className="text-sm pb-1.5 text-gray-400">
-                      {plan.period}
-                    </span>
+                    <span className="text-sm pb-1.5 text-gray-400">{plan.period}</span>
                   </div>
                   <p className={`text-sm leading-relaxed ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
                     {plan.description}
@@ -251,7 +255,7 @@ export default async function PricingPage() {
 
                 {useUpgrade ? (
                   <UpgradeButton
-                    plan={planKey as "basic" | "pro" | "multi"}
+                    plan={planKey as "basic" | "pro"}
                     className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
                       plan.highlight
                         ? "bg-white text-gray-900 hover:bg-gray-100"
@@ -284,6 +288,54 @@ export default async function PricingPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* Multi-Practice — full-width horizontal card */}
+        <div className="relative mt-5 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col sm:flex-row sm:items-center gap-6">
+          {multiPlan.badge && (
+            <div className="absolute -top-3 left-6 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+              {multiPlan.badge}
+            </div>
+          )}
+          <div className="sm:w-56 shrink-0">
+            <h2 className="text-sm font-semibold uppercase tracking-widest mb-2 text-gray-400">Multi-Practice</h2>
+            <div className="flex items-end gap-1 mb-2">
+              <span className="text-4xl font-bold tracking-tight text-gray-900">{multiPlan.price}</span>
+              <span className="text-sm pb-1.5 text-gray-400">{multiPlan.period}</span>
+            </div>
+            <p className="text-sm text-gray-500 leading-relaxed">{multiPlan.description}</p>
+          </div>
+          <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            {multiPlan.features.map((f) => (
+              <li key={f} className="flex items-start gap-2.5 text-sm">
+                <span className="shrink-0 mt-0.5 font-bold text-blue-600">✓</span>
+                <span className="text-gray-600">{f}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-2">
+            {multiUseUpgrade ? (
+              <UpgradeButton
+                plan="multi"
+                className="px-6 py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-60"
+              >
+                {multiCta}
+              </UpgradeButton>
+            ) : (
+              <Link
+                href={multiHref}
+                aria-disabled={multiIsCurrent}
+                className={`px-6 py-3 rounded-xl text-sm font-semibold text-center transition-colors ${
+                  multiIsCurrent
+                    ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none"
+                    : "bg-gray-900 text-white hover:bg-gray-700"
+                }`}
+              >
+                {multiCta}
+              </Link>
+            )}
+            <p className="text-xs text-center text-gray-400">Upgrade or cancel anytime</p>
+          </div>
         </div>
 
         {/* Fine print */}
