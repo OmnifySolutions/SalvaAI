@@ -82,13 +82,13 @@ export default async function DashboardPage() {
                 plan="basic"
                 className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
-                Basic — $49/mo
+                Basic — $69/mo
               </UpgradeButton>
               <UpgradeButton
                 plan="pro"
                 className="text-sm border border-gray-300 text-gray-600 px-4 py-2 rounded-lg font-medium hover:border-gray-400 transition-colors disabled:opacity-50"
               >
-                Pro — $189/mo
+                Pro — $219/mo
               </UpgradeButton>
             </div>
           </div>
@@ -242,7 +242,7 @@ export default async function DashboardPage() {
               plan="pro"
               className="shrink-0 text-sm bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              Upgrade to Pro — $189/mo
+              Upgrade to Pro — $219/mo
             </UpgradeButton>
           </div>
         )}

@@ -391,7 +391,7 @@ export default function SettingsForm({ business }: { business: Business }) {
           <div className="bg-gray-50 rounded-lg px-4 py-3">
             <p className="text-sm text-gray-500">
               Voice AI is available on the{" "}
-              <a href="/pricing" className="text-blue-600 hover:underline font-medium">Pro plan ($189/mo)</a>.
+              <a href="/pricing" className="text-blue-600 hover:underline font-medium">Pro plan ($219/mo)</a>.
               {" "}Upgrade to answer calls automatically, 24/7.
             </p>
           </div>

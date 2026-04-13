@@ -25,7 +25,7 @@ const plans = [
   },
   {
     name: "Basic",
-    price: "$49",
+    price: "$69",
     period: "/ month",
     description: "For growing practices that want to capture every opportunity.",
     features: [
@@ -45,7 +45,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$189",
+    price: "$219",
     period: "/ month",
     description: "For busy practices that can't afford to miss a single call.",
     features: [
@@ -64,7 +64,7 @@ const plans = [
   },
   {
     name: "Multi-Practice",
-    price: "$649",
+    price: "$749",
     period: "/ month",
     description: "One AI platform across all your locations — at a fraction of buying 5 Pro plans.",
     features: [
@@ -86,13 +86,13 @@ const plans = [
 const comparison = [
   {
     feature: "Starting price",
-    hustle: "$49 / mo",
+    hustle: "$69 / mo",
     arini: "$249 / mo",
     truelark: "$345 / mo",
   },
   {
     feature: "Voice AI answering",
-    hustle: "Pro · $189/mo",
+    hustle: "Pro · $219/mo",
     arini: "$249 / mo",
     truelark: "$345 / mo",
   },
@@ -110,7 +110,7 @@ const comparison = [
   },
   {
     feature: "Multi-location support",
-    hustle: "$649 / mo (5 locations)",
+    hustle: "$749 / mo (5 locations)",
     arini: false,
     truelark: false,
   },
