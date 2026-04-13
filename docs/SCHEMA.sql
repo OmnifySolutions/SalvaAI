@@ -50,6 +50,11 @@ CREATE TABLE businesses (
 
   -- Voice AI
   voice_enabled BOOLEAN DEFAULT false,
+  voice_tone TEXT DEFAULT 'professional',          -- 'professional' | 'warm' | 'clinical'
+  voice_emergency_number TEXT,                     -- E.164 or display format, read aloud in emergencies
+  voice_emergency_message TEXT,                    -- Custom emergency instruction sentence
+  voice_deflect_topics JSONB DEFAULT '[]',         -- Array of topic keys + custom strings
+  voice_scenarios JSONB DEFAULT '[]',              -- Array of active scenario keys
 
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
