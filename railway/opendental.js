@@ -86,3 +86,88 @@ export async function createPatient(serverUrl, customerKey, { name, phone, dob, 
     throw new OpenDentalError('PATIENT_ERROR', e.message);
   }
 }
+
+// Return array of { ProvNum, FName, LName, Abbr } for all active providers.
+export async function getProviders(serverUrl, customerKey) {
+  const providers = await odFetch(serverUrl, customerKey, '/providers');
+  return Array.isArray(providers) ? providers : [];
+}
+
+// Return up to 5 open slots within windowDays from today.
+// Each slot: { date, time, provider, providerId, operatoryId, aptDateTime }
+// providerName: optional string — if given, filter to matching provider only.
+// Default appointment length: 60 minutes.
+export async function getAvailability(serverUrl, customerKey, { windowDays = 7, providerName = null }) {
+  const startDate = new Date().toISOString().slice(0, 10);
+  const end = new Date();
+  end.setDate(end.getDate() + windowDays);
+  const stopDate = end.toISOString().slice(0, 10);
+
+  let providers = [];
+  if (providerName) {
+    try {
+      const all = await getProviders(serverUrl, customerKey);
+      providers = all.filter(
+        (p) => `${p.FName} ${p.LName}`.toLowerCase().includes(providerName.toLowerCase())
+               || p.Abbr?.toLowerCase().includes(providerName.toLowerCase())
+      );
+    } catch { /* ignore provider filter failure — fall back to all providers */ }
+  }
+
+  const params = new URLSearchParams({
+    startDate,
+    stopDate,
+    length: '60',
+  });
+  if (providers.length === 1) params.set('provNum', String(providers[0].ProvNum));
+
+  const slots = await odFetch(serverUrl, customerKey, `/openslots?${params}`);
+  if (!Array.isArray(slots)) return [];
+
+  return slots.slice(0, 5).map((s) => {
+    const dt = new Date(s.AptDateTime || s.aptDateTime);
+    return {
+      aptDateTime: s.AptDateTime || s.aptDateTime,
+      date: dt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+      time: dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      provider: s.ProviderName || s.provAbbr || 'the doctor',
+      providerId: s.ProvNum,
+      operatoryId: s.Op || s.OperatoryNum,
+    };
+  });
+}
+
+// Book an appointment. mode controls AptStatus:
+//   'autonomous' → AptStatus 1 (Scheduled — appears confirmed in Open Dental)
+//   'pending'    → AptStatus 6 (Unscheduled — front desk must confirm)
+//   'collect_only' → never call this function; handle at caller level
+export async function createAppointment(serverUrl, customerKey, {
+  patientId, aptDateTime, operatoryId, providerId, reason, mode,
+}) {
+  const aptStatus = mode === 'pending' ? 6 : 1;
+  const body = {
+    PatNum: patientId,
+    AptDateTime: aptDateTime,
+    Op: operatoryId,
+    ProvNum: providerId,
+    ProcDescript: reason || 'General appointment',
+    AptStatus: aptStatus,
+  };
+  try {
+    const apt = await odFetch(serverUrl, customerKey, '/appointments', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    if (!apt?.AptNum) throw new OpenDentalError('UNREACHABLE', 'No AptNum in response');
+    return apt;
+  } catch (e) {
+    if (e instanceof OpenDentalError) {
+      // Re-classify 409 Conflict (slot taken) if we can detect it
+      if (e.message.includes('409') || e.message.toLowerCase().includes('conflict')) {
+        throw new OpenDentalError('SLOT_TAKEN', 'That slot was just booked by someone else');
+      }
+      throw e;
+    }
+    throw new OpenDentalError('UNREACHABLE', e.message);
+  }
+}
