@@ -56,6 +56,12 @@ CREATE TABLE businesses (
   voice_deflect_topics JSONB DEFAULT '[]',         -- Array of topic keys + custom strings
   voice_scenarios JSONB DEFAULT '[]',              -- Array of active scenario keys
 
+  -- Open Dental PMS integration
+  opendental_server_url TEXT,                      -- customer's eConnector base URL
+  opendental_api_key TEXT,                         -- customer API key (null = not connected)
+  opendental_booking_mode TEXT DEFAULT 'autonomous', -- 'autonomous' | 'pending' | 'collect_only'
+  opendental_booking_window INT DEFAULT 7,         -- 3 | 7 | 14 (days to look ahead)
+
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -84,6 +90,7 @@ CREATE TABLE conversations (
   -- Outcome tracking
   callback_requested BOOLEAN DEFAULT false,
   appointment_requested BOOLEAN DEFAULT false,
+  appointment_id TEXT,                             -- Open Dental appointment ID; null if not booked via PMS
   summary TEXT,
 
   started_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
