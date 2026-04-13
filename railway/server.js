@@ -198,14 +198,37 @@ function safeParse(s) {
 // ============================================================================
 async function detectBookingIntent(userText) {
   const system = 'You are a classifier. Reply with only "yes" or "no". Does the caller want to schedule, book, change, or cancel a dental appointment?';
-  const messages = [{ role: 'user', content: userText }];
   try {
-    const reply = USE_GROQ
-      ? await callGroq(system, messages, null)
-      : await callClaude(system, messages, null);
-    return reply.toLowerCase().startsWith('yes');
+    if (USE_GROQ) {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 5,
+          messages: [{ role: 'system', content: system }, { role: 'user', content: userText }],
+        }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content?.trim().toLowerCase().startsWith('yes') ?? false;
+    } else {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 5,
+          system,
+          messages: [{ role: 'user', content: userText }],
+        }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return data.content?.[0]?.text?.trim().toLowerCase().startsWith('yes') ?? false;
+    }
   } catch {
-    return false; // on any error, don't enter booking mode
+    return false;
   }
 }
 
@@ -245,7 +268,7 @@ Replace each field with the actual value. Use empty string for provider if calle
     const slots = bookingState.availableSlots || [];
     const slotList = slots
       .slice(0, 3)
-      .map((s, i) => `${i + 1}. ${s.date} at ${s.time} with ${s.provider}`)
+      .map((s) => `${s.date} at ${s.time} with ${s.provider}`)
       .join('\n');
     return `You are ${name}, the AI receptionist for ${practice}. You have the following open appointment slots:
 
