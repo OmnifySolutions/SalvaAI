@@ -1,6 +1,7 @@
 import express from 'express';
 import expressWs from 'express-ws';
 import WebSocket from 'ws';
+import { findPatient, createPatient, getAvailability, createAppointment, OpenDentalError } from './opendental.js';
 
 // Prevent unhandled promise rejections from crashing the Railway process.
 // All per-call errors are caught locally; this is a safety net for anything missed.
@@ -21,6 +22,7 @@ const ELEVENLABS_API_KEY  = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID;
 const SUPABASE_URL        = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const OPENDENTAL_DEVELOPER_KEY = process.env.OPENDENTAL_DEVELOPER_KEY; // set in Railway env
 const TWILIO_ACCOUNT_SID  = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN   = process.env.TWILIO_AUTH_TOKEN;
 
@@ -189,6 +191,99 @@ General guidelines:
 
 function safeParse(s) {
   try { return JSON.parse(s); } catch { return {}; }
+}
+
+// ============================================================================
+// Booking intent detection — fast, non-streaming, returns true/false
+// ============================================================================
+async function detectBookingIntent(userText) {
+  const system = 'You are a classifier. Reply with only "yes" or "no". Does the caller want to schedule, book, change, or cancel a dental appointment?';
+  const messages = [{ role: 'user', content: userText }];
+  try {
+    const reply = USE_GROQ
+      ? await callGroq(system, messages, null)
+      : await callClaude(system, messages, null);
+    return reply.toLowerCase().startsWith('yes');
+  } catch {
+    return false; // on any error, don't enter booking mode
+  }
+}
+
+// ============================================================================
+// Booking-specific system prompt — used instead of buildSystemPrompt during booking
+// ============================================================================
+function buildBookingPrompt(business, stage, bookingState) {
+  const name = business.ai_name || 'Claire';
+  const practice = business.name;
+
+  if (stage === 'collecting') {
+    const collected = [];
+    if (bookingState.name)               collected.push(`name: ${bookingState.name}`);
+    if (bookingState.phone)              collected.push(`phone: ${bookingState.phone}`);
+    if (bookingState.dob)                collected.push(`date of birth: ${bookingState.dob}`);
+    if (bookingState.reason)             collected.push(`reason: ${bookingState.reason}`);
+    if (bookingState.providerPreference) collected.push(`preferred doctor: ${bookingState.providerPreference}`);
+    const missing = ['name','phone','dob','reason'].filter((f) => !bookingState[f]);
+
+    return `You are ${name}, the AI receptionist for ${practice}. You are collecting information to book a dental appointment.
+
+So far you have collected: ${collected.join(', ') || 'nothing yet'}.
+Still needed: ${missing.join(', ')}.
+
+Ask for ONE missing field at a time in a natural, conversational way. Keep responses to one sentence.
+- For date of birth, ask: "And could I get your date of birth?"
+- For reason, ask: "What's the reason for your visit?"
+- After collecting all four required fields, ask: "Do you have a preferred doctor, or is any available provider fine?"
+
+When you have collected all four required fields AND the provider preference (even if "no preference"), end your response with this exact marker on a new line:
+[BOOKING_DATA:{"name":"FULL_NAME","phone":"PHONE","dob":"DOB","reason":"REASON","provider":"PROVIDER_OR_EMPTY"}]
+
+Replace each field with the actual value. Use empty string for provider if caller has no preference. Do not include this marker until you have all five values. Never speak the marker aloud — it will be stripped automatically.`;
+  }
+
+  if (stage === 'checking') {
+    const slots = bookingState.availableSlots || [];
+    const slotList = slots
+      .slice(0, 3)
+      .map((s, i) => `${i + 1}. ${s.date} at ${s.time} with ${s.provider}`)
+      .join('\n');
+    return `You are ${name}, the AI receptionist for ${practice}. You have the following open appointment slots:
+
+${slotList}
+
+Read these options naturally to the caller and ask which one works for them. Keep it conversational. One or two sentences maximum. Do not use lists or numbers — say "I have Tuesday April 15th at 2pm with Dr Smith, or Thursday April 17th at 10am with Dr Patel."`;
+  }
+
+  if (stage === 'confirming') {
+    const s = bookingState.chosenSlot;
+    return `You are ${name}, the AI receptionist for ${practice}. You are confirming an appointment booking.
+
+Patient name: ${bookingState.name}
+Slot: ${s ? `${s.date} at ${s.time} with ${s.provider}` : 'the chosen slot'}
+
+Read back the appointment details clearly and ask the caller to confirm. One or two sentences. Example: "Perfect, I'll book you in for Tuesday April 15th at 2pm with Dr Smith. Shall I go ahead and confirm that?"`;
+  }
+
+  return buildSystemPrompt(business); // fallback to normal prompt
+}
+
+// Parse which slot the caller chose from their response text.
+// Returns the matching slot object or null.
+async function extractSlotChoice(userText, availableSlots) {
+  if (!availableSlots.length) return null;
+  const slotDescriptions = availableSlots
+    .slice(0, 3)
+    .map((s, i) => `Option ${i + 1}: ${s.date} at ${s.time} with ${s.provider}`)
+    .join('\n');
+  const system = `The caller was offered these appointment slots:\n${slotDescriptions}\n\nReply with ONLY a number (1, 2, or 3) indicating which slot the caller chose, or "none" if unclear.`;
+  try {
+    const reply = USE_GROQ
+      ? await callGroq(system, [{ role: 'user', content: userText }], null)
+      : await callClaude(system, [{ role: 'user', content: userText }], null);
+    const num = parseInt(reply.trim(), 10);
+    if (num >= 1 && num <= availableSlots.length) return availableSlots[num - 1];
+  } catch { /* fall through */ }
+  return null;
 }
 
 // ============================================================================
