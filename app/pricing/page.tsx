@@ -121,7 +121,7 @@ const comparison = [
     truelark: true,
   },
   {
-    feature: "30-day free trial",
+    feature: "14-day free trial",
     hustle: true,
     arini: false,
     truelark: false,
@@ -288,7 +288,7 @@ export default async function PricingPage() {
 
         {/* Fine print */}
         <p className="text-center text-sm text-gray-400 mt-10">
-          All paid plans start with a 30-day free trial. No credit card required to start.
+          All paid plans start with a 14-day free trial. Credit card required — cancel anytime.
         </p>
 
         {/* Competitor comparison */}
@@ -383,8 +383,8 @@ const faqs = [
     a: "No. You copy one line of code and paste it into your website before the closing </body> tag. Most practice managers can do it in under 5 minutes.",
   },
   {
-    q: "What happens when I hit the interaction limit?",
-    a: "The widget lets patients know to call the office directly. You can upgrade at any time to restore full access.",
+    q: "What happens when the Free plan's 50 interaction limit is reached?",
+    a: "The widget lets patients know to call the office directly. Upgrade to Basic or Pro for unlimited interactions.",
   },
   {
     q: "Is patient data safe?",

@@ -403,7 +403,7 @@ export default function SettingsForm({ business }: { business: Business }) {
         <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
           <div>
             <h2 className="font-semibold text-gray-800">Voice Customization</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Personalise how your AI receptionist sounds and behaves.</p>
+            <p className="text-xs text-gray-400 mt-0.5">Personalize how your AI receptionist sounds and behaves.</p>
           </div>
 
           {/* Tone preset */}

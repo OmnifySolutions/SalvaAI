@@ -70,7 +70,7 @@ export default async function HomePage() {
               href="/sign-up"
               className="bg-gray-900 text-white px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-700 transition-colors shadow-sm"
             >
-              Start 30-day free trial
+              Start 14-day free trial
             </Link>
             <Link
               href="/pricing"
@@ -79,7 +79,7 @@ export default async function HomePage() {
               See pricing →
             </Link>
           </div>
-          <p className="text-xs text-gray-400 mb-14">30-day free trial. Cancel anytime.</p>
+          <p className="text-xs text-gray-400 mb-14">14-day free trial. Cancel anytime.</p>
 
           {/* Pain stats strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-gray-100 border border-gray-100 rounded-2xl overflow-hidden max-w-2xl mx-auto">
@@ -153,7 +153,7 @@ export default async function HomePage() {
             Every missed call is a missed patient.
           </h2>
           <p className="text-gray-400 mb-8">
-            HustleClaude answers 24/7 so you never lose another one. First 30 days free.
+            HustleClaude answers 24/7 so you never lose another one. First 14 days free.
           </p>
           <Link
             href="/sign-up"

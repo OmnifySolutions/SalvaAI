@@ -29,17 +29,17 @@ export default async function DashboardPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const embedCode = `<script src="${appUrl}/api/widget/embed?id=${business.id}"></script>`;
 
-  const interactionLimit = business.plan === "basic" ? 500 : "Unlimited";
+  const interactionLimit = business.plan === "free" ? 50 : "Unlimited";
   const usagePercent =
-    business.plan === "basic"
-      ? Math.min(100, Math.round((business.interaction_count / 500) * 100))
+    business.plan === "free"
+      ? Math.min(100, Math.round((business.interaction_count / 50) * 100))
       : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <Link href="/dashboard" className="font-bold text-blue-600 text-lg">HustleClaude</Link>
+        <Link href="/dashboard" className="font-bold text-gray-900 text-lg">HustleClaude</Link>
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <span>{business.name}</span>
           <Link href="/settings" className="text-gray-500 hover:text-gray-700 text-sm">Settings</Link>
@@ -152,8 +152,8 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Usage bar (basic plan only) */}
-        {business.plan === "basic" && (
+        {/* Usage bar (free plan only) */}
+        {business.plan === "free" && (
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <div className="flex justify-between text-sm mb-2">
               <span className="font-medium text-gray-700">Monthly Usage</span>
@@ -169,7 +169,7 @@ export default async function DashboardPage() {
             </div>
             {usagePercent > 80 && (
               <p className="text-xs text-red-500 mt-2">
-                You&apos;re nearing your limit. <Link href="/billing" className="underline">Upgrade to Pro</Link> for unlimited interactions.
+                You&apos;re nearing your limit. <Link href="/pricing" className="underline">Upgrade to Pro</Link> for unlimited interactions.
               </p>
             )}
           </div>
