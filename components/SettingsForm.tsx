@@ -25,6 +25,10 @@ type Business = {
   voice_emergency_message: string | null;
   voice_deflect_topics: string[] | null;
   voice_scenarios: string[] | null;
+  opendental_server_url: string | null;
+  opendental_api_key: string | null;
+  opendental_booking_mode: "autonomous" | "pending" | "collect_only" | null;
+  opendental_booking_window: number | null;
 };
 
 const TONES: { key: VoiceTone; label: string; subtitle: string }[] = [
@@ -78,6 +82,17 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [voiceEmergencyMessage, setVoiceEmergencyMessage] = useState(business.voice_emergency_message ?? "");
   const [voiceDeflectTopics, setVoiceDeflectTopics] = useState<string[]>(business.voice_deflect_topics ?? []);
   const [voiceScenarios, setVoiceScenarios] = useState<string[]>(business.voice_scenarios ?? []);
+  const [odServerUrl, setOdServerUrl] = useState(business.opendental_server_url ?? "");
+  const [odApiKey, setOdApiKey] = useState(business.opendental_api_key ?? "");
+  const [odBookingMode, setOdBookingMode] = useState<"autonomous" | "pending" | "collect_only">(
+    business.opendental_booking_mode ?? "autonomous"
+  );
+  const [odBookingWindow, setOdBookingWindow] = useState<number>(
+    business.opendental_booking_window ?? 7
+  );
+  const [odTestStatus, setOdTestStatus] = useState<"idle" | "testing" | "ok" | "error">("idle");
+  const [odTestMessage, setOdTestMessage] = useState("");
+  const isOdConnected = !!business.opendental_api_key;
   const [customDeflectInput, setCustomDeflectInput] = useState("");
   const [showCustomDeflectInput, setShowCustomDeflectInput] = useState(false);
   const [customDeflectError, setCustomDeflectError] = useState("");
@@ -125,6 +140,29 @@ export default function SettingsForm({ business }: { business: Business }) {
     );
   }
 
+  async function handleTestConnection() {
+    setOdTestStatus("testing");
+    setOdTestMessage("");
+    try {
+      const res = await fetch("/api/settings/opendental-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serverUrl: odServerUrl, apiKey: odApiKey }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setOdTestStatus("ok");
+        setOdTestMessage("Connected successfully");
+      } else {
+        setOdTestStatus("error");
+        setOdTestMessage(data.error || "Connection failed");
+      }
+    } catch {
+      setOdTestStatus("error");
+      setOdTestMessage("Network error — could not reach server");
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -149,6 +187,10 @@ export default function SettingsForm({ business }: { business: Business }) {
           voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics,
           voiceScenarios,
+          openDentalServerUrl: odServerUrl || null,
+          openDentalApiKey: odApiKey || null,
+          openDentalBookingMode: odBookingMode,
+          openDentalBookingWindow: odBookingWindow,
         }),
       });
       const data = await res.json();
@@ -527,6 +569,103 @@ export default function SettingsForm({ business }: { business: Business }) {
           </div>
         </section>
       )}
+
+      {/* Practice Management */}
+      <div id="practice-management" className="border border-gray-200 rounded-2xl p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Practice Management</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Connect Open Dental to enable live appointment booking.</p>
+          </div>
+          {isOdConnected && (
+            <span className="text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">
+              Connected
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Server URL</label>
+            <input
+              type="url"
+              value={odServerUrl}
+              onChange={(e) => setOdServerUrl(e.target.value)}
+              placeholder="https://your-practice.opendental.com"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Customer API Key</label>
+            <div className="flex gap-2">
+              <input
+                type="password"
+                value={odApiKey}
+                onChange={(e) => { setOdApiKey(e.target.value); setOdTestStatus("idle"); }}
+                placeholder="Your Open Dental customer key"
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={handleTestConnection}
+                disabled={!odServerUrl || !odApiKey || odTestStatus === "testing"}
+                className="px-4 py-2.5 text-sm font-medium border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+              >
+                {odTestStatus === "testing" ? "Testing…" : "Test Connection"}
+              </button>
+            </div>
+            {odTestStatus === "ok" && (
+              <p className="text-xs text-green-600 mt-1">{odTestMessage}</p>
+            )}
+            {odTestStatus === "error" && (
+              <p className="text-xs text-red-500 mt-1">{odTestMessage}</p>
+            )}
+          </div>
+        </div>
+
+        {(isOdConnected || odTestStatus === "ok") && (
+          <>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">Booking Mode</p>
+              {(["autonomous", "pending", "collect_only"] as const).map((mode) => (
+                <label key={mode} className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="odBookingMode"
+                    value={mode}
+                    checked={odBookingMode === mode}
+                    onChange={() => setOdBookingMode(mode)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {mode === "autonomous" && <><span className="font-medium">Fully autonomous</span> — AI books directly in Open Dental</>}
+                    {mode === "pending"    && <><span className="font-medium">Hold for confirmation</span> — AI offers slots, front desk confirms</>}
+                    {mode === "collect_only" && <><span className="font-medium">Collect only</span> — AI takes details, team does the booking</>}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">Availability Window</p>
+              <div className="flex gap-4">
+                {([3, 7, 14] as const).map((days) => (
+                  <label key={days} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="odBookingWindow"
+                      value={days}
+                      checked={odBookingWindow === days}
+                      onChange={() => setOdBookingWindow(days)}
+                    />
+                    <span className="text-sm text-gray-700">Next {days} days</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
       {saved && <p className="text-sm text-green-600">Settings saved.</p>}
