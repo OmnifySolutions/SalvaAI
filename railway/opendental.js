@@ -32,7 +32,9 @@ async function odFetch(serverUrl, customerKey, path, options = {}) {
   }
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw new OpenDentalError('UNREACHABLE', `Open Dental ${res.status}: ${body}`);
+    const err = new OpenDentalError('UNREACHABLE', `Open Dental ${res.status}: ${body}`);
+    err.status = res.status;
+    throw err;
   }
   const text = await res.text();
   try {
@@ -97,11 +99,13 @@ export async function getProviders(serverUrl, customerKey) {
 // Each slot: { date, time, provider, providerId, operatoryId, aptDateTime }
 // providerName: optional string — if given, filter to matching provider only.
 // Default appointment length: 60 minutes.
-export async function getAvailability(serverUrl, customerKey, { windowDays = 7, providerName = null }) {
-  const startDate = new Date().toISOString().slice(0, 10);
-  const end = new Date();
-  end.setDate(end.getDate() + windowDays);
-  const stopDate = end.toISOString().slice(0, 10);
+export async function getAvailability(serverUrl, customerKey, { windowDays = 7, providerName = null, timeZone = 'America/New_York' }) {
+  // Use practice timezone for date math to avoid UTC midnight off-by-one for US practices
+  const now = new Date();
+  const startDate = now.toLocaleDateString('en-CA', { timeZone }); // en-CA gives YYYY-MM-DD
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() + windowDays);
+  const stopDate = endDate.toLocaleDateString('en-CA', { timeZone });
 
   let providers = [];
   if (providerName) {
@@ -163,7 +167,7 @@ export async function createAppointment(serverUrl, customerKey, {
   } catch (e) {
     if (e instanceof OpenDentalError) {
       // Re-classify 409 Conflict (slot taken) if we can detect it
-      if (e.message.includes('409') || e.message.toLowerCase().includes('conflict')) {
+      if (e.status === 409 || e.message.toLowerCase().includes('conflict')) {
         throw new OpenDentalError('SLOT_TAKEN', 'That slot was just booked by someone else');
       }
       throw e;
