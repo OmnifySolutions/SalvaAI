@@ -202,7 +202,7 @@ const DEFLECT_PRESETS: { key: string; label: string }[] = [
   { key: "appointments",        label: "Appointment requests" },
   { key: "insurance",           label: "Insurance & billing questions" },
   { key: "cost",                label: "Treatment cost estimates" },
-  { key: "clinical",            label: "Clinical / medical advice" },
+  { key: "clinical_advice",     label: "Clinical / medical advice" },
   { key: "prescriptions",       label: "Prescription refill requests" },
   { key: "doctor_availability", label: "Specific doctor availability" },
 ];

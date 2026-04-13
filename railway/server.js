@@ -127,7 +127,7 @@ function buildSystemPrompt(business) {
 
   // ── Emergency ───────────────────────────────────────────────────────────────
   const emergencyText = (business.voice_emergency_number || business.voice_emergency_message)
-    ? `Emergency handling: If a caller describes a dental emergency, ${business.voice_emergency_message || 'direct them to seek immediate care.'} ${business.voice_emergency_number ? `Our emergency line is ${business.voice_emergency_number}.` : ''}`
+    ? `Emergency handling: If a caller describes a dental emergency, ${business.voice_emergency_message || 'direct them to seek immediate care.'} ${business.voice_emergency_number ? `The emergency line is ${business.voice_emergency_number}.` : ''}`
     : `If a caller describes a dental emergency, tell them you will flag it as urgent and have someone call them back immediately.`;
 
   // ── Deflection (PRIORITY — injected before scenarios) ───────────────────────
@@ -182,6 +182,7 @@ ${deflectText ? `\n${deflectText}` : ''}
 ${scenarioText ? `\n${scenarioText}` : ''}
 
 General guidelines:
+- For clinical or medical questions, do not speculate — tell the caller a team member will follow up.
 - If you don't know something, offer to have the office follow up.
 - Do not volunteer that you are an AI unless directly asked.`;
 }
