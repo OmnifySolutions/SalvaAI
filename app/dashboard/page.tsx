@@ -94,6 +94,24 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        {/* Open Dental nudge — shown to Pro/Multi without OD connected */}
+        {(business.plan === "pro" || business.plan === "multi") && !business.opendental_api_key && (
+          <div className="border border-blue-100 bg-blue-50 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-gray-800 text-sm">Enable Live Appointment Booking</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Connect Open Dental so your AI can check availability and book appointments directly during calls.
+              </p>
+            </div>
+            <Link
+              href="/settings#practice-management"
+              className="shrink-0 text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors text-center"
+            >
+              Connect in Settings →
+            </Link>
+          </div>
+        )}
+
         {business.plan === "basic" && business.plan_status !== "past_due" && (
           <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
             <div>
