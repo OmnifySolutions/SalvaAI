@@ -565,6 +565,19 @@ async function generateCallSummary(businessName, messages) {
   }
 }
 
+// SMS to front desk when collect_only mode or Open Dental offline fallback
+async function sendBookingCollectedSms(business, bookingState) {
+  if (!business.phone_number) return;
+  const mode = business.opendental_booking_mode || 'autonomous';
+  let body;
+  if (mode === 'collect_only') {
+    body = `Appointment request via AI — ${bookingState.name || 'Unknown'}, ${bookingState.phone || 'no phone'}, DOB: ${bookingState.dob || 'not given'}, reason: ${bookingState.reason || 'not given'}. Please confirm a time.`;
+  } else {
+    body = `Booking attempted via AI but Open Dental offline — ${bookingState.name || 'Unknown'}, ${bookingState.phone || 'no phone'}, DOB: ${bookingState.dob || 'not given'}, reason: ${bookingState.reason || 'not given'}. Please follow up.`;
+  }
+  await sendSms(business.phone_number, business.twilio_sid, body).catch(() => {});
+}
+
 // ============================================================================
 // Deepgram TTS → Twilio media frames (mulaw 8kHz, 160-byte/frame)
 // Returns when audio is fully sent OR when abortSignal is triggered (barge-in)
@@ -684,6 +697,7 @@ app.ws('/media-stream', async (ws, req) => {
   let heardSentences   = [];   // sentences the caller actually heard before any barge-in
   let keepAliveTimer   = null; // periodic mark event to prevent Twilio WebSocket idle drop
   let silenceTimer     = null; // auto-disconnect after SILENCE_TIMEOUT_MS of no user speech
+  let bookingState     = { stage: 'idle', name: null, phone: null, dob: null, reason: null, providerPreference: null, availableSlots: [], chosenSlot: null, patientId: null };
 
   const SILENCE_TIMEOUT_MS = 20_000;
 
@@ -805,56 +819,229 @@ app.ws('/media-stream', async (ws, req) => {
   // Process a completed user turn (called from both speech_final and UtteranceEnd)
   // ------------------------------------------------------------------
   async function processTurn(userText) {
-    if (isSpeaking) return; // SpeechStarted already cleared this; bail if still racing
-    resetSilenceTimer(); // confirmed speech — reset idle countdown
+    if (isSpeaking) return;
+    resetSilenceTimer();
     isSpeaking = true;
 
     console.log(`[User] ${userText}`);
 
-    // ── Fix 3+4: Build accurate message history based on what was actually heard.
-    // If barge-in fired mid-response, heardSentences contains only the sentences
-    // that fully played before the caller interrupted. We push only those to
-    // messages (not the full reply), so the LLM knows exactly what the caller heard.
+    // Flush heard sentences from previous turn
     if (heardSentences.length > 0) {
       const heardText = heardSentences.join(' ');
       messages.push({ role: 'assistant', content: heardText });
-      if (conversationId) {
-        saveMessage(conversationId, 'assistant', heardText).catch(() => {});
-      }
+      if (conversationId) saveMessage(conversationId, 'assistant', heardText).catch(() => {});
       heardSentences = [];
     }
 
-    // Annotate the user message if we know it's an interruption mid-thought
-    // (i.e., there was a prior AI turn that was cut off — we already handled
-    // the partial heard content above, so just save the user text normally)
     messages.push({ role: 'user', content: userText });
-    if (conversationId) {
-      saveMessage(conversationId, 'user', userText).catch((e) =>
-        console.error('[DB save]', e.message)
-      );
-    }
+    if (conversationId) saveMessage(conversationId, 'user', userText).catch((e) => console.error('[DB save]', e.message));
 
-    heardSentences = []; // reset for this new turn
+    heardSentences = [];
     abortController = new AbortController();
-    const mySignal = abortController.signal; // capture local ref — abortController may be
-    const myTurn   = ++turnId;               // overwritten by next turn before we check it
+    const mySignal = abortController.signal;
+    const myTurn   = ++turnId;
+
     try {
-      const reply = await streamLLMAndSpeak(
-        systemPrompt, messages, mySignal, ws, streamSid, heardSentences
-      );
+      // ── Check for booking intent when idle ───────────────────────────────
+      if (bookingState.stage === 'idle' && business?.opendental_booking_mode !== undefined) {
+        const isBooking = await detectBookingIntent(userText);
+        if (isBooking) {
+          bookingState.stage = 'collecting';
+          console.log('[Booking] Intent detected — entering collection stage');
+        }
+      }
+
+      // ── Extract BOOKING_DATA marker from previous assistant message ───────
+      if (bookingState.stage === 'collecting') {
+        const lastAssistant = messages.filter((m) => m.role === 'assistant').pop();
+        if (lastAssistant) {
+          const match = lastAssistant.content.match(/\[BOOKING_DATA:(\{.*?\})\]/s);
+          if (match) {
+            try {
+              const data = JSON.parse(match[1]);
+              bookingState.name               = data.name     || bookingState.name;
+              bookingState.phone              = data.phone    || bookingState.phone;
+              bookingState.dob                = data.dob      || bookingState.dob;
+              bookingState.reason             = data.reason   || bookingState.reason;
+              bookingState.providerPreference = data.provider || null;
+              // Strip marker from stored message so it doesn't affect LLM context
+              lastAssistant.content = lastAssistant.content.replace(/\[BOOKING_DATA:.*?\]/s, '').trim();
+              console.log('[Booking] Collected all fields:', bookingState);
+            } catch { /* malformed marker — keep collecting */ }
+          }
+        }
+
+        const allCollected = bookingState.name && bookingState.phone && bookingState.dob && bookingState.reason;
+
+        if (allCollected) {
+          const mode = business?.opendental_booking_mode || 'autonomous';
+          const hasOD = business?.opendental_api_key && business?.opendental_server_url;
+
+          if (!hasOD || mode === 'collect_only') {
+            await sendBookingCollectedSms(business, bookingState);
+            bookingState.stage = 'done';
+            const reply = `Thank you ${bookingState.name}. I've taken your details and our team will be in touch to confirm a time. Is there anything else I can help you with?`;
+            await speakToTwilio(reply, ws, streamSid, mySignal);
+            messages.push({ role: 'assistant', content: reply });
+            if (conversationId) saveMessage(conversationId, 'assistant', reply).catch(() => {});
+            isSpeaking = false;
+            return;
+          }
+
+          // Fetch availability from Open Dental
+          bookingState.stage = 'checking';
+          try {
+            const slots = await getAvailability(
+              business.opendental_server_url,
+              business.opendental_api_key,
+              {
+                windowDays: business.opendental_booking_window || 7,
+                providerName: bookingState.providerPreference || null,
+                timeZone: business.timezone || 'America/New_York',
+              }
+            );
+            if (!slots.length) throw new Error('No slots returned');
+            bookingState.availableSlots = slots;
+            console.log('[Booking] Got', slots.length, 'available slots');
+          } catch (e) {
+            console.error('[Booking] getAvailability failed:', e.message);
+            await sendBookingCollectedSms(business, bookingState);
+            bookingState.stage = 'done';
+            const reply = `I wasn't able to check our online calendar just now. I've noted your details and our team will call you back to confirm a time. Is there anything else I can help you with?`;
+            await speakToTwilio(reply, ws, streamSid, mySignal);
+            messages.push({ role: 'assistant', content: reply });
+            if (conversationId) saveMessage(conversationId, 'assistant', reply).catch(() => {});
+            isSpeaking = false;
+            return;
+          }
+        }
+      }
+
+      // ── Extract slot choice from caller response ──────────────────────────
+      if (bookingState.stage === 'checking') {
+        const chosen = await extractSlotChoice(userText, bookingState.availableSlots);
+        if (chosen) {
+          bookingState.chosenSlot = chosen;
+          bookingState.stage = 'confirming';
+          console.log('[Booking] Caller chose slot:', chosen);
+        }
+      }
+
+      // ── Handle yes/no confirmation ────────────────────────────────────────
+      if (bookingState.stage === 'confirming') {
+        const confirmed = /\b(yes|yeah|yep|sure|confirm|go ahead|book it|that works|perfect|great)\b/i.test(userText);
+        const declined  = /\b(no|nope|cancel|don't|different|another|change)\b/i.test(userText);
+
+        if (confirmed && bookingState.chosenSlot) {
+          try {
+            let patient = await findPatient(
+              business.opendental_server_url,
+              business.opendental_api_key,
+              { name: bookingState.name, dob: bookingState.dob }
+            );
+            if (!patient) {
+              patient = await createPatient(
+                business.opendental_server_url,
+                business.opendental_api_key,
+                { name: bookingState.name, phone: bookingState.phone, dob: bookingState.dob, reason: bookingState.reason }
+              );
+            }
+            bookingState.patientId = patient.PatNum;
+
+            const s = bookingState.chosenSlot;
+            const mode = business.opendental_booking_mode || 'autonomous';
+            const apt = await createAppointment(
+              business.opendental_server_url,
+              business.opendental_api_key,
+              { patientId: patient.PatNum, aptDateTime: s.aptDateTime, operatoryId: s.operatoryId, providerId: s.providerId, reason: bookingState.reason, mode }
+            );
+            bookingState.stage = 'done';
+
+            if (conversationId) {
+              supabaseRequest(`conversations?id=eq.${conversationId}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ appointment_id: String(apt.AptNum), appointment_requested: true }),
+                headers: { Prefer: 'return=minimal' },
+              }).catch(() => {});
+            }
+
+            if (business.phone_number) {
+              const smsMode = mode === 'pending' ? '(pending confirmation)' : '(confirmed)';
+              sendSms(business.phone_number, business.twilio_sid,
+                `Appointment booked via AI ${smsMode} — ${bookingState.name}, ${s.date} at ${s.time} with ${s.provider}, reason: ${bookingState.reason}`
+              ).catch(() => {});
+            }
+
+            const confirmMsg = mode === 'autonomous'
+              ? `You're all booked. ${bookingState.name}, we have you down for ${s.date} at ${s.time} with ${s.provider}. Is there anything else I can help you with?`
+              : `I've submitted your appointment request for ${s.date} at ${s.time} with ${s.provider}. Our team will confirm it with you shortly. Is there anything else I can help you with?`;
+
+            await speakToTwilio(confirmMsg, ws, streamSid, mySignal);
+            messages.push({ role: 'assistant', content: confirmMsg });
+            if (conversationId) saveMessage(conversationId, 'assistant', confirmMsg).catch(() => {});
+            isSpeaking = false;
+            return;
+
+          } catch (e) {
+            console.error('[Booking] createAppointment failed:', e.code, e.message);
+            if (e.code === 'SLOT_TAKEN') {
+              try {
+                const newSlots = await getAvailability(
+                  business.opendental_server_url,
+                  business.opendental_api_key,
+                  { windowDays: business.opendental_booking_window || 7, timeZone: business.timezone || 'America/New_York' }
+                );
+                bookingState.availableSlots = newSlots;
+                bookingState.stage = 'checking';
+                bookingState.chosenSlot = null;
+                const retryMsg = `It looks like that slot just filled up. Let me find you the next available time.`;
+                await speakToTwilio(retryMsg, ws, streamSid, mySignal);
+                // Fall through — LLM will offer new slots
+              } catch {
+                await sendBookingCollectedSms(business, bookingState);
+                bookingState.stage = 'done';
+                const fallback = `I'm having trouble booking online right now. I've noted your details and our team will call you to confirm. Is there anything else I can help you with?`;
+                await speakToTwilio(fallback, ws, streamSid, mySignal);
+                messages.push({ role: 'assistant', content: fallback });
+                if (conversationId) saveMessage(conversationId, 'assistant', fallback).catch(() => {});
+                isSpeaking = false;
+                return;
+              }
+            } else {
+              await sendBookingCollectedSms(business, bookingState);
+              bookingState.stage = 'done';
+              const fallback = `I'm having trouble reaching our booking system right now. I've noted your details and our team will call you to confirm. Is there anything else I can help you with?`;
+              await speakToTwilio(fallback, ws, streamSid, mySignal);
+              messages.push({ role: 'assistant', content: fallback });
+              if (conversationId) saveMessage(conversationId, 'assistant', fallback).catch(() => {});
+              isSpeaking = false;
+              return;
+            }
+          }
+        }
+
+        if (declined) {
+          bookingState.stage = 'checking';
+          bookingState.chosenSlot = null;
+        }
+      }
+
+      // ── Normal LLM turn (also handles booking collection/slot offering) ──
+      const activePrompt = (bookingState.stage !== 'idle' && bookingState.stage !== 'done')
+        ? buildBookingPrompt(business, bookingState.stage, bookingState)
+        : systemPrompt;
+
+      const reply = await streamLLMAndSpeak(activePrompt, messages, mySignal, ws, streamSid, heardSentences);
       if (!reply || mySignal.aborted) return;
 
-      // Full reply completed without interruption — push the whole canonical reply.
-      // heardSentences was being populated by streamLLMAndSpeak; discard it since
-      // we're using the full reply text instead (avoids double-push on next turn).
       console.log(`[AI] ${reply}`);
       heardSentences = [];
-      messages.push({ role: 'assistant', content: reply });
-      if (conversationId) {
-        saveMessage(conversationId, 'assistant', reply).catch((e) =>
-          console.error('[DB save]', e.message)
-        );
-      }
+
+      // Strip BOOKING_DATA marker before storing (will be parsed on the NEXT turn)
+      const cleanReply = reply.replace(/\[BOOKING_DATA:.*?\]/s, '').trim();
+      messages.push({ role: 'assistant', content: cleanReply });
+      if (conversationId) saveMessage(conversationId, 'assistant', cleanReply).catch((e) => console.error('[DB save]', e.message));
+
     } catch (e) {
       if (e.name !== 'AbortError') console.error('[AI]', e.message);
     } finally {
