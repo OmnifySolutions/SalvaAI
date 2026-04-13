@@ -64,11 +64,12 @@ Key column names — use exactly:
 
 ## Pricing (locked)
 - Free: $0, 50 interactions/month, chat only, branded — demo/lead gen only
-- Basic: $49/month, unlimited chat, no voice, no branding
-- Pro: $189/month, unlimited chat + voice AI (up to 500 calls/month), 92.6% margin
-- Multi-Practice: $649/month, up to 5 locations, everything in Pro, 89.2% margin
-- Competitors: Arini $249, TrueLark/Weave $345 — Pro is $60 cheaper than Arini, $156 cheaper than TrueLark
-- Multi-Practice saves customers $296/month vs buying 5 individual Pro plans ($945)
+- Basic: $69/month, unlimited chat, no voice, no branding
+- Pro: $219/month, unlimited chat + voice AI, no call cap
+- Multi-Practice: $749/month, up to 5 locations, everything in Pro
+- Competitors: Arini $249, TrueLark/Weave $345 — Pro is $30 cheaper than Arini, $126 cheaper than TrueLark
+- Multi-Practice saves customers $346/month vs buying 5 individual Pro plans ($1,095)
+- Stripe price IDs (updated 2026-04-14): Basic=price_1TLtYnDhh4LmUaH16CsZVE7T, Pro=price_1TLtZdDhh4LmUaH10mm7CBR3, Multi=price_1TLtaMDhh4LmUaH1JLbucbED
 - `businesses.plan` values: `"free" | "basic" | "pro" | "multi"`
 
 ## Product decisions (locked)
