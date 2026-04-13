@@ -11,7 +11,6 @@ import {
   Zap,
 } from "lucide-react";
 import ChatCardSpread from "@/components/ChatCardSpread";
-import FloatingBubbles from "@/components/FloatingBubbles";
 import StatsCarousel from "@/components/StatsCarousel";
 import AudioDemo from "@/components/AudioDemo";
 
@@ -47,52 +46,55 @@ export default async function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 text-center overflow-hidden">
-        <FloatingBubbles />
-        <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-8 tracking-wide uppercase">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+      <section className="relative bg-gray-950 overflow-hidden">
+        {/* Subtle radial glow behind headline */}
+        <div className="pointer-events-none absolute inset-0 flex items-start justify-center">
+          <div className="w-[900px] h-[500px] bg-blue-600/10 rounded-full blur-3xl -translate-y-1/4" />
+        </div>
+        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-blue-300 text-xs font-semibold px-3 py-1.5 rounded-full mb-8 tracking-wide uppercase">
+            <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
             AI Voice + Chat Receptionist for Dental Practices
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight mb-6 max-w-3xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6 max-w-3xl mx-auto">
             Your practice loses<br />
-            <span className="text-blue-600">$150,000 a year</span><br />
+            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">$150,000 a year</span><br />
             to missed calls.
           </h1>
 
-          <p className="text-xl text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            Salva AI answers every call and chat 24/7 — trained on your practice's FAQs, services, and hours so no new patient ever hits voicemail again.
+          <p className="text-xl text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
+            Salva AI answers every call and chat 24/7 — trained on your practice&apos;s FAQs, services, and hours so no new patient ever hits voicemail again.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
             <Link
               href="/sign-up"
-              className="bg-gray-900 text-white px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-700 transition-colors shadow-sm"
+              className="bg-white text-gray-900 px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
             >
               Start 14-day free trial
             </Link>
             <Link
               href="/pricing"
-              className="text-sm text-gray-500 hover:text-gray-800 px-7 py-3.5 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors font-medium"
+              className="text-sm text-gray-300 hover:text-white px-7 py-3.5 rounded-xl border border-white/15 hover:border-white/30 transition-colors font-medium"
             >
               See pricing →
             </Link>
           </div>
-          <p className="text-xs text-gray-400 mb-14">14-day free trial. Cancel anytime.</p>
+          <p className="text-xs text-gray-600 mb-14">14-day free trial. Cancel anytime.</p>
 
           {/* Pain stats strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-gray-100 border border-gray-100 rounded-2xl overflow-hidden max-w-2xl mx-auto">
-            <div className="bg-white px-6 py-5">
-              <p className="text-2xl font-bold text-gray-900 tracking-tight">35%</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden max-w-2xl mx-auto">
+            <div className="bg-gray-900 px-6 py-5">
+              <p className="text-2xl font-bold text-white tracking-tight">35%</p>
               <p className="text-xs text-gray-500 mt-1">of dental calls go unanswered</p>
             </div>
-            <div className="bg-white px-6 py-5">
-              <p className="text-2xl font-bold text-gray-900 tracking-tight">78%</p>
+            <div className="bg-gray-900 px-6 py-5">
+              <p className="text-2xl font-bold text-white tracking-tight">78%</p>
               <p className="text-xs text-gray-500 mt-1">hang up without leaving a voicemail</p>
             </div>
-            <div className="bg-white px-6 py-5">
-              <p className="text-2xl font-bold text-gray-900 tracking-tight">$850</p>
+            <div className="bg-gray-900 px-6 py-5">
+              <p className="text-2xl font-bold text-white tracking-tight">$850</p>
               <p className="text-xs text-gray-500 mt-1">lost per missed new patient call</p>
             </div>
           </div>
