@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HustleClaude — AI Receptionist for Dental Offices",
+  title: "Salva AI — AI Receptionist for Dental Offices",
   description: "Never miss a new patient call again. AI receptionist answers 24/7.",
 };
 

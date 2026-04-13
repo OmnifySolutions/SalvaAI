@@ -1,5 +1,5 @@
 {
-  "name": "hustleclaude-voice",
+  "name": "salva-ai-voice",
   "version": "1.0.0",
   "type": "module",
   "description": "Twilio Media Streams WebSocket server for voice AI",

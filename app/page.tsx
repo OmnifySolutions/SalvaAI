@@ -26,7 +26,7 @@ export default async function HomePage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <span className="font-bold text-gray-900 text-lg tracking-tight">HustleClaude</span>
+            <span className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</span>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
               <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
               <a href="#features" className="hover:text-gray-800 transition-colors">Features</a>
@@ -62,7 +62,7 @@ export default async function HomePage() {
           </h1>
 
           <p className="text-xl text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            HustleClaude answers every call and chat 24/7 — in your voice, with your FAQs, so no new patient ever hits voicemail again.
+            Salva AI answers every call and chat 24/7 — in your voice, with your FAQs, so no new patient ever hits voicemail again.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
@@ -153,7 +153,7 @@ export default async function HomePage() {
             Every missed call is a missed patient.
           </h2>
           <p className="text-gray-400 mb-8">
-            HustleClaude answers 24/7 so you never lose another one. First 14 days free.
+            Salva AI answers 24/7 so you never lose another one. First 14 days free.
           </p>
           <Link
             href="/sign-up"
@@ -167,12 +167,12 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <span className="font-semibold text-gray-700">HustleClaude</span>
+          <span className="font-semibold text-gray-700">Salva AI</span>
           <div className="flex gap-6">
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
             <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>
           </div>
-          <span>© {new Date().getFullYear()} HustleClaude</span>
+          <span>© {new Date().getFullYear()} Salva AI</span>
         </div>
       </footer>
     </div>
@@ -183,7 +183,7 @@ const features = [
   {
     icon: Phone,
     title: "AI voice answering",
-    description: "Forward your practice number to HustleClaude. Every call gets answered in your voice — appointments, insurance questions, after-hours, anything.",
+    description: "Forward your practice number to Salva AI. Every call gets answered in your voice — appointments, insurance questions, after-hours, anything.",
   },
   {
     icon: Clock,

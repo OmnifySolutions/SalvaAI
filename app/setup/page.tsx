@@ -20,7 +20,7 @@ const CARRIER_TABS: { id: Carrier; label: string; sub: string }[] = [
   { id: "us",   label: "US Mobile Carriers",      sub: "AT&T, Verizon, T-Mobile" },
 ];
 
-const PLACEHOLDER_CODE = `<script src="https://app.hustleclaude.com/api/widget/embed?id=YOUR_ID"></script>`;
+const PLACEHOLDER_CODE = `<script src="https://app.salvaai.com/api/widget/embed?id=YOUR_ID"></script>`;
 
 export default function SetupPage() {
   const [platform, setPlatform] = useState<Platform>("squarespace");
@@ -40,7 +40,7 @@ export default function SetupPage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight">HustleClaude</Link>
+            <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
               <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
               <Link href="/#features" className="hover:text-gray-800 transition-colors">Features</Link>
@@ -69,7 +69,7 @@ export default function SetupPage() {
             Setup guide
           </div>
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-3">
-            Add HustleClaude to your website
+            Add Salva AI to your website
           </h1>
           <p className="text-lg text-gray-500">
             Your AI receptionist will be live in under 5 minutes. No developer needed.
@@ -168,7 +168,7 @@ export default function SetupPage() {
                 <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">Pro</span>
               </div>
               <p className="text-gray-500 text-sm">
-                Forward your office phone to your HustleClaude number so the AI answers when your team can&apos;t.
+                Forward your office phone to your Salva AI number so the AI answers when your team can&apos;t.
               </p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function SetupPage() {
             {[
               { step: "Patient calls", sub: "your existing office number" },
               { step: "No answer", sub: "after ~4 rings (20 sec)" },
-              { step: "AI picks up", sub: "on your HustleClaude number" },
+              { step: "AI picks up", sub: "on your Salva AI number" },
             ].map((item, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
                 <div className="w-8 h-8 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700 flex items-center justify-center mb-1">
@@ -193,7 +193,7 @@ export default function SetupPage() {
           {/* Steps */}
           <Step number={1} title="Find your forwarding number">
             <p className="text-gray-500 text-sm mb-3">
-              Once you activate the Pro plan, HustleClaude provisions a dedicated phone number for your practice. You&apos;ll find it in your dashboard under <span className="font-medium text-gray-700">Settings → Voice AI</span>.
+              Once you activate the Pro plan, Salva AI provisions a dedicated phone number for your practice. You&apos;ll find it in your dashboard under <span className="font-medium text-gray-700">Settings → Voice AI</span>.
             </p>
             <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
               <span className="text-gray-400 text-xs font-mono">+1 (555) 000-0000</span>
@@ -260,7 +260,7 @@ export default function SetupPage() {
             </p>
           </div>
           <a
-            href="mailto:support@hustleclaude.com"
+            href="mailto:support@salvaai.com"
             className="shrink-0 text-sm bg-gray-900 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-700 transition-colors"
           >
             Contact support
@@ -271,12 +271,12 @@ export default function SetupPage() {
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8 mt-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <Link href="/" className="font-semibold text-gray-700">HustleClaude</Link>
+          <Link href="/" className="font-semibold text-gray-700">Salva AI</Link>
           <div className="flex gap-6">
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
             <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>
           </div>
-          <span>© {new Date().getFullYear()} HustleClaude</span>
+          <span>© {new Date().getFullYear()} Salva AI</span>
         </div>
       </footer>
     </div>
@@ -377,7 +377,7 @@ function WixSteps() {
         <>Paste your embed code into the code field.</>,
         <>Set <strong className="text-gray-800">Place Code in</strong> to <strong className="text-gray-800">Body — end</strong>.</>,
         <>Set <strong className="text-gray-800">Add Code to Pages</strong> to <strong className="text-gray-800">All Pages</strong>.</>,
-        <>Give it a name like "HustleClaude" and click <strong className="text-gray-800">Apply</strong>.</>,
+        <>Give it a name like "Salva AI" and click <strong className="text-gray-800">Apply</strong>.</>,
       ]} />
     </div>
   );
@@ -439,7 +439,7 @@ function GsmSteps() {
     <div>
       <div className="bg-gray-50 border-b border-gray-200 px-5 py-3">
         <p className="text-xs font-medium text-gray-600 mb-0.5">Standard GSM codes — works on virtually all mobile carriers worldwide</p>
-        <p className="text-xs text-gray-400">Dial the code from your office phone keypad and press Call. Replace <span className="font-mono">+XXXXXXXXXXX</span> with your HustleClaude number (include country code, e.g. +44 for UK, +1 for US).</p>
+        <p className="text-xs text-gray-400">Dial the code from your office phone keypad and press Call. Replace <span className="font-mono">+XXXXXXXXXXX</span> with your Salva AI number (include country code, e.g. +44 for UK, +1 for US).</p>
       </div>
       <div className="px-5 pt-3 pb-1">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Activate forwarding</p>
@@ -487,7 +487,7 @@ function VoipSteps() {
           <>In the <strong className="text-gray-800">Admin Portal</strong>, go to <strong className="text-gray-800">Phone System → Users</strong>.</>,
           <>Click the user whose calls should forward (usually the main receptionist line).</>,
           <>Open <strong className="text-gray-800">Call Handling &amp; Forwarding</strong>.</>,
-          <>Under <strong className="text-gray-800">If no one answers</strong>, select <strong className="text-gray-800">Forward to external number</strong> and enter your HustleClaude number.</>,
+          <>Under <strong className="text-gray-800">If no one answers</strong>, select <strong className="text-gray-800">Forward to external number</strong> and enter your Salva AI number.</>,
           <>Set the ring time to <strong className="text-gray-800">20–25 seconds</strong> and save.</>,
         ]} />
       </div>
@@ -500,7 +500,7 @@ function VoipSteps() {
           <>Log in to the <strong className="text-gray-800">Vonage Business Admin Dashboard</strong>.</>,
           <>Go to <strong className="text-gray-800">Phone Numbers</strong> and click on your main office number.</>,
           <>Select <strong className="text-gray-800">Call Forwarding</strong> and choose <strong className="text-gray-800">Forward when not answered</strong>.</>,
-          <>Enter your HustleClaude forwarding number and click <strong className="text-gray-800">Save</strong>.</>,
+          <>Enter your Salva AI forwarding number and click <strong className="text-gray-800">Save</strong>.</>,
         ]} />
       </div>
 
@@ -512,7 +512,7 @@ function VoipSteps() {
           <>In the <strong className="text-gray-800">3CX Admin Console</strong>, go to <strong className="text-gray-800">Users</strong>.</>,
           <>Select the extension for your main reception line.</>,
           <>Click <strong className="text-gray-800">Forwarding Rules</strong> and set <strong className="text-gray-800">No Answer</strong> to <strong className="text-gray-800">Forward to number</strong>.</>,
-          <>Enter your HustleClaude number (with country code) and save.</>,
+          <>Enter your Salva AI number (with country code) and save.</>,
         ]} />
       </div>
 
@@ -531,7 +531,7 @@ function UsCarrierSteps() {
   return (
     <div>
       <div className="bg-gray-50 border-b border-gray-200 px-5 py-3">
-        <p className="text-xs text-gray-400">For US mobile carriers. Replace <span className="font-mono">10DIGITNUMBER</span> with your HustleClaude number (10 digits, no spaces).</p>
+        <p className="text-xs text-gray-400">For US mobile carriers. Replace <span className="font-mono">10DIGITNUMBER</span> with your Salva AI number (10 digits, no spaces).</p>
       </div>
 
       {/* AT&T */}

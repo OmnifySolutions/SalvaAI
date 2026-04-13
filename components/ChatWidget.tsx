@@ -127,7 +127,7 @@ export default function ChatWidget({
 
       {/* Powered by */}
       <div className="text-center text-xs text-gray-400 pb-2">
-        Powered by <span className="font-medium">HustleClaude AI</span>
+        Powered by <span className="font-medium">Salva AI</span>
       </div>
     </div>
   );
