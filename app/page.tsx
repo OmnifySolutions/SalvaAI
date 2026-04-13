@@ -62,7 +62,7 @@ export default async function HomePage() {
           </h1>
 
           <p className="text-xl text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            Salva AI answers every call and chat 24/7 — in your voice, with your FAQs, so no new patient ever hits voicemail again.
+            Salva AI answers every call and chat 24/7 — trained on your practice's FAQs, services, and hours so no new patient ever hits voicemail again.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
@@ -100,7 +100,7 @@ export default async function HomePage() {
       </section>
 
       {/* Animated chat card spread */}
-      <section className="pb-32 px-6">
+      <section className="pb-32 px-6 bg-gray-50">
         <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
           Real conversations, handled automatically
         </p>
@@ -118,7 +118,8 @@ export default async function HomePage() {
       <AudioDemo />
 
       {/* Features */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
+      <section id="features" className="bg-gray-50 py-24">
+      <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
             Voice AI + chat, fully automated
@@ -128,9 +129,9 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 [&>*:last-child:nth-child(3n+1)]:md:col-start-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((f) => (
-            <div key={f.title} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all">
+            <div key={f.title} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
               <div className="w-10 h-10 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600">
                 <f.icon size={20} strokeWidth={1.5} />
               </div>
@@ -139,6 +140,7 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+      </div>
       </section>
 
       {/* Competitive nudge */}
@@ -207,7 +209,7 @@ const features = [
   },
   {
     icon: ShieldCheck,
-    title: "HIPAA-safe by design",
+    title: "HIPAA-compliant",
     description: "We never collect or store personal health information. Patients are directed to call for anything clinical.",
   },
   {

@@ -154,7 +154,7 @@ export default async function DashboardPage() {
 
         {/* Usage bar (free plan only) */}
         {business.plan === "free" && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div className="flex justify-between text-sm mb-2">
               <span className="font-medium text-gray-700">Monthly Usage</span>
               <span className="text-gray-500">
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
         )}
 
         {/* Embed code */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-1">
             <h2 className="font-semibold text-gray-800">Embed Your Widget</h2>
             <Link href="/setup" className="text-xs text-blue-500 hover:text-blue-600 transition-colors">
@@ -204,7 +204,7 @@ export default async function DashboardPage() {
 
         {/* Voice AI status */}
         {(business.plan === "pro" || business.plan === "multi") ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-gray-800">Voice AI</h2>
               <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
         )}
 
         {/* Conversations list */}
-        <div className="bg-white rounded-xl border border-gray-200">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-semibold text-gray-800">Recent Conversations</h2>
             <span className="text-xs text-gray-400">Last 20</span>
@@ -296,7 +296,7 @@ export default async function DashboardPage() {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
       <div className="text-2xl font-bold text-gray-800">{value}</div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
     </div>
