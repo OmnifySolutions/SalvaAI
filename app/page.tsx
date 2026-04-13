@@ -10,6 +10,9 @@ import {
   ShieldCheck,
   Zap,
   Bell,
+  PhoneCall,
+  Headphones,
+  CheckCircle2,
 } from "lucide-react";
 import ChatCardSpread from "@/components/ChatCardSpread";
 import StatsCarousel from "@/components/StatsCarousel";
@@ -120,8 +123,37 @@ export default async function HomePage() {
       {/* Audio demo */}
       <AudioDemo />
 
+      {/* How it works */}
+      <section className="bg-gray-50 py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+              How Salva AI handles a call
+            </h2>
+            <p className="text-gray-500 max-w-md mx-auto">
+              From ring to resolution in seconds — without a single staff member picking up.
+            </p>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute top-8 left-[14%] right-[14%] h-px bg-gray-200" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {howItWorks.map((step, i) => (
+                <div key={step.title} className="relative flex flex-col items-center text-center">
+                  <div className="relative z-10 w-16 h-16 bg-gray-900 text-white rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                    <step.icon size={24} strokeWidth={1.5} />
+                  </div>
+                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-1">Step {i + 1}</div>
+                  <h3 className="font-semibold text-gray-900 mb-1.5 text-sm">{step.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{step.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="bg-gray-50 py-24">
+      <section id="features" className="bg-white py-24">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
@@ -134,7 +166,7 @@ export default async function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((f) => (
-            <div key={f.title} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
+            <div key={f.title} className="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
               <div className="w-10 h-10 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600">
                 <f.icon size={20} strokeWidth={1.5} />
               </div>
@@ -146,12 +178,38 @@ export default async function HomePage() {
       </div>
       </section>
 
-      {/* PMS compatibility note */}
-      <div className="text-center py-6 bg-gray-50">
-        <p className="text-sm text-gray-400 max-w-lg mx-auto">
-          Works alongside your existing practice management software — no integrations required until you&apos;re ready.
-        </p>
-      </div>
+      {/* Setup timeline */}
+      <section className="bg-gray-50 py-24 border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+              Up and running in minutes
+            </h2>
+            <p className="text-gray-500 max-w-md mx-auto">
+              No IT team. No long onboarding. Most practices are live the same day they sign up.
+            </p>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute top-7 left-[16.67%] right-[16.67%] h-0.5 bg-gray-200" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {setupTimeline.map((t, i) => (
+                <div key={t.milestone} className="flex flex-col items-center text-center">
+                  <div className={`relative z-10 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-sm font-bold shadow-sm ${
+                    i === 0 ? "bg-blue-600 text-white" : i === 1 ? "bg-gray-900 text-white" : "bg-white border border-gray-200 text-gray-500"
+                  }`}>
+                    {t.milestone}
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">{t.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="text-center text-xs text-gray-400 mt-12">
+            Works alongside your existing practice management software — no integrations required until you&apos;re ready.
+          </p>
+        </div>
+      </section>
 
       {/* Competitive nudge */}
       <div className="text-center pb-10">
@@ -231,5 +289,46 @@ const features = [
     icon: Bell,
     title: "Smart handoffs",
     description: "If the AI can't answer, it takes a message and notifies your team immediately. No patient left without a response.",
+  },
+];
+
+const howItWorks = [
+  {
+    icon: PhoneCall,
+    title: "Patient calls",
+    description: "A patient calls your practice — during hours, after hours, on a holiday. Doesn't matter.",
+  },
+  {
+    icon: Headphones,
+    title: "Salva AI answers",
+    description: "The AI picks up immediately and introduces itself in your practice's voice. No hold time.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Question answered",
+    description: "Hours, insurance, services, appointment requests — resolved instantly without staff involvement.",
+  },
+  {
+    icon: Bell,
+    title: "Team notified",
+    description: "Can't handle it? The AI takes a message and alerts your team. No lead slips through.",
+  },
+];
+
+const setupTimeline = [
+  {
+    milestone: "Day 1",
+    title: "Chat widget live",
+    description: "Copy one line of code to your website. Your AI receptionist starts answering patient questions immediately.",
+  },
+  {
+    milestone: "Week 1",
+    title: "Voice AI activated",
+    description: "Forward your practice number. Every call gets answered 24/7 — no missed patients, no voicemail.",
+  },
+  {
+    milestone: "Month 1",
+    title: "ROI visible",
+    description: "See every conversation in your dashboard. Track leads captured, calls answered, and patient inquiries handled.",
   },
 ];
