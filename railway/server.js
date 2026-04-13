@@ -22,7 +22,6 @@ const ELEVENLABS_API_KEY  = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID;
 const SUPABASE_URL        = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-const OPENDENTAL_DEVELOPER_KEY = process.env.OPENDENTAL_DEVELOPER_KEY; // set in Railway env
 const TWILIO_ACCOUNT_SID  = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN   = process.env.TWILIO_AUTH_TOKEN;
 
@@ -843,7 +842,9 @@ app.ws('/media-stream', async (ws, req) => {
 
     try {
       // ── Check for booking intent when idle ───────────────────────────────
-      if (bookingState.stage === 'idle' && business?.opendental_api_key && business?.opendental_server_url) {
+      if (bookingState.stage === 'idle' &&
+          (business?.opendental_booking_mode === 'collect_only' ||
+           (business?.opendental_api_key && business?.opendental_server_url))) {
         const isBooking = await detectBookingIntent(userText);
         if (isBooking) {
           bookingState.stage = 'collecting';
@@ -991,6 +992,7 @@ app.ws('/media-stream', async (ws, req) => {
                   business.opendental_api_key,
                   { windowDays: business.opendental_booking_window || 7, timeZone: business.timezone || 'America/New_York' }
                 );
+                if (!newSlots.length) throw new Error('No slots on retry');
                 bookingState.availableSlots = newSlots;
                 bookingState.stage = 'checking';
                 bookingState.chosenSlot = null;

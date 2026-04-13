@@ -15,6 +15,15 @@ export async function POST(req: NextRequest) {
     openDentalServerUrl, openDentalApiKey, openDentalBookingMode, openDentalBookingWindow,
   } = body;
 
+  const validModes = ['autonomous', 'pending', 'collect_only'];
+  const validWindows = [3, 7, 14];
+  if (openDentalBookingMode && !validModes.includes(openDentalBookingMode)) {
+    return Response.json({ error: "Invalid booking mode" }, { status: 400 });
+  }
+  if (openDentalBookingWindow != null && !validWindows.includes(Number(openDentalBookingWindow))) {
+    return Response.json({ error: "Invalid booking window" }, { status: 400 });
+  }
+
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
 
   const { error } = await supabaseAdmin
