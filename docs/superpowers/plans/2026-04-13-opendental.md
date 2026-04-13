@@ -57,8 +57,10 @@ Open the Supabase dashboard → SQL Editor. Run:
 ALTER TABLE businesses
   ADD COLUMN IF NOT EXISTS opendental_server_url    TEXT,
   ADD COLUMN IF NOT EXISTS opendental_api_key       TEXT,
-  ADD COLUMN IF NOT EXISTS opendental_booking_mode  TEXT DEFAULT 'autonomous',
-  ADD COLUMN IF NOT EXISTS opendental_booking_window INT  DEFAULT 7;
+  ADD COLUMN IF NOT EXISTS opendental_booking_mode  TEXT DEFAULT 'autonomous'
+    CHECK (opendental_booking_mode IN ('autonomous', 'pending', 'collect_only')),
+  ADD COLUMN IF NOT EXISTS opendental_booking_window INT  DEFAULT 7
+    CHECK (opendental_booking_window IN (3, 7, 14));
 
 ALTER TABLE conversations
   ADD COLUMN IF NOT EXISTS appointment_id TEXT;

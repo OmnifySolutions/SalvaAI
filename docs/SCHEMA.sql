@@ -59,8 +59,10 @@ CREATE TABLE businesses (
   -- Open Dental PMS integration
   opendental_server_url TEXT,                      -- customer's eConnector base URL
   opendental_api_key TEXT,                         -- customer API key (null = not connected)
-  opendental_booking_mode TEXT DEFAULT 'autonomous', -- 'autonomous' | 'pending' | 'collect_only'
-  opendental_booking_window INT DEFAULT 7,         -- 3 | 7 | 14 (days to look ahead)
+  opendental_booking_mode TEXT DEFAULT 'autonomous' -- 'autonomous' | 'pending' | 'collect_only'
+    CHECK (opendental_booking_mode IN ('autonomous', 'pending', 'collect_only')),
+  opendental_booking_window INT DEFAULT 7          -- 3 | 7 | 14 (days to look ahead)
+    CHECK (opendental_booking_window IN (3, 7, 14)),
 
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
