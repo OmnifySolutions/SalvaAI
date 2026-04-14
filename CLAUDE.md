@@ -48,7 +48,7 @@ Key column names — use exactly:
   - Auth: `/api/voice/(.*)` exempted from Clerk in `proxy.ts`
   - Twilio TwiML App SID: `APb69c7c65d2d8e75d4f55a416a3447b68`
   - `vad_events=true` required in Deepgram params for SpeechStarted to fire
-- Open Dental integration (partial — schema + settings UI + `opendental.js` module + booking state machine in `railway/server.js`). Blocked on developer API key from Open Dental.
+- **Open Dental integration** ✅ (complete — schema + settings UI + `opendental.js` module + booking state machine in `railway/server.js`. Ready to test with customer keys. Setup: Set `OPENDENTAL_DEVELOPER_KEY` env var in Railway to the developer API key from Open Dental email.)
 - Components: `ChatCardSpread`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`, `AudioDemo`, `DashboardMockup`, `SocialProof`
 - Hooks: `useCarousel` — shared infinite-scroll logic
 
@@ -111,15 +111,22 @@ Key column names — use exactly:
 17. ✅ **Homepage visual sections** — How It Works (4-step), Dashboard Mockup, Setup Timeline, Social Proof (hidden)
 18. ✅ **UI/UX pass** — shadows, alternating sections, settings max-w-3xl, focus rings, pricing layout 3+1
 19. ✅ **Content pass** — BAA FAQ, Smart Handoffs feature, PMS framing, handoff clarity copy, 14-day trial
-20. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
-21. **Open Dental integration** — blocked on developer API key; schema + UI + module built, needs key to finish
-22. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
-23. **Enable social proof section** — flip `{false &&` to `{true &&` when first real review is collected
+20. ✅ **Open Dental integration** — fully wired: `OPENDENTAL_DEVELOPER_KEY` set in Railway + Vercel, test connection works, business context loads via Twilio Stream Parameters. ngrok required for local testing; real customers use their own server URL.
+21. ✅ **Fix business context loading** — express-ws drops URL query params; switched to Twilio `<Parameter>` elements in `<Stream>` TwiML, read from `customParameters` in the `start` event. Business now loads correctly on every call.
+22. ✅ **Voice quality fixes** — TTS syllable clipping fixed (silence lead-in frames), `BOOKING_DATA` marker stripped before TTS, "Dr."/"Mr." sentence splitting fixed, hardcoded bridge message before Open Dental fetch.
+23. 🔧 **Voice call UX tuning** — known issues to fix next session:
+    - Microphone permission prompt doesn't appear until tab switch (browser SDK issue)
+    - Barge-in too aggressive — cuts off AI mid-sentence (echo or VAD sensitivity)
+    - LLM reasoning/flow needs tuning — better dental context, appointment flow
+    - Open Dental booking not confirmed end-to-end (got cut off before appointment created)
+24. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
+25. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
+26. **Enable social proof section** — flip `{false &&` to `{true &&` when first real review is collected
 
 ## Blockers
 - **Anthropic credits** — out of credits; Groq is the active LLM until resolved
-- **Open Dental developer key** — emailed vendor.relations@opendental.com, waiting on portal access
 - **Twilio trial account** — plays watermark message before every call; upgrade account to remove
+- **Open Dental ngrok** — local testing requires ngrok running on dev machine; URL must match settings
 
 ## Key stats (verified, use in copy)
 - 35% of dental calls go unanswered (>50% during busy hours)
