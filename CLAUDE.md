@@ -21,15 +21,15 @@ Key column names — use exactly:
 - See `docs/SCHEMA.sql` for full schema
 
 ## What's built
-- Landing page (`/`) — voice-first hero ("$150k lost" headline), pain stats strip, floating bubbles, chat card carousel, stats carousel, audio demo (3 scenarios), features grid (voice first), CTA banner, competitive nudge line
-- Pricing page (`/pricing`) — Free/Basic/Pro/Multi-Practice (4 tiers), competitor table, auth-aware CTAs (UpgradeButton)
+- Landing page (`/`) — dark hero (`bg-gray-950`, gradient text on "$150,000 a year"), pain stats strip, chat card carousel, stats carousel, audio demo (3 scenarios, MP3s live), "How It Works" 4-step flow, features grid (8 cards, voice first), dashboard mockup visual, setup timeline (Day 1/Week 1/Month 1), social proof section (built, hidden — `{false && <SocialProof />}`), CTA banner
+- Pricing page (`/pricing`) — 3-card row (Free/Basic/Pro) + full-width Multi-Practice card, competitor table, auth-aware CTAs, BAA FAQ entry
 - Auth: sign-in, sign-up (Clerk), onboarding (`/onboarding`)
-- Dashboard (`/dashboard`) — stats, billing section, voice AI card (status + forwarding number), embed code, conversation list
-- Settings (`/settings`) — name, hours (HoursPicker), services, AI config, FAQs, voice toggle (Pro/Multi only)
+- Dashboard (`/dashboard`) — stats, billing section, voice AI card (status + forwarding number), embed code, conversation list, Open Dental nudge for Pro/Multi without OD connected
+- Settings (`/settings`) — max-w-3xl, name, hours (HoursPicker), services, AI config, FAQs, voice toggle, voice customization (tone/emergency/deflect/scenarios), Open Dental connection (Pro/Multi)
 - Setup guide (`/setup`) — embed instructions + phone forwarding guide
 - Chat widget (`/widget/[businessId]`) + embed script (`/api/widget/embed`)
 - Chat API (`/api/chat`) — real Claude Haiku or mock fallback if no API key
-- Stripe billing (`/api/stripe/checkout|portal|webhook`) — 30-day trial, plan sync, 4 plans
+- Stripe billing (`/api/stripe/checkout|portal|webhook`) — 14-day trial, plan sync, 4 plans
 - **Voice AI pipeline** ✅ (fully working, tested end-to-end via browser)
   - Railway WebSocket server (`railway/server.js`) — Deepgram STT → Groq LLM → Deepgram TTS → Twilio
   - TTS: Deepgram Aura (`aura-asteria-en`, mulaw 8kHz) — replaced ElevenLabs (free plan blocks API)
@@ -48,12 +48,13 @@ Key column names — use exactly:
   - Auth: `/api/voice/(.*)` exempted from Clerk in `proxy.ts`
   - Twilio TwiML App SID: `APb69c7c65d2d8e75d4f55a416a3447b68`
   - `vad_events=true` required in Deepgram params for SpeechStarted to fire
-- Components: `ChatCardSpread`, `FloatingBubbles`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`, `AudioDemo`
+- Open Dental integration (partial — schema + settings UI + `opendental.js` module + booking state machine in `railway/server.js`). Blocked on developer API key from Open Dental.
+- Components: `ChatCardSpread`, `SignOutButton`, `SettingsForm`, `HoursPicker`, `UpgradeButton`, `StatsCarousel`, `AudioDemo`, `DashboardMockup`, `SocialProof`
 - Hooks: `useCarousel` — shared infinite-scroll logic
 
 ## Design system (locked — do not change)
 - Option B: clean, warm, Stripe-like
-- Background: white (`bg-white`)
+- Background: white (`bg-white`) — exception: homepage hero is `bg-gray-950` (dark)
 - Headlines: `text-gray-900`, bold, tight tracking
 - Body: `text-gray-500` / `text-gray-600`
 - Primary accent: `blue-600` (used on icons, links, badges)
@@ -79,7 +80,7 @@ Key column names — use exactly:
 - Voice infra: Railway hosts the WebSocket server (Next.js/Vercel can't do persistent WebSockets). ~$6/month.
 - Voice is the main product. Chat is a bonus. All homepage messaging should lead with voice/missed calls.
 - No mobile SDK for MVP
-- Free trial requires credit card (Stripe charges $0 now, auto-bills after 30 days) — messaging: "cancel anytime"
+- Free trial requires credit card (Stripe charges $0 now, auto-bills after 14 days) — messaging: "cancel anytime"
 - Cancel anytime policy: yes, keep it, it increases conversions
 - Competitor messaging: never on homepage (signals insecurity). Pricing page only. One soft nudge line on homepage: "Most practices save $60–160/month vs competitors."
 
@@ -90,11 +91,11 @@ Key column names — use exactly:
 - One competitive nudge line only: "Most practices save $60–160/month vs competitors"
 - Don't oversell: no "revolutionary", no "best-in-class" — let the numbers speak
 
-## Approved build queue (next session, do in order)
+## Approved build queue
 1. ✅ **Update pricing everywhere** — 4 tiers, Stripe price IDs, plan enum "multi" added
 2. ✅ **Rewrite homepage hero** — voice-first, "$150k lost" headline, pain stats strip
 3. ✅ **Flip feature section order** — voice first, chat second
-4. ✅ **Pre-recorded audio demo section** — AudioDemo component built, MP3s still need generating
+4. ✅ **Pre-recorded audio demo section** — AudioDemo component built, MP3s live in `/public/audio/`
 5. ✅ **Competitive nudge line** — added to homepage
 6. ✅ **Update pricing page** — 4-tier, updated competitor table
 7. ✅ **Voice AI pipeline** — Deepgram STT + Groq LLM + Deepgram TTS wired, barge-in, post-call SMS
@@ -104,13 +105,20 @@ Key column names — use exactly:
 11. ✅ **Sentence streaming** — ~600ms first audio, streams LLM by sentence to TTS immediately
 12. ✅ **Barge-in overhaul** — SpeechStarted VAD, heard-context tracking, race condition fixes
 13. ✅ **Connection stability** — keepalive, Deepgram reconnect, pre-buffer, silence auto-disconnect
-14. **Settings — voice customization** — tone preset, emergency handling, deflection topics, scenario builder
-15. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
-16. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
+14. ✅ **Settings — voice customization** — tone preset, emergency handling, deflection topics, scenario builder
+15. ✅ **Rename HustleClaude → Salva AI** — full codebase rename, GitHub repo renamed to SalvaAI
+16. ✅ **Dark hero** — `bg-gray-950`, gradient text on "$150,000 a year", removed FloatingBubbles
+17. ✅ **Homepage visual sections** — How It Works (4-step), Dashboard Mockup, Setup Timeline, Social Proof (hidden)
+18. ✅ **UI/UX pass** — shadows, alternating sections, settings max-w-3xl, focus rings, pricing layout 3+1
+19. ✅ **Content pass** — BAA FAQ, Smart Handoffs feature, PMS framing, handoff clarity copy, 14-day trial
+20. **Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
+21. **Open Dental integration** — blocked on developer API key; schema + UI + module built, needs key to finish
+22. **Switch back to Claude Haiku** — when Anthropic credits arrive, remove GROQ_API_KEY from Railway
+23. **Enable social proof section** — flip `{false &&` to `{true &&` when first real review is collected
 
 ## Blockers
 - **Anthropic credits** — out of credits; Groq is the active LLM until resolved
-- **Audio demo MP3s** — generate 3 files via Deepgram TTS, save to `/public/audio/`
+- **Open Dental developer key** — emailed vendor.relations@opendental.com, waiting on portal access
 - **Twilio trial account** — plays watermark message before every call; upgrade account to remove
 
 ## Key stats (verified, use in copy)
