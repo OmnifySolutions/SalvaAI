@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
     const twiml = new twilio.twiml.VoiceResponse();
 
     const connect = twiml.connect();
-    connect.stream({
-      url: `${railwayUrl}/media-stream?conversationId=${conversation.id}`,
-    });
+    const streamUrl = `${railwayUrl}/media-stream?conversationId=${conversation.id}&businessId=${businesses.id}`;
+    console.log(`[incoming-call] streamUrl=${streamUrl}`);
+    connect.stream({ url: streamUrl });
 
     return new NextResponse(twiml.toString(), {
       headers: { 'Content-Type': 'application/xml' },

@@ -9,6 +9,8 @@ export async function POST(request: NextRequest) {
     const businessId = formData.get('businessId') as string;
     const callSid    = formData.get('CallSid') as string;
 
+    console.log(`[browser-call] businessId=${businessId} callSid=${callSid}`);
+
     if (!businessId) {
       const twiml = new twilio.twiml.VoiceResponse();
       twiml.say('Missing business ID.');
@@ -33,11 +35,12 @@ export async function POST(request: NextRequest) {
 
     const railwayUrl = process.env.RAILWAY_URL || 'wss://hustleclaude-production.up.railway.app';
 
+    const streamUrl = `${railwayUrl}/media-stream?conversationId=${conversation?.id}&businessId=${businessId}`;
+    console.log(`[browser-call] streamUrl=${streamUrl}`);
+
     const twiml = new twilio.twiml.VoiceResponse();
     const connect = twiml.connect();
-    connect.stream({
-      url: `${railwayUrl}/media-stream?conversationId=${conversation?.id}&businessId=${businessId}`,
-    });
+    connect.stream({ url: streamUrl });
 
     return new NextResponse(twiml.toString(), {
       headers: { 'Content-Type': 'application/xml' },
