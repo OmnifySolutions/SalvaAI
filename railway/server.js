@@ -185,7 +185,9 @@ ${scenarioText ? `\n${scenarioText}` : ''}
 General guidelines:
 - For clinical or medical questions, do not speculate — tell the caller a team member will follow up.
 - If you don't know something, offer to have the office follow up.
-- Do not volunteer that you are an AI unless directly asked.`;
+- Do not volunteer that you are an AI unless directly asked.
+- Never say "pause", "(pause)", "one moment", "hold on", "just a second", or any filler placeholder. If you need to check something, say so naturally in one sentence without placeholders.
+- You are a dental office receptionist. Only offer dental appointments and dental services. Never suggest non-dental appointment types.`;
 }
 
 function safeParse(s) {
@@ -461,10 +463,10 @@ async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid, 
   let ttsRunning  = false;
   let drainPromise = Promise.resolve();
 
-  // Regex: sentence ends at .!? followed by whitespace or end-of-string.
-  // We intentionally keep it simple — the LLM is prompted to write short,
-  // plain spoken sentences with no abbreviations or lists.
-  const SENTENCE_END = /[.!?]+(?=\s|$)/;
+  // Regex: sentence ends at .!? followed by whitespace or end-of-string,
+  // but NOT after common honorifics (Dr, Mr, Mrs, Ms, St, vs) which Deepgram
+  // TTS would otherwise split into their own utterances ("Let me check Dr." pause "Smith").
+  const SENTENCE_END = /(?<!\b(?:Dr|Mr|Mrs|Ms|St|vs|etc))[.!?]+(?=\s|$)/;
 
   function drainQueue() {
     if (ttsRunning) return; // already draining
@@ -695,6 +697,7 @@ app.ws('/media-stream', async (ws, req) => {
 
   const url = new URL(req.url, 'http://localhost');
   const conversationId = url.searchParams.get('conversationId');
+  const businessIdParam = url.searchParams.get('businessId');
 
   // Per-call state
   let streamSid        = null;
@@ -732,19 +735,21 @@ app.ws('/media-stream', async (ws, req) => {
     }, SILENCE_TIMEOUT_MS);
   }
 
-  // Load business config before Twilio start event arrives
-  if (conversationId) {
-    try {
-      business = await getBusinessByConversationId(conversationId);
-      if (business) {
-        systemPrompt = buildSystemPrompt(business);
-        console.log(`[Call] Business: ${business.name}`);
-      } else {
-        console.warn('[Call] No business for conversation', conversationId);
-      }
-    } catch (e) {
-      console.error('[Supabase]', e.message);
+  // Load business config — try businessId directly first (fastest, most reliable),
+  // fall back to conversationId lookup for phone calls via incoming-call webhook.
+  try {
+    if (businessIdParam && businessIdParam !== 'undefined') {
+      const biz = await supabaseRequest(`businesses?id=eq.${businessIdParam}&select=*`);
+      business = biz?.[0] || null;
+      console.log(business ? `[Call] Business (direct): ${business.name}` : `[Call] No business for id ${businessIdParam}`);
     }
+    if (!business && conversationId && conversationId !== 'undefined') {
+      business = await getBusinessByConversationId(conversationId);
+      console.log(business ? `[Call] Business (via conv): ${business.name}` : `[Call] No business for conversation ${conversationId}`);
+    }
+    if (business) systemPrompt = buildSystemPrompt(business);
+  } catch (e) {
+    console.error('[Supabase load]', e.message);
   }
 
   // ------------------------------------------------------------------

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const twiml = new twilio.twiml.VoiceResponse();
     const connect = twiml.connect();
     connect.stream({
-      url: `${railwayUrl}/media-stream?conversationId=${conversation?.id}`,
+      url: `${railwayUrl}/media-stream?conversationId=${conversation?.id}&businessId=${businessId}`,
     });
 
     return new NextResponse(twiml.toString(), {
