@@ -302,16 +302,16 @@ export default async function PricingPage() {
             </div>
           )}
           
-          <div className="sm:w-64 shrink-0 relative z-10">
+          <div className="sm:w-64 shrink-0 relative z-10 break-words">
             <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-blue-400">Multi-Practice</h2>
             <div className="flex items-end gap-1 mb-3">
-              <span className="text-5xl font-black tracking-tight text-white">{multiPlan.price}</span>
+              <span className="text-3xl lg:text-4xl font-black tracking-tight text-white">{multiPlan.price}</span>
               <span className="text-sm pb-1.5 text-gray-400 font-medium">{multiPlan.period}</span>
             </div>
-            <p className="text-[13px] text-gray-400 leading-relaxed max-w-[200px]">{multiPlan.description}</p>
+            <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-[200px]">{multiPlan.description}</p>
           </div>
           
-          <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
+          <ul className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
             {multiPlan.features.map((f) => (
               <li key={f} className="flex items-center gap-3 text-sm">
                 <span className="shrink-0 w-5 h-5 rounded-full bg-blue-900/50 flex items-center justify-center border border-blue-500/30">

@@ -169,16 +169,18 @@ export default function SettingsForm({ business }: { business: Business }) {
             <p className="text-gray-500 text-sm mt-1">General information about your office.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field label="Practice name">
                 <input required type="text" value={name} onChange={e => setName(e.target.value)} className={inputCls} />
               </Field>
               <Field label="Specialty">
-                <select value={businessType} onChange={e => setBusinessType(e.target.value)} className={inputCls}>
-                  <option value="dental">General Dental</option>
-                  <option value="orthodontics">Orthodontics</option>
-                  <option value="oral_surgery">Oral Surgery</option>
-                </select>
+                <div className="relative">
+                  <select value={businessType} onChange={e => setBusinessType(e.target.value)} className={`${inputCls} appearance-none pr-10 bg-no-repeat bg-[right_1rem_center] bg-[length:1em]`} style={{ backgroundImage: "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")" }}>
+                    <option value="dental">General Dental</option>
+                    <option value="orthodontics">Orthodontics</option>
+                    <option value="oral_surgery">Oral Surgery</option>
+                  </select>
+                </div>
               </Field>
             </div>
             <Field label="Services Offered" hint="Comma-separated primary treatments">
@@ -197,7 +199,7 @@ export default function SettingsForm({ business }: { business: Business }) {
             <p className="text-gray-500 text-sm mt-1">Define how your agent responds and answers FAQs.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <Field label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
                <Field label="Custom Greeting (Optional)"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder="Hi, thanks for calling..." /></Field>
             </div>
