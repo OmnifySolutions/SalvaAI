@@ -235,7 +235,7 @@ export default async function HomePage() {
               </li>
               <li className="flex items-center gap-3 text-gray-300">
                 <CheckCircle2 className="text-blue-400" size={20} />
-                <span>Real-time patient record lookups</span>
+                <span><strong className="text-white">Real Time</strong> patient record lookups</span>
               </li>
             </ul>
           </div>
@@ -259,7 +259,7 @@ export default async function HomePage() {
                 </div>
                 <div className="bg-gray-900/50 p-4 rounded-xl text-sm font-mono flex items-center gap-2">
                   <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  <span className="text-white">Awaiting patient confirmation...</span>
+                  <span className="text-white font-bold animate-pulse">Awaiting patient confirmation...</span>
                 </div>
               </div>
             </div>
@@ -434,12 +434,12 @@ const setupTimeline = [
     description: "Copy one line of code to your website. Your AI receptionist starts answering patient questions immediately.",
   },
   {
-    milestone: "Week 1",
+    milestone: "Day 2",
     title: "Voice AI activated",
     description: "Forward your practice number. Every call gets answered 24/7 — no missed patients, no voicemail.",
   },
   {
-    milestone: "Month 1",
+    milestone: "Day 3",
     title: "ROI visible",
     description: "See every conversation in your dashboard. Track leads captured, calls answered, and patient inquiries handled.",
   },

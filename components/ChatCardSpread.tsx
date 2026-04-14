@@ -27,19 +27,12 @@ const scenarios = [
       { role: "user", text: "That sounds great, let's do it!" },
     ],
   },
-  {
-    label: "Pricing",
-    messages: [
-      { role: "user", text: "How much does Invisalign cost?" },
-      { role: "ai",   text: "Invisalign starts at $3,800 — we also offer 0% financing over 18 months. Want to book a free consult?" },
-      { role: "user", text: "Yes, that sounds perfect!" },
-    ],
-  },
 ];
 
-// Duplicate to ensure width is larger than screen for seamless loop
-const duplicatedScenarios = [...scenarios, ...scenarios];
-const trackItems = [...duplicatedScenarios, ...duplicatedScenarios]; // Total 16 items
+// We restrict to 3 scenarios max
+const activeScenarios = scenarios.slice(0, 3);
+const duplicatedScenarios = [...activeScenarios, ...activeScenarios];
+const trackItems = [...duplicatedScenarios, ...duplicatedScenarios]; // Total 12 items
 
 export default function ChatCardSpread() {
   return (

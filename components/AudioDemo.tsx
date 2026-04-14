@@ -78,14 +78,14 @@ export default function AudioDemo() {
               key={s.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all"
             >
-              {/* Hidden audio element */}
               <audio
                 ref={(el) => { refs.current[s.id] = el; }}
-                src={s.src}
                 onTimeUpdate={() => handleTimeUpdate(s.id)}
                 onEnded={() => handleEnded(s.id)}
                 preload="metadata"
-              />
+              >
+                <source src={s.src} type="audio/mpeg" />
+              </audio>
 
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div>

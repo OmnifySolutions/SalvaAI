@@ -161,15 +161,18 @@ export default async function DashboardPage() {
 
             {/* Quick Actions / Upgrades */}
             {business.plan === "free" && (
-              <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500 rounded-full opacity-20 blur-2xl"></div>
-                <h3 className="font-bold text-lg mb-2">Unlock Full Automation</h3>
-                <p className="text-gray-400 text-sm mb-5 leading-relaxed">
-                  Upgrade to Pro to remove branding, unlock voice AI, and enable live OpenDental booking.
+              <div className="bg-gray-900 rounded-3xl border border-gray-800 p-8 text-white shadow-2xl relative overflow-hidden group">
+                <div className="absolute -top-10 -right-10 w-48 h-48 bg-blue-600 rounded-full opacity-30 blur-3xl group-hover:opacity-40 transition-opacity"></div>
+                <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center mb-5 border border-blue-500/30">
+                  <PhoneCall size={24} />
+                </div>
+                <h3 className="font-black text-2xl mb-3 tracking-tight">Unlock Voice AI</h3>
+                <p className="text-blue-100/70 text-sm mb-6 leading-relaxed">
+                  Start answering calls 24/7. Upgrade to Pro to enable your Voice Agent and OpenDental sync.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <UpgradeButton plan="pro" className="w-full text-sm bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-semibold transition-colors">
-                    Upgrade to Pro — $219/mo
+                  <UpgradeButton plan="pro" className="w-full text-sm bg-white hover:bg-gray-100 text-gray-900 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex justify-center items-center gap-2">
+                    Buy Pro — $219/mo
                   </UpgradeButton>
                 </div>
               </div>

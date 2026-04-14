@@ -253,71 +253,80 @@ export default async function PricingPage() {
                   ))}
                 </ul>
 
-                {useUpgrade ? (
-                  <UpgradeButton
-                    plan={planKey as "basic" | "pro"}
-                    className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
-                      plan.highlight
-                        ? "bg-white text-gray-900 hover:bg-gray-100"
-                        : "bg-gray-900 text-white hover:bg-gray-700"
-                    }`}
-                  >
-                    {cta}
-                  </UpgradeButton>
-                ) : (
-                  <Link
-                    href={href}
-                    aria-disabled={isCurrent}
-                    className={`block text-center py-3 rounded-xl text-sm font-semibold transition-colors ${
-                      isCurrent
-                        ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none"
-                        : plan.highlight
-                          ? "bg-white text-gray-900 hover:bg-gray-100"
-                          : "bg-gray-900 text-white hover:bg-gray-700"
-                    }`}
-                  >
-                    {cta}
-                  </Link>
-                )}
-
-                {isPaid && (
-                  <p className={`text-xs text-center mt-2.5 ${plan.highlight ? "text-gray-500" : "text-gray-400"}`}>
-                    Upgrade or cancel anytime
-                  </p>
-                )}
+                <div className="mt-auto">
+                  {useUpgrade ? (
+                    <UpgradeButton
+                      plan={planKey as "basic" | "pro"}
+                      className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
+                        plan.highlight
+                          ? "bg-white text-gray-900 hover:bg-gray-100 shadow-lg shadow-white/20"
+                          : "bg-gray-900 text-white hover:bg-gray-700 shadow-lg shadow-gray-900/20"
+                      }`}
+                    >
+                      {cta}
+                    </UpgradeButton>
+                  ) : (
+                    <Link
+                      href={href}
+                      aria-disabled={isCurrent}
+                      className={`block text-center py-3 rounded-xl text-sm font-semibold transition-colors shadow-lg ${
+                        isCurrent
+                          ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none shadow-none"
+                          : plan.highlight
+                            ? "bg-white text-gray-900 hover:bg-gray-100 shadow-white/20"
+                            : "bg-gray-900 text-white hover:bg-gray-700 shadow-gray-900/20"
+                      }`}
+                    >
+                      {cta}
+                    </Link>
+                  )}
+  
+                  {isPaid && (
+                    <p className={`text-[11px] font-medium text-center mt-3 ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
+                      Upgrade or cancel anytime
+                    </p>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* Multi-Practice — full-width horizontal card */}
-        <div className="relative mt-5 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col sm:flex-row sm:items-center gap-6">
+        {/* Multi-Practice — full-width horizontal card overhauled */}
+        <div className="relative mt-8 rounded-3xl border border-gray-800 bg-gray-900 p-8 flex flex-col sm:flex-row sm:items-center gap-8 shadow-2xl overflow-hidden">
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-[100px] pointer-events-none" />
+          
           {multiPlan.badge && (
-            <div className="absolute -top-3 left-6 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+            <div className="absolute -top-3 left-8 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg">
               {multiPlan.badge}
             </div>
           )}
-          <div className="sm:w-56 shrink-0">
-            <h2 className="text-sm font-semibold uppercase tracking-widest mb-2 text-gray-400">Multi-Practice</h2>
-            <div className="flex items-end gap-1 mb-2">
-              <span className="text-4xl font-bold tracking-tight text-gray-900">{multiPlan.price}</span>
-              <span className="text-sm pb-1.5 text-gray-400">{multiPlan.period}</span>
+          
+          <div className="sm:w-64 shrink-0 relative z-10">
+            <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-blue-400">Multi-Practice</h2>
+            <div className="flex items-end gap-1 mb-3">
+              <span className="text-5xl font-black tracking-tight text-white">{multiPlan.price}</span>
+              <span className="text-sm pb-1.5 text-gray-400 font-medium">{multiPlan.period}</span>
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed">{multiPlan.description}</p>
+            <p className="text-[13px] text-gray-400 leading-relaxed max-w-[200px]">{multiPlan.description}</p>
           </div>
-          <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+          
+          <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
             {multiPlan.features.map((f) => (
-              <li key={f} className="flex items-start gap-2.5 text-sm">
-                <span className="shrink-0 mt-0.5 font-bold text-blue-600">✓</span>
-                <span className="text-gray-600">{f}</span>
+              <li key={f} className="flex items-center gap-3 text-sm">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-blue-900/50 flex items-center justify-center border border-blue-500/30">
+                  <Check size={12} className="text-blue-400 stroke-[3]" />
+                </span>
+                <span className="text-gray-300 font-medium">{f}</span>
               </li>
             ))}
           </ul>
-          <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-2">
+          
+          <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-3 relative z-10 ml-auto">
             {multiUseUpgrade ? (
               <UpgradeButton
                 plan="multi"
-                className="px-6 py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-60"
+                className="px-8 py-4 rounded-xl text-sm font-bold bg-white text-gray-900 hover:bg-gray-100 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-60"
               >
                 {multiCta}
               </UpgradeButton>
@@ -325,16 +334,16 @@ export default async function PricingPage() {
               <Link
                 href={multiHref}
                 aria-disabled={multiIsCurrent}
-                className={`px-6 py-3 rounded-xl text-sm font-semibold text-center transition-colors ${
+                className={`px-8 py-4 rounded-xl text-sm font-bold text-center transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] ${
                   multiIsCurrent
-                    ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none"
-                    : "bg-gray-900 text-white hover:bg-gray-700"
+                    ? "bg-gray-800 text-gray-400 cursor-default pointer-events-none shadow-none"
+                    : "bg-white text-gray-900 hover:bg-gray-100"
                 }`}
               >
                 {multiCta}
               </Link>
             )}
-            <p className="text-xs text-center text-gray-400">Upgrade or cancel anytime</p>
+            <p className="text-[11px] font-medium text-center text-gray-500 mt-1">Upgrade or cancel anytime</p>
           </div>
         </div>
 

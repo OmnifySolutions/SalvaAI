@@ -40,7 +40,7 @@ body {
 }
 
 .animate-marquee-reverse {
-  animation: marquee-reverse 45s linear infinite;
+  animation: marquee-reverse 25s linear infinite;
 }
 
 .animate-marquee:hover, .animate-marquee-reverse:hover {
