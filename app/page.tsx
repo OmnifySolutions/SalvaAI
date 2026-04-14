@@ -17,6 +17,7 @@ import {
 import ChatCardSpread from "@/components/ChatCardSpread";
 import StatsCarousel from "@/components/StatsCarousel";
 import DashboardMockup from "@/components/DashboardMockup";
+import SocialProof from "@/components/SocialProof";
 import AudioDemo from "@/components/AudioDemo";
 
 export default async function HomePage() {
@@ -226,6 +227,9 @@ export default async function HomePage() {
           </p>
         </div>
       </section>
+
+      {/* Social proof — hidden at launch, enable when real reviews are collected */}
+      {false && <SocialProof />}
 
       {/* Competitive nudge */}
       <div className="text-center pb-10">
