@@ -1,6 +1,6 @@
 "use client";
 
-import { useCarousel } from "@/hooks/useCarousel";
+import React from "react";
 
 const stats = [
   { number: "35%",      label: "of dental calls go unanswered" },
@@ -10,45 +10,29 @@ const stats = [
   { number: "$150,000", label: "lost annually from missed calls" },
 ];
 
-const N = stats.length;
-const VISIBLE = 3;
-const items = [...stats, ...stats.slice(0, VISIBLE)];
-
-const CARD_W = 252;
-const GAP = 16;
-const CONTAINER_W = CARD_W * VISIBLE + GAP * (VISIBLE - 1);
-const STEP = CARD_W + GAP;
-const TRACK_W = items.length * CARD_W + (items.length - 1) * GAP;
+const duplicatedStats = [...stats, ...stats, ...stats]; // Enough to fill out the width
+const trackItems = [...duplicatedStats, ...duplicatedStats];
 
 export default function StatsCarousel() {
-  const { position, animate } = useCarousel(N);
-
   return (
-    <div className="mx-auto" style={{ width: CONTAINER_W }}>
-      <div className="overflow-hidden">
-        <div
-          style={{
-            display: "flex",
-            width: TRACK_W,
-            transform: `translateX(${-position * STEP}px)`,
-            transition: animate ? "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
-          }}
-        >
-          {items.map((stat, i) => (
-            <div
-              key={i}
-              style={{ width: CARD_W, flexShrink: 0, marginRight: GAP }}
-              className="text-center py-6"
-            >
-              <div className="text-3xl font-bold text-gray-900 tracking-tight">
-                {stat.number}
-              </div>
-              <div className="text-sm text-gray-500 mt-1.5 leading-snug max-w-[180px] mx-auto">
-                {stat.label}
-              </div>
+    <div className="w-full overflow-hidden relative border-y border-gray-100 bg-white py-6">
+      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
+
+      <div className="flex animate-marquee-reverse hover:[animation-play-state:paused]">
+        {trackItems.map((stat, i) => (
+          <div
+            key={i}
+            className="w-[280px] shrink-0 mr-8 text-center flex flex-col items-center justify-center bg-gray-50/50 rounded-2xl py-5 border border-gray-100 transition-colors hover:bg-gray-50"
+          >
+            <div className="text-3xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent tracking-tight">
+              {stat.number}
             </div>
-          ))}
-        </div>
+            <div className="text-[13px] text-gray-500 mt-2 font-medium leading-snug max-w-[180px]">
+              {stat.label}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -125,39 +125,71 @@ export default async function HomePage() {
       {/* Audio demo */}
       <AudioDemo />
 
-      {/* How it works */}
-      <section className="bg-gray-50 py-24">
+      {/* Playbook / Workflows */}
+      <section className="bg-white py-24 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
-              How Salva AI handles a call
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-wide uppercase">
+              The AI Playbook
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
+              Works exactly like your top staff
             </h2>
-            <p className="text-gray-500 max-w-md mx-auto">
-              From ring to resolution in seconds — without a single staff member picking up.
+            <p className="text-gray-500 max-w-xl mx-auto text-lg">
+              Salva AI comes pre-trained on three core workflows. No complex training needed — just turn it on.
             </p>
           </div>
-          <div className="relative">
-            <div className="hidden md:block absolute top-8 left-[14%] right-[14%] h-px bg-gray-200" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {howItWorks.map((step, i) => (
-                <div key={step.title} className="relative flex flex-col items-center text-center">
-                  <div className="relative z-10 w-16 h-16 bg-gray-900 text-white rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-                    <step.icon size={24} strokeWidth={1.5} />
-                  </div>
-                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-1">Step {i + 1}</div>
-                  <h3 className="font-semibold text-gray-900 mb-1.5 text-sm">{step.title}</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">{step.description}</p>
-                </div>
-              ))}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                <Headphones size={24} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">The 24/7 Receptionist</h3>
+              <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                Answers every call in your practice's exact tone. Handles endless FAQ loops, office hours, and parking directions without bothering your team.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Barge-in supported</span>
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Custom greetings</span>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                <ShieldCheck size={24} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Insurance Checker</h3>
+              <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                Patients ask "Do you take my insurance?" and Salva checks your accepted list immediately. Stops bad leads and books the good ones.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Pre-trained</span>
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Medicaid routing</span>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                <Zap size={24} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">New Patient Booking</h3>
+              <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                Walks new patients through intake questions, pitches your new patient specials, and secures the booking directly into your calendar.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">High conversion</span>
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Guided onboarding</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="bg-white py-24">
+      <section id="features" className="bg-gray-50 py-24 border-t border-gray-100">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-14">
+        <div className="text-center mb-16">
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
             Voice AI + chat, fully automated
           </h2>
@@ -166,9 +198,9 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {features.map((f) => (
-            <div key={f.title} className="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
+            <div key={f.title} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
               <div className="w-10 h-10 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600">
                 <f.icon size={20} strokeWidth={1.5} />
               </div>
@@ -178,6 +210,61 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+      </section>
+
+      {/* PMS Integration */}
+      <section className="bg-gray-900 py-24 text-white overflow-hidden relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[100px]" />
+        <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-16">
+          <div className="flex-1 space-y-6">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-full tracking-wide uppercase">
+              Deep Integrations
+            </div>
+            <h2 className="text-4xl font-bold tracking-tight">Syncs directly with your Practice Management Software.</h2>
+            <p className="text-gray-400 text-lg leading-relaxed">
+              Real-time, bi-directional sync means your AI agent always knows your true availability, and appointments book directly into your actual calendar.
+            </p>
+            <ul className="space-y-4 pt-4">
+              <li className="flex items-center gap-3 text-gray-300">
+                <CheckCircle2 className="text-blue-400" size={20} />
+                <span><strong className="text-white">Open Dental:</strong> Fully integrated and supported</span>
+              </li>
+              <li className="flex items-center gap-3 text-gray-300">
+                <CheckCircle2 className="text-blue-400" size={20} />
+                <span><strong className="text-white">Dentrix & Eaglesoft:</strong> Waitlist integrations active</span>
+              </li>
+              <li className="flex items-center gap-3 text-gray-300">
+                <CheckCircle2 className="text-blue-400" size={20} />
+                <span>Real-time patient record lookups</span>
+              </li>
+            </ul>
+          </div>
+          <div className="flex-1 w-full relative">
+            <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700 p-6 rounded-3xl shadow-2xl">
+              <div className="flex items-center gap-4 mb-6 border-b border-gray-700 pb-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                  <Zap className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Live Booking Engine</h3>
+                  <p className="text-xs text-gray-400">Connected to OpenDental API</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-gray-900/50 p-4 rounded-xl text-sm font-mono text-green-400">
+                  {`> Checking availability for next Tuesday...`}
+                </div>
+                <div className="bg-gray-900/50 p-4 rounded-xl text-sm font-mono text-green-400 opacity-80">
+                  {`> Found slot: 2:00 PM with Dr. Smith`}
+                </div>
+                <div className="bg-gray-900/50 p-4 rounded-xl text-sm font-mono flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-white">Awaiting patient confirmation...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Dashboard mockup */}
@@ -196,35 +283,40 @@ export default async function HomePage() {
       </section>
 
       {/* Setup timeline */}
-      <section className="bg-gray-50 py-24 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+      <section className="bg-gray-50 py-32 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
               Up and running in minutes
             </h2>
-            <p className="text-gray-500 max-w-md mx-auto">
-              No IT team. No long onboarding. Most practices are live the same day they sign up.
+            <p className="text-gray-500 max-w-lg mx-auto text-lg">
+              No IT team. No months of onboarding. The moment you sign up, you're ready to go.
             </p>
           </div>
           <div className="relative">
-            <div className="hidden md:block absolute top-7 left-[16.67%] right-[16.67%] h-0.5 bg-gray-200" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {/* Background connecting line */}
+            <div className="hidden md:block absolute top-[28px] left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-blue-100 via-blue-600 to-gray-200" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-14 relative z-10">
               {setupTimeline.map((t, i) => (
                 <div key={t.milestone} className="flex flex-col items-center text-center">
-                  <div className={`relative z-10 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-sm font-bold shadow-sm ${
-                    i === 0 ? "bg-blue-600 text-white" : i === 1 ? "bg-gray-900 text-white" : "bg-white border border-gray-200 text-gray-500"
+                  <div className={`w-auto px-6 h-14 rounded-full flex items-center justify-center mb-6 text-sm font-bold shadow-lg ring-4 ring-white ${
+                    i === 0 ? "bg-blue-600 text-white" : i === 1 ? "bg-gray-900 text-white" : "bg-white border-2 border-gray-200 text-gray-700"
                   }`}>
                     {t.milestone}
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{t.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{t.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">{t.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed px-4">{t.description}</p>
                 </div>
               ))}
             </div>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-12">
-            Works alongside your existing practice management software — no integrations required until you&apos;re ready.
-          </p>
+          <div className="mt-16 flex justify-center">
+            <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-600 text-sm px-4 py-2 rounded-xl shadow-sm">
+              <CheckCircle2 size={16} className="text-blue-500" />
+              Works alongside your existing systems.
+            </div>
+          </div>
         </div>
       </section>
 
