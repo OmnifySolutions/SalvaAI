@@ -35,12 +35,16 @@ export async function POST(request: NextRequest) {
 
     const railwayUrl = process.env.RAILWAY_URL || 'wss://hustleclaude-production.up.railway.app';
 
-    const streamUrl = `${railwayUrl}/media-stream?conversationId=${conversation?.id}&businessId=${businessId}`;
-    console.log(`[browser-call] streamUrl=${streamUrl}`);
+    const streamUrl = `${railwayUrl}/media-stream`;
+    console.log(`[browser-call] streamUrl=${streamUrl} conversationId=${conversation?.id} businessId=${businessId}`);
 
     const twiml = new twilio.twiml.VoiceResponse();
     const connect = twiml.connect();
-    connect.stream({ url: streamUrl });
+    const stream = connect.stream({ url: streamUrl });
+    // Pass IDs as Twilio Stream Parameters — more reliable than URL query params
+    // (express-ws drops query params from WebSocket upgrade requests)
+    if (conversation?.id) stream.parameter({ name: 'conversationId', value: conversation.id });
+    stream.parameter({ name: 'businessId', value: businessId });
 
     return new NextResponse(twiml.toString(), {
       headers: { 'Content-Type': 'application/xml' },

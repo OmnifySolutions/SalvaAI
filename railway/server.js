@@ -1176,7 +1176,35 @@ app.ws('/media-stream', async (ws, req) => {
       if (msg.event === 'start') {
         streamSid   = msg.start?.streamSid || msg.streamSid;
         callerPhone = msg.start?.customParameters?.callerPhone || null;
-        console.log(`[Twilio] Call started: ${streamSid}`);
+        const startBusinessId     = msg.start?.customParameters?.businessId     || null;
+        const startConversationId = msg.start?.customParameters?.conversationId || null;
+        console.log(`[Twilio] Call started: ${streamSid} businessId=${startBusinessId} conversationId=${startConversationId}`);
+
+        // Load business from customParameters (passed via TwiML <Parameter> elements)
+        if (!business) {
+          try {
+            if (startBusinessId) {
+              const biz = await supabaseRequest(`businesses?id=eq.${startBusinessId}&select=*`);
+              business = biz?.[0] || null;
+              if (business) {
+                systemPrompt = buildSystemPrompt(business);
+                console.log(`[Call] Business loaded: ${business.name}`);
+              } else {
+                console.warn(`[Call] No business found for id ${startBusinessId}`);
+              }
+            }
+            if (!business && startConversationId) {
+              business = await getBusinessByConversationId(startConversationId);
+              if (business) {
+                systemPrompt = buildSystemPrompt(business);
+                console.log(`[Call] Business loaded via conversation: ${business.name}`);
+              }
+            }
+          } catch (e) {
+            console.error('[Call] Business load error:', e.message);
+          }
+        }
+
         setupDeepgram();
         setTimeout(() => sendGreeting(), 300);
         // Send a Twilio mark event every 10s to prevent WebSocket idle disconnection

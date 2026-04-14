@@ -46,9 +46,11 @@ export async function POST(request: NextRequest) {
     const twiml = new twilio.twiml.VoiceResponse();
 
     const connect = twiml.connect();
-    const streamUrl = `${railwayUrl}/media-stream?conversationId=${conversation.id}&businessId=${businesses.id}`;
-    console.log(`[incoming-call] streamUrl=${streamUrl}`);
-    connect.stream({ url: streamUrl });
+    const streamUrl = `${railwayUrl}/media-stream`;
+    console.log(`[incoming-call] streamUrl=${streamUrl} conversationId=${conversation.id} businessId=${businesses.id}`);
+    const stream = connect.stream({ url: streamUrl });
+    stream.parameter({ name: 'conversationId', value: conversation.id });
+    stream.parameter({ name: 'businessId', value: businesses.id });
 
     return new NextResponse(twiml.toString(), {
       headers: { 'Content-Type': 'application/xml' },
