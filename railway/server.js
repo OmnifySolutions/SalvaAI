@@ -698,6 +698,8 @@ app.ws('/media-stream', async (ws, req) => {
   const url = new URL(req.url, 'http://localhost');
   const conversationId = url.searchParams.get('conversationId');
   const businessIdParam = url.searchParams.get('businessId');
+  console.log(`[Call] Raw URL: ${req.url}`);
+  console.log(`[Call] Params — conversationId: ${conversationId}, businessId: ${businessIdParam}`);
 
   // Per-call state
   let streamSid        = null;
