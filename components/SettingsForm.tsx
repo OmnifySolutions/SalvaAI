@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Plus, User, Bot, PhoneCall, Zap, Save, AlertCircle } from "lucide-react";
+import { Check, X, Plus, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 
 // Types remain same
@@ -169,17 +169,18 @@ export default function SettingsForm({ business }: { business: Business }) {
             <p className="text-gray-500 text-sm mt-1">General information about your office.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <Field label="Practice name">
                 <input required type="text" value={name} onChange={e => setName(e.target.value)} className={inputCls} />
               </Field>
               <Field label="Specialty">
                 <div className="relative">
-                  <select value={businessType} onChange={e => setBusinessType(e.target.value)} className={`${inputCls} appearance-none pr-10 bg-no-repeat bg-[right_1rem_center] bg-[length:1em]`} style={{ backgroundImage: "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")" }}>
+                  <select value={businessType} onChange={e => setBusinessType(e.target.value)} className={`${inputCls} appearance-none pr-10 cursor-pointer`}>
                     <option value="dental">General Dental</option>
                     <option value="orthodontics">Orthodontics</option>
                     <option value="oral_surgery">Oral Surgery</option>
                   </select>
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                 </div>
               </Field>
             </div>
@@ -199,9 +200,9 @@ export default function SettingsForm({ business }: { business: Business }) {
             <p className="text-gray-500 text-sm mt-1">Define how your agent responds and answers FAQs.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <Field label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
-               <Field label="Custom Greeting (Optional)"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder="Hi, thanks for calling..." /></Field>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+               <Field fixedHintHeight label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
+               <Field hint="What the AI says when picking up" label="Custom Greeting"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder="Hi, thanks for calling..." /></Field>
             </div>
             <Field label="System Prompt" hint="Direct operating instructions for the LLM">
               <textarea rows={4} value={customPrompt} onChange={e => setCustomPrompt(e.target.value)} className={inputCls} placeholder="Always offer the new patient special..." />
@@ -340,11 +341,12 @@ export default function SettingsForm({ business }: { business: Business }) {
 
 const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all bg-gray-50/50 hover:bg-white";
 
-function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
+function Field({ label, required, hint, fixedHintHeight, children }: { label: string; required?: boolean; hint?: string; fixedHintHeight?: boolean; children: React.ReactNode }) {
   return (
-    <div>
+    <div className="flex flex-col h-full justify-end">
       <label className="block text-sm font-bold text-gray-700 mb-1.5">{label} {required && <span className="text-red-500">*</span>}</label>
       {hint && <p className="text-[11px] text-gray-500 mb-2 font-medium">{hint}</p>}
+      {!hint && fixedHintHeight && <div className="h-[20px] w-full" />}
       {children}
     </div>
   );

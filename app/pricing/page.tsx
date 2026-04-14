@@ -155,7 +155,7 @@ export default async function PricingPage() {
   const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
+    <div className="min-h-screen bg-[#fafafa] text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
 
       {/* Nav */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -192,11 +192,11 @@ export default async function PricingPage() {
         </nav>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-20">
+      <main className="max-w-6xl mx-auto px-6 py-20 bg-[#fafafa]">
 
         {/* Header */}
         <div className="text-center mb-14">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4">
             Simple, transparent pricing
           </h1>
           <p className="text-lg text-gray-500 max-w-md mx-auto">
@@ -217,38 +217,42 @@ export default async function PricingPage() {
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-2xl p-6 flex flex-col ${
+                className={`relative rounded-3xl p-8 flex flex-col transition-all ${
                   plan.highlight
-                    ? "bg-gray-900 text-white"
-                    : "bg-white border border-gray-200"
+                    ? "bg-gray-900 text-white shadow-2xl scale-105 z-10 border-gray-800"
+                    : "bg-white border border-gray-200 shadow-sm"
                 }`}
               >
                 {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg">
                     {plan.badge}
                   </div>
                 )}
 
-                <div className="mb-5">
-                  <h2 className="text-sm font-semibold uppercase tracking-widest mb-3 text-gray-400">
+                <div className="mb-6">
+                  <h2 className={`text-sm font-bold uppercase tracking-widest mb-3 ${plan.highlight ? "text-blue-400" : "text-gray-400"}`}>
                     {plan.name}
                   </h2>
                   <div className="flex items-end gap-1 mb-3">
-                    <span className={`text-4xl font-bold tracking-tight ${plan.highlight ? "text-white" : "text-gray-900"}`}>
+                    <span className={`text-5xl font-black tracking-tight ${plan.highlight ? "text-white" : "text-gray-900"}`}>
                       {plan.price}
                     </span>
-                    <span className="text-sm pb-1.5 text-gray-400">{plan.period}</span>
+                    <span className="text-sm pb-1.5 text-gray-400 font-medium">{plan.period}</span>
                   </div>
                   <p className={`text-sm leading-relaxed ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
                     {plan.description}
                   </p>
                 </div>
 
-                <ul className="space-y-2.5 mb-7 flex-1">
+                <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm">
-                      <span className={`shrink-0 mt-0.5 font-bold ${plan.highlight ? "text-blue-400" : "text-blue-600"}`}>✓</span>
-                      <span className={plan.highlight ? "text-gray-300" : "text-gray-600"}>{f}</span>
+                    <li key={f} className="flex items-start gap-3 text-sm">
+                      <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center border ${
+                        plan.highlight ? "bg-blue-900/50 border-blue-500/30 text-blue-400" : "bg-blue-50 border-blue-100 text-blue-600"
+                      }`}>
+                        <Check size={12} className="stroke-[3]" />
+                      </span>
+                      <span className={`font-medium ${plan.highlight ? "text-gray-300" : "text-gray-600"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -257,10 +261,10 @@ export default async function PricingPage() {
                   {useUpgrade ? (
                     <UpgradeButton
                       plan={planKey as "basic" | "pro"}
-                      className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
+                      className={`w-full py-4 rounded-xl text-sm font-bold transition-colors disabled:opacity-60 ${
                         plan.highlight
-                          ? "bg-white text-gray-900 hover:bg-gray-100 shadow-lg shadow-white/20"
-                          : "bg-gray-900 text-white hover:bg-gray-700 shadow-lg shadow-gray-900/20"
+                          ? "bg-white text-gray-900 hover:bg-gray-100 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                          : "bg-gray-900 text-white hover:bg-gray-700 shadow-lg"
                       }`}
                     >
                       {cta}
@@ -269,18 +273,18 @@ export default async function PricingPage() {
                     <Link
                       href={href}
                       aria-disabled={isCurrent}
-                      className={`block text-center py-3 rounded-xl text-sm font-semibold transition-colors shadow-lg ${
+                      className={`block text-center py-4 rounded-xl text-sm font-bold transition-colors shadow-lg ${
                         isCurrent
                           ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none shadow-none"
                           : plan.highlight
-                            ? "bg-white text-gray-900 hover:bg-gray-100 shadow-white/20"
-                            : "bg-gray-900 text-white hover:bg-gray-700 shadow-gray-900/20"
+                            ? "bg-white text-gray-900 hover:bg-gray-100 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                            : "bg-gray-900 text-white hover:bg-gray-700"
                       }`}
                     >
                       {cta}
                     </Link>
                   )}
-  
+
                   {isPaid && (
                     <p className={`text-[11px] font-medium text-center mt-3 ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
                       Upgrade or cancel anytime
@@ -293,11 +297,11 @@ export default async function PricingPage() {
         </div>
 
         {/* Multi-Practice — full-width horizontal card overhauled */}
-        <div className="relative mt-8 rounded-3xl border border-gray-800 bg-gray-900 p-8 flex flex-col sm:flex-row sm:items-center gap-8 shadow-2xl overflow-hidden">
-          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-[100px] pointer-events-none" />
+        <div className="relative mt-12 rounded-[2rem] border border-gray-800 bg-gray-900 p-8 flex flex-col sm:flex-row sm:items-center gap-8 shadow-2xl overflow-visible">
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-[100px] pointer-events-none z-0" />
           
           {multiPlan.badge && (
-            <div className="absolute -top-3 left-8 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg z-10">
               {multiPlan.badge}
             </div>
           )}
@@ -306,9 +310,9 @@ export default async function PricingPage() {
             <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-blue-400">Multi-Practice</h2>
             <div className="flex items-end gap-1 mb-3">
               <span className="text-3xl lg:text-4xl font-black tracking-tight text-white">{multiPlan.price}</span>
-              <span className="text-sm pb-1.5 text-gray-400 font-medium">{multiPlan.period}</span>
+              <span className="text-sm pb-1 text-gray-400 font-medium">{multiPlan.period}</span>
             </div>
-            <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-[200px]">{multiPlan.description}</p>
+            <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-xs">{multiPlan.description}</p>
           </div>
           
           <ul className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
@@ -348,78 +352,66 @@ export default async function PricingPage() {
         </div>
 
         {/* Fine print */}
-        <p className="text-center text-sm text-gray-400 mt-10">
+        <p className="text-center text-sm font-medium text-gray-400 mt-10">
           All paid plans start with a 14-day free trial. Credit card required — cancel anytime.
         </p>
 
-        {/* Competitor comparison */}
-        <div className="mt-20 border-t border-gray-100 pt-14">
+        {/* Competitor comparison Overhaul */}
+        <div className="mt-24">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">How we compare</h2>
-            <p className="text-gray-500 text-sm">Same features as enterprise tools — at a fraction of the price.</p>
+            <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-3">How we compare</h2>
+            <p className="text-gray-500 font-medium">Same powerful features as enterprise tools — at a fraction of the price.</p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium w-[38%]" />
-                  <th className="py-3 px-4 text-center w-[20%]">
-                    <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full text-xs">
-                      Salva AI
-                    </span>
-                  </th>
-                  <th className="py-3 px-4 text-center text-gray-500 font-medium w-[20%]">Arini</th>
-                  <th className="py-3 px-4 text-center text-gray-500 font-medium w-[20%]">TrueLark</th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparison.map((row, i) => (
-                  <tr key={row.feature} className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                    <td className="py-3 px-4 text-gray-600 font-medium rounded-l-lg">{row.feature}</td>
-                    <td className="py-3 px-4 text-center rounded-none">
-                      <ComparisonCell value={row.hustle} highlight />
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <ComparisonCell value={row.arini} />
-                    </td>
-                    <td className="py-3 px-4 text-center rounded-r-lg">
-                      <ComparisonCell value={row.truelark} />
-                    </td>
+          <div className="bg-white rounded-[2rem] shadow-xl border border-gray-200 overflow-hidden relative">
+            {/* Dark background for table header to make it premium */}
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm border-collapse text-left">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="py-5 px-6 text-gray-400 font-semibold w-[40%] text-xs uppercase tracking-widest">Feature Comparison</th>
+                    <th className="py-5 px-6 text-center w-[20%] border-l border-gray-200 bg-blue-50/50">
+                      <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-md">
+                        Salva AI
+                      </span>
+                    </th>
+                    <th className="py-5 px-6 text-center text-gray-500 font-bold w-[20%] border-l border-gray-200">Arini</th>
+                    <th className="py-5 px-6 text-center text-gray-500 font-bold w-[20%] border-l border-gray-200">TrueLark</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {comparison.map((row, i) => (
+                    <tr key={row.feature} className={`hover:bg-gray-50/50 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-gray-50/30"}`}>
+                      <td className="py-4 px-6 text-gray-700 font-semibold">{row.feature}</td>
+                      <td className="py-4 px-6 text-center border-l border-gray-200 bg-blue-50/20">
+                        <ComparisonCell value={row.hustle} highlight />
+                      </td>
+                      <td className="py-4 px-6 text-center border-l border-gray-200">
+                        <ComparisonCell value={row.arini} />
+                      </td>
+                      <td className="py-4 px-6 text-center border-l border-gray-200">
+                        <ComparisonCell value={row.truelark} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-
-          <p className="text-xs text-gray-400 text-center mt-4">
+          <p className="text-[11px] font-medium text-gray-400 text-center mt-6">
             Competitor pricing based on publicly available information. Subject to change.
           </p>
         </div>
 
-        {/* FAQ */}
-        <div className="mt-20 border-t border-gray-100 pt-14">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight text-center mb-8">
-            Common questions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {faqs.map((faq) => (
-              <div key={faq.q}>
-                <h3 className="font-medium text-gray-900 mb-1.5 text-sm">{faq.q}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 px-6 py-8 mt-16">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <Link href="/" className="font-semibold text-gray-700">Salva AI</Link>
-          <div className="flex gap-6">
-            <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
-            <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>
+      <footer className="border-t border-gray-200 bg-white px-6 py-10 mt-16">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-medium text-gray-400">
+          <Link href="/" className="font-bold text-gray-900 tracking-tight text-lg">Salva AI</Link>
+          <div className="flex gap-8">
+            <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
+            <Link href="/sign-in" className="hover:text-gray-800 transition-colors">Sign in</Link>
           </div>
           <span>© {new Date().getFullYear()} Salva AI</span>
         </div>
@@ -430,33 +422,14 @@ export default async function PricingPage() {
 
 function ComparisonCell({ value, highlight = false }: { value: boolean | string; highlight?: boolean }) {
   if (value === true) {
-    return <Check size={16} strokeWidth={2.5} className={highlight ? "text-blue-600 mx-auto" : "text-gray-400 mx-auto"} />;
+    return (
+      <div className={`mx-auto w-6 h-6 rounded-full flex items-center justify-center ${highlight ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-400"}`}>
+        <Check size={14} strokeWidth={3} />
+      </div>
+    );
   }
   if (value === false) {
     return <X size={16} strokeWidth={2.5} className="text-gray-300 mx-auto" />;
   }
-  return <span className={`text-xs font-medium ${highlight ? "text-blue-700" : "text-gray-500"}`}>{value}</span>;
+  return <span className={`text-xs font-bold ${highlight ? "text-blue-700" : "text-gray-600"}`}>{value}</span>;
 }
-
-const faqs = [
-  {
-    q: "Do I need a developer to set this up?",
-    a: "No. You copy one line of code and paste it into your website before the closing </body> tag. Most practice managers can do it in under 5 minutes.",
-  },
-  {
-    q: "What happens when the Free plan's 50 interaction limit is reached?",
-    a: "The widget lets patients know to call the office directly. Upgrade to Basic or Pro for unlimited interactions.",
-  },
-  {
-    q: "Is patient data safe?",
-    a: "Yes. We never collect or store personal health information. The widget only handles general questions — it directs patients to call for anything clinical.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes. No contracts, no cancellation fees. Upgrade or cancel from your dashboard whenever you want.",
-  },
-  {
-    q: "Is a Business Associate Agreement (BAA) available?",
-    a: "Yes. A BAA is available on Pro and Multi-Practice plans. Contact us after signing up and we'll send one over.",
-  },
-];
