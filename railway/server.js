@@ -695,10 +695,10 @@ app.post('/incoming-call', express.json(), (req, res) => {
 app.ws('/media-stream', async (ws, req) => {
   console.log('[Twilio] New Media Stream connection');
 
-  const url = new URL(req.url, 'http://localhost');
-  const conversationId = url.searchParams.get('conversationId');
-  const businessIdParam = url.searchParams.get('businessId');
-  console.log(`[Call] Raw URL: ${req.url}`);
+  // express-ws rewrites req.url to /media-stream/.websocket — query params
+  // are only accessible via req.query (parsed from the original upgrade URL).
+  const conversationId = req.query?.conversationId || null;
+  const businessIdParam = req.query?.businessId || null;
   console.log(`[Call] Params — conversationId: ${conversationId}, businessId: ${businessIdParam}`);
 
   // Per-call state
