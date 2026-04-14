@@ -472,7 +472,11 @@ async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid, 
     drainPromise = (async () => {
       while (sentenceQueue.length > 0) {
         if (signal?.aborted) break;
-        const sentence = sentenceQueue.shift();
+        const raw = sentenceQueue.shift();
+        // Strip BOOKING_DATA marker so it never reaches TTS — it's a data
+        // payload for server-side parsing, not spoken text.
+        const sentence = raw.replace(/\[BOOKING_DATA:.*?\]/s, '').trim();
+        if (!sentence) continue;
         console.log(`[TTS→] "${sentence}"`);
         await speakToTwilio(sentence, ws, streamSid, signal);
         // Only mark as heard if the signal wasn't aborted mid-playback
@@ -602,6 +606,17 @@ async function speakToTwilio(text, ws, streamSid, signal) {
   if (!res.ok || !res.body) {
     console.error('[Deepgram TTS]', res.status, await res.text().catch(() => ''));
     return;
+  }
+
+  // Lead-in silence: prime Twilio's jitter buffer before real audio arrives.
+  // Without this, the first syllable of each TTS chunk gets clipped (Twilio
+  // drops frames until its buffer stabilises). 3 frames = 60ms — enough to
+  // prevent clipping without adding noticeable latency.
+  const SILENCE_LEAD_FRAMES = 3;
+  const silenceFrame = Buffer.alloc(FRAME_SIZE, 0xff); // mulaw silence = 0xFF
+  for (let i = 0; i < SILENCE_LEAD_FRAMES; i++) {
+    if (signal?.aborted || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ event: 'media', streamSid, media: { payload: silenceFrame.toString('base64') } }));
   }
 
   let buffer = Buffer.alloc(0);
@@ -891,6 +906,14 @@ app.ws('/media-stream', async (ws, req) => {
 
           // Fetch availability from Open Dental
           bookingState.stage = 'checking';
+
+          // Hardcoded bridge — speak before the async fetch so the LLM never
+          // needs to generate filler words like "pause" or "one moment" itself.
+          const checkingMsg = `Let me check our schedule for you, one moment.`;
+          await speakToTwilio(checkingMsg, ws, streamSid, mySignal);
+          messages.push({ role: 'assistant', content: checkingMsg });
+          if (conversationId) saveMessage(conversationId, 'assistant', checkingMsg).catch(() => {});
+
           try {
             const slots = await getAvailability(
               business.opendental_server_url,
