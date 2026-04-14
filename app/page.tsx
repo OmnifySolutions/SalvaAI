@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import ChatCardSpread from "@/components/ChatCardSpread";
 import StatsCarousel from "@/components/StatsCarousel";
+import DashboardMockup from "@/components/DashboardMockup";
 import AudioDemo from "@/components/AudioDemo";
 
 export default async function HomePage() {
@@ -176,6 +177,21 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+      </section>
+
+      {/* Dashboard mockup */}
+      <section className="bg-white py-24 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+              Everything in one place
+            </h2>
+            <p className="text-gray-500 max-w-md mx-auto">
+              Your dashboard shows every call and chat in real time — so you always know what patients are asking.
+            </p>
+          </div>
+          <DashboardMockup />
+        </div>
       </section>
 
       {/* Setup timeline */}
