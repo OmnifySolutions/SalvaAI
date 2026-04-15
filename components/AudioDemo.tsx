@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Square } from "lucide-react";
 
 const scenarios = [
@@ -30,10 +30,49 @@ const scenarios = [
 export default function AudioDemo() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, number>>({});
-  const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
+  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+
+  useEffect(() => {
+    // Initialize standard vanilla JS Audio objects
+    scenarios.forEach((s) => {
+      if (!audioRefs.current[s.id]) {
+        const audio = new Audio(s.src);
+        audio.preload = "metadata";
+
+        audio.addEventListener("timeupdate", () => {
+          if (audio.duration) {
+            setProgress((prev) => ({
+              ...prev,
+              [s.id]: (audio.currentTime / audio.duration) * 100,
+            }));
+          }
+        });
+
+        audio.addEventListener("ended", () => {
+          setPlaying(null);
+          setProgress((prev) => ({ ...prev, [s.id]: 0 }));
+          audio.currentTime = 0;
+        });
+
+        audioRefs.current[s.id] = audio;
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      Object.keys(audioRefs.current).forEach((key) => {
+        const audioEl = audioRefs.current[key];
+        if (audioEl) {
+          audioEl.pause();
+          audioEl.src = "";
+        }
+      });
+      audioRefs.current = {};
+    };
+  }, []);
 
   const handlePlayPause = (id: string) => {
-    // Pause any other playing audio natively
+    // Pause any other playing audio naturally
     Object.keys(audioRefs.current).forEach((key) => {
       const audioEl = audioRefs.current[key];
       if (key !== id && audioEl) {
@@ -51,7 +90,7 @@ export default function AudioDemo() {
     } else {
       setPlaying(id);
       // Synchronous direct play call so iOS/Safari does not reject the Promise
-      targetEl.play().catch(e => {
+      targetEl.play().catch((e) => {
         console.warn("Autoplay blocked. Consider trying again after interaction.", e);
         setPlaying(null);
       });
@@ -82,23 +121,6 @@ export default function AudioDemo() {
               key={s.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all"
             >
-              <audio
-                src={s.src}
-                ref={(el) => { audioRefs.current[s.id] = el; }}
-                preload="metadata"
-                // Listeners right on the React element
-                onTimeUpdate={(e) => {
-                  const target = e.currentTarget;
-                  if (target.duration) {
-                    setProgress((prev) => ({ ...prev, [s.id]: (target.currentTime / target.duration) * 100 }));
-                  }
-                }}
-                onEnded={() => {
-                  setPlaying(null);
-                  setProgress((prev) => ({ ...prev, [s.id]: 0 }));
-                }}
-              />
-
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
                   <h3 className="font-bold text-gray-900 mb-1">{s.label}</h3>

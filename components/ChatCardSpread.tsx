@@ -31,21 +31,19 @@ const scenarios = [
 
 // We restrict to 3 scenarios max
 const activeScenarios = scenarios.slice(0, 3);
-const duplicatedScenarios = [...activeScenarios, ...activeScenarios];
-const trackItems = [...duplicatedScenarios, ...duplicatedScenarios]; // Total 12 items
 
 export default function ChatCardSpread() {
   return (
     <div className="w-full max-w-5xl mx-auto overflow-hidden select-none relative group mt-10" style={{ height: 380 }}>
       {/* Background matches #fafafa so fade-out doesn't create hard cutoffs */}
-      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fafafa] to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#fafafa] to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#fafafa] to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#fafafa] to-transparent z-10 pointer-events-none" />
       
-      <div className="flex animate-marquee h-full hover:[animation-play-state:paused]">
-        {trackItems.map((scenario, i) => (
+      <div className="flex justify-center gap-6 h-full">
+        {activeScenarios.map((scenario, i) => (
           <div
             key={i}
-            className="w-[300px] shrink-0 mr-6 h-full transition-transform duration-300 hover:scale-[1.02]"
+            className="w-[300px] shrink-0 h-full transition-transform duration-300 hover:scale-[1.02]"
           >
             <ChatCard scenario={scenario} />
           </div>
