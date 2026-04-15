@@ -134,6 +134,29 @@ const comparison = [
   },
 ];
 
+const faqs = [
+  {
+    q: "Do I need a developer to set this up?",
+    a: "No. You copy one line of code and paste it into your website before the closing </body> tag. Most practice managers can do it in under 5 minutes.",
+  },
+  {
+    q: "What happens when the Free plan's 50 interaction limit is reached?",
+    a: "The widget lets patients know to call the office directly. Upgrade to Basic or Pro for unlimited interactions.",
+  },
+  {
+    q: "Is patient data safe?",
+    a: "Yes. We never collect or store personal health information. The widget only handles general questions — it directs patients to call for anything clinical.",
+  },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes. No contracts, no cancellation fees. Upgrade or cancel from your dashboard whenever you want.",
+  },
+  {
+    q: "Is a Business Associate Agreement (BAA) available?",
+    a: "Yes. A BAA is available on Pro and Multi-Practice plans. Contact us after signing up and we'll send one over.",
+  },
+];
+
 export default async function PricingPage() {
   const { userId } = await auth();
   const isLoggedIn = !!userId;
@@ -205,7 +228,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Plans — Free / Basic / Pro row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
           {plans.filter((p) => p.name !== "Multi-Practice").map((plan) => {
             const isPaid = plan.name !== "Free";
             const planKey = plan.name.toLowerCase() as "free" | "basic" | "pro";
@@ -214,12 +237,13 @@ export default async function PricingPage() {
             const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
             const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
 
+            // Notice the h-full flex flex-col to force equal heights!
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-3xl p-8 flex flex-col transition-all ${
+                className={`relative rounded-3xl p-8 flex flex-col h-full transition-all ${
                   plan.highlight
-                    ? "bg-gray-900 text-white shadow-2xl scale-105 z-10 border-gray-800"
+                    ? "bg-gray-900 text-white shadow-2xl scale-[1.02] z-10 border-gray-800"
                     : "bg-white border border-gray-200 shadow-sm"
                 }`}
               >
@@ -244,6 +268,7 @@ export default async function PricingPage() {
                   </p>
                 </div>
 
+                {/* flex-1 to push the CTA button to the absolute bottom evenly! */}
                 <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm">
@@ -285,11 +310,13 @@ export default async function PricingPage() {
                     </Link>
                   )}
 
-                  {isPaid && (
-                    <p className={`text-[11px] font-medium text-center mt-3 ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
-                      Upgrade or cancel anytime
-                    </p>
-                  )}
+                  <div className="h-6 mt-3">
+                    {isPaid ? (
+                      <p className={`text-[11px] font-medium text-center ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
+                        Upgrade or cancel anytime
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             );
@@ -301,7 +328,7 @@ export default async function PricingPage() {
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-[100px] pointer-events-none z-0" />
           
           {multiPlan.badge && (
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg z-10">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg z-20">
               {multiPlan.badge}
             </div>
           )}
@@ -312,7 +339,7 @@ export default async function PricingPage() {
               <span className="text-3xl lg:text-4xl font-black tracking-tight text-white">{multiPlan.price}</span>
               <span className="text-sm pb-1 text-gray-400 font-medium">{multiPlan.period}</span>
             </div>
-            <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-xs">{multiPlan.description}</p>
+            <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-[200px]">{multiPlan.description}</p>
           </div>
           
           <ul className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
@@ -326,7 +353,7 @@ export default async function PricingPage() {
             ))}
           </ul>
           
-          <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-3 relative z-10 ml-auto">
+          <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-3 relative z-10 ml-auto pt-4 sm:pt-0">
             {multiUseUpgrade ? (
               <UpgradeButton
                 plan="multi"
@@ -352,7 +379,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Fine print */}
-        <p className="text-center text-sm font-medium text-gray-400 mt-10">
+        <p className="text-center text-sm font-medium text-gray-400 mt-10 mb-20">
           All paid plans start with a 14-day free trial. Credit card required — cancel anytime.
         </p>
 
@@ -364,7 +391,6 @@ export default async function PricingPage() {
           </div>
 
           <div className="bg-white rounded-[2rem] shadow-xl border border-gray-200 overflow-hidden relative">
-            {/* Dark background for table header to make it premium */}
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-left">
                 <thead>
@@ -403,6 +429,20 @@ export default async function PricingPage() {
           </p>
         </div>
 
+        {/* RE-INSERTED FAQ SECTION */}
+        <div className="mt-28 border-t border-gray-200 pt-20">
+          <h2 className="text-3xl font-black text-gray-900 tracking-tight text-center mb-12">
+            Common questions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 max-w-4xl mx-auto">
+            {faqs.map((faq) => (
+              <div key={faq.q}>
+                <h3 className="font-bold text-gray-900 mb-2 text-base">{faq.q}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed font-medium">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </main>
 
       {/* Footer */}

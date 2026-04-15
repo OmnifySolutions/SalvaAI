@@ -20,8 +20,11 @@ export default async function SettingsPage() {
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <Link href="/dashboard" className="font-bold text-gray-900 text-lg">Salva AI</Link>
-        <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
-          ← Back to dashboard
+        <Link 
+          href="/dashboard" 
+          className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors"
+        >
+          Dashboard
         </Link>
       </nav>
       <div className="max-w-3xl mx-auto px-6 py-8">

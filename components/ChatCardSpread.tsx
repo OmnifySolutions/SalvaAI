@@ -1,27 +1,30 @@
-import { PhoneCall, MapPin, Search } from "lucide-react";
+"use client";
+
+import React from "react";
 
 const scenarios = [
   {
-    label: "New patient",
+    label: "Insurance",
     messages: [
-      { role: "user", text: "Are you guys taking new patients right now?" },
-      { role: "ai",   text: "Yes, we are! Dr. Smith has an opening tomorrow at 2:00 PM for a new patient exam. Should I lock that in for you?" },
-      { role: "user", text: "That sounds great, let's do it!" },
+      { role: "user", text: "Do you accept Delta Dental insurance?" },
+      { role: "ai",   text: "Yes! We're in-network with Delta Dental, Cigna, and Aetna. Want to schedule a new patient exam?" },
+      { role: "user", text: "Yes please, what times are available?" },
     ],
   },
   {
     label: "After-hours",
     messages: [
-      { role: "user", text: "I chipped my tooth and I'm in a lot of pain." },
-      { role: "ai",   text: "I'm so sorry you're dealing with that. Our office is closed, but I am routing your number to the on-call dentist immediately." },
+      { role: "user", text: "Hi, it's 9pm and I have a toothache. Can I book tomorrow?" },
+      { role: "ai",   text: "So sorry to hear that! We open at 8am — I'd suggest calling first thing. Need the number?" },
+      { role: "user", text: "Yes please, that would be great!" },
     ],
   },
   {
-    label: "Insurance",
+    label: "New patient",
     messages: [
-      { role: "user", text: "Do you accept Delta Dental?" },
-      { role: "ai",   text: "Yes, we are in-network with Delta Dental PPO! Want me to check your specific benefits before you come in?" },
-      { role: "user", text: "That would be awesome, thanks." },
+      { role: "user", text: "How much is a teeth cleaning for a new patient?" },
+      { role: "ai",   text: "New patient exams with X-rays and cleaning start at $149, often covered by insurance. Shall I check availability?" },
+      { role: "user", text: "That sounds great, let's do it!" },
     ],
   },
 ];
@@ -33,46 +36,66 @@ const trackItems = [...duplicatedScenarios, ...duplicatedScenarios]; // Total 12
 
 export default function ChatCardSpread() {
   return (
-    <div className="relative w-full max-w-4xl mx-auto h-[400px] overflow-hidden flex items-center bg-transparent mt-10">
+    <div className="w-full max-w-5xl mx-auto overflow-hidden select-none relative group mt-10" style={{ height: 380 }}>
+      {/* Background matches #fafafa so fade-out doesn't create hard cutoffs */}
+      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fafafa] to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#fafafa] to-transparent z-10 pointer-events-none" />
       
-      {/* Heavy fade out on edges to force center focus */}
-      <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-r from-white via-transparent to-white via-[35%_65%]" />
-
-      <div className="flex gap-6 animate-marquee items-center w-max pl-6">
-        {trackItems.map((s, i) => (
+      <div className="flex animate-marquee h-full hover:[animation-play-state:paused]">
+        {trackItems.map((scenario, i) => (
           <div
             key={i}
-            className="w-[320px] bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 flex flex-col shrink-0 relative"
+            className="w-[300px] shrink-0 mr-6 h-full transition-transform duration-300 hover:scale-[1.02]"
           >
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-50 pb-3">
-              <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                {s.label === "New patient" && <PhoneCall size={12} />}
-                {s.label === "After-hours" && <MapPin size={12} />}
-                {s.label === "Insurance"   && <Search size={12} />}
-              </div>
-              <span className="text-xs font-semibold text-gray-600 tracking-wide uppercase">
-                {s.label}
-              </span>
-            </div>
+            <ChatCard scenario={scenario} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-            {/* Messages */}
-            <div className="space-y-3 flex-1 flex flex-col justify-end">
-              {s.messages.map((m, idx) => (
-                <div
-                  key={idx}
-                  className={`px-3.5 py-2.5 rounded-2xl text-sm max-w-[85%] leading-snug ${
-                    m.role === "ai"
-                      ? "bg-blue-600 text-white self-start rounded-tl-sm shadow-sm"
-                      : "bg-gray-100 text-gray-800 self-end rounded-tr-sm"
-                  }`}
-                >
-                  {m.text}
-                </div>
-              ))}
+function ChatCard({ scenario }: { scenario: (typeof scenarios)[number] }) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-lg shadow-gray-100/50 overflow-hidden h-full flex flex-col">
+      <div className="bg-gray-900 px-4 py-3 flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm">
+          AI
+        </div>
+        <div>
+          <div className="text-white text-sm font-medium">Salva AI</div>
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium tracking-wide">
+            <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+            ONLINE NOW
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 p-4 space-y-4 bg-gray-50 overflow-hidden">
+        {scenario.messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div
+              className={`text-[13px] px-4 py-3 rounded-2xl max-w-[85%] leading-relaxed ${
+                msg.role === "user"
+                  ? "bg-gray-900 text-white rounded-br-sm shadow-sm"
+                  : "bg-white border border-gray-200 text-gray-700 rounded-bl-sm shadow-sm"
+              }`}
+            >
+              {msg.text}
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-2 shrink-0">
+        <div className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-[13px] text-gray-400">
+          Type a message...
+        </div>
+        <div className="w-9 h-9 bg-gray-900 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105 cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" className="w-4 h-4">
+            <path d="M3.105 3.105a.75.75 0 0 1 .919-.11l13.5 7.5a.75.75 0 0 1 0 1.31l-13.5 7.5a.75.75 0 0 1-1.05-.949l1.9-4.75a.75.75 0 0 0 0-.612l-1.9-4.75a.75.75 0 0 1 .131-.639Z" />
+          </svg>
+        </div>
       </div>
     </div>
   );

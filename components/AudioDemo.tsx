@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Play, Square } from "lucide-react";
 
 const scenarios = [
@@ -27,57 +27,32 @@ const scenarios = [
   },
 ];
 
-// Instead of <audio> tags which break on static Vercel caching without user interaction bubbles, We'll use absolute HTML5 Audio objects
 export default function AudioDemo() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, number>>({});
-  const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
+  const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
 
-  // Initialize objects once
-  useEffect(() => {
-    scenarios.forEach((s) => {
-      audioRefs.current[s.id] = new Audio(s.src);
-      // Auto updates
-      audioRefs.current[s.id].addEventListener("timeupdate", () => {
-        setProgress(prev => ({
-          ...prev, 
-          [s.id]: (audioRefs.current[s.id].currentTime / audioRefs.current[s.id].duration) * 100
-        }));
-      });
-      // Endings
-      audioRefs.current[s.id].addEventListener("ended", () => {
-        setPlaying(null);
-        setProgress(prev => ({...prev, [s.id]: 0}));
-      });
-    });
-    
-    return () => {
-      // Cleanup
-      Object.values(audioRefs.current).forEach(audio => {
-        audio.pause();
-        audio.src = "";
-      });
-    };
-  }, []);
-
-  const togglePlay = (id: string) => {
-    // Stop all others
-    Object.keys(audioRefs.current).forEach(key => {
-      if (key !== id) {
-        audioRefs.current[key].pause();
-        audioRefs.current[key].currentTime = 0;
+  const handlePlayPause = (id: string) => {
+    // Pause any other playing audio natively
+    Object.keys(audioRefs.current).forEach((key) => {
+      const audioEl = audioRefs.current[key];
+      if (key !== id && audioEl) {
+        audioEl.pause();
+        audioEl.currentTime = 0;
       }
     });
 
-    const targetAudio = audioRefs.current[id];
+    const targetEl = audioRefs.current[id];
+    if (!targetEl) return;
 
     if (playing === id) {
-      targetAudio.pause();
+      targetEl.pause();
       setPlaying(null);
     } else {
       setPlaying(id);
-      targetAudio.play().catch(e => {
-        console.error("Audio playback error. Ensure /public/audio/ is deployed.", e);
+      // Synchronous direct play call so iOS/Safari does not reject the Promise
+      targetEl.play().catch(e => {
+        console.warn("Autoplay blocked. Consider trying again after interaction.", e);
         setPlaying(null);
       });
     }
@@ -107,6 +82,23 @@ export default function AudioDemo() {
               key={s.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all"
             >
+              <audio
+                src={s.src}
+                ref={(el) => { audioRefs.current[s.id] = el; }}
+                preload="metadata"
+                // Listeners right on the React element
+                onTimeUpdate={(e) => {
+                  const target = e.currentTarget;
+                  if (target.duration) {
+                    setProgress((prev) => ({ ...prev, [s.id]: (target.currentTime / target.duration) * 100 }));
+                  }
+                }}
+                onEnded={() => {
+                  setPlaying(null);
+                  setProgress((prev) => ({ ...prev, [s.id]: 0 }));
+                }}
+              />
+
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
                   <h3 className="font-bold text-gray-900 mb-1">{s.label}</h3>
@@ -115,11 +107,11 @@ export default function AudioDemo() {
                   </span>
                 </div>
                 <button
-                  onClick={() => togglePlay(s.id)}
+                  onClick={() => handlePlayPause(s.id)}
                   className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all shadow-sm ${
                     isPlaying
-                      ? "bg-gray-900 text-white"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20"
+                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20"
                   }`}
                   aria-label={isPlaying ? "Pause audio" : "Play audio"}
                 >
