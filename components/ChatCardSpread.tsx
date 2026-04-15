@@ -45,7 +45,7 @@ export default function ChatCardSpread() {
         {trackItems.map((scenario, i) => (
           <div
             key={i}
-            className="w-[300px] shrink-0 mr-6 h-full transition-transform duration-300 hover:scale-[1.02]"
+            className="w-[300px] shrink-0 mr-6 h-full transition-transform duration-300 hover:scale-[1.02] whitespace-normal"
           >
             <ChatCard scenario={scenario} />
           </div>
