@@ -36,10 +36,10 @@ const trackItems = [...duplicatedScenarios, ...duplicatedScenarios]; // Total 12
 
 export default function ChatCardSpread() {
   return (
-    <div className="w-full max-w-[948px] mx-auto overflow-hidden select-none relative group mt-10" style={{ height: 380 }}>
+    <div className="w-full max-w-[850px] mx-auto overflow-hidden select-none relative group mt-10" style={{ height: 380 }}>
       {/* Background matches #fafafa so fade-out doesn't create hard cutoffs */}
-      <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#fafafa] to-transparent z-20 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#fafafa] to-transparent z-20 pointer-events-none" />
+      <div className="absolute inset-y-0 left-0 w-[220px] bg-gradient-to-r from-[#fafafa] via-[#fafafa]/90 to-transparent z-20 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-[220px] bg-gradient-to-l from-[#fafafa] via-[#fafafa]/90 to-transparent z-20 pointer-events-none" />
       
       <div className="flex animate-marquee h-full hover:[animation-play-state:paused] whitespace-nowrap overflow-visible items-center">
         {trackItems.map((scenario, i) => (
