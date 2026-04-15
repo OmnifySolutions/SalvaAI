@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Play, Square } from "lucide-react";
+import { useState } from "react";
+import { AudioDemoPlayer } from "./AudioDemoPlayer";
 
 const scenarios = [
   {
@@ -28,74 +28,7 @@ const scenarios = [
 ];
 
 export default function AudioDemo() {
-  const [playing, setPlaying] = useState<string | null>(null);
-  const [progress, setProgress] = useState<Record<string, number>>({});
-  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
-
-  useEffect(() => {
-    // Initialize standard vanilla JS Audio objects
-    scenarios.forEach((s) => {
-      if (!audioRefs.current[s.id]) {
-        const audio = new Audio(s.src);
-        audio.preload = "metadata";
-
-        audio.addEventListener("timeupdate", () => {
-          if (audio.duration) {
-            setProgress((prev) => ({
-              ...prev,
-              [s.id]: (audio.currentTime / audio.duration) * 100,
-            }));
-          }
-        });
-
-        audio.addEventListener("ended", () => {
-          setPlaying(null);
-          setProgress((prev) => ({ ...prev, [s.id]: 0 }));
-          audio.currentTime = 0;
-        });
-
-        audioRefs.current[s.id] = audio;
-      }
-    });
-
-    // Cleanup on unmount
-    return () => {
-      Object.keys(audioRefs.current).forEach((key) => {
-        const audioEl = audioRefs.current[key];
-        if (audioEl) {
-          audioEl.pause();
-          audioEl.src = "";
-        }
-      });
-      audioRefs.current = {};
-    };
-  }, []);
-
-  const handlePlayPause = (id: string) => {
-    // Pause any other playing audio naturally
-    Object.keys(audioRefs.current).forEach((key) => {
-      const audioEl = audioRefs.current[key];
-      if (key !== id && audioEl) {
-        audioEl.pause();
-        audioEl.currentTime = 0;
-      }
-    });
-
-    const targetEl = audioRefs.current[id];
-    if (!targetEl) return;
-
-    if (playing === id) {
-      targetEl.pause();
-      setPlaying(null);
-    } else {
-      setPlaying(id);
-      // Synchronous direct play call so iOS/Safari does not reject the Promise
-      targetEl.play().catch((e) => {
-        console.warn("Autoplay blocked. Consider trying again after interaction.", e);
-        setPlaying(null);
-      });
-    }
-  };
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-24 border-t border-gray-100">
@@ -112,53 +45,14 @@ export default function AudioDemo() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {scenarios.map((s) => {
-          const isPlaying = playing === s.id;
-          const currentProgress = progress[s.id] || 0;
-
-          return (
-            <div
-              key={s.id}
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all"
-            >
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-1">{s.label}</h3>
-                  <span className="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
-                    {s.duration}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handlePlayPause(s.id)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all shadow-sm ${
-                    isPlaying
-                      ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20"
-                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20"
-                  }`}
-                  aria-label={isPlaying ? "Pause audio" : "Play audio"}
-                >
-                  {isPlaying ? (
-                    <Square size={20} className="fill-current" />
-                  ) : (
-                    <Play size={20} className="ml-1 fill-current" />
-                  )}
-                </button>
-              </div>
-
-              <p className="text-sm text-gray-500 mb-6 line-clamp-2">
-                {s.description}
-              </p>
-
-              {/* Progress bar */}
-              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 transition-all duration-100"
-                  style={{ width: `${currentProgress}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
+        {scenarios.map((s) => (
+          <AudioDemoPlayer
+            key={s.id}
+            s={s}
+            playing={playingId}
+            setPlaying={setPlayingId}
+          />
+        ))}
       </div>
     </div>
   );
