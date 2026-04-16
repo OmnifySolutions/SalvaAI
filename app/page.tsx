@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Salva AI — AI Receptionist for Dental Offices",
+  description:
+    "24/7 AI receptionist and chat widget for dental practices. Answer every new-patient call, book appointments, and sync with OpenDental.",
+  alternates: { canonical: "/" },
+};
 import {
   Phone,
   MessageSquare,
@@ -26,6 +34,36 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                name: "Salva AI",
+                url: "https://salvaai.com",
+                description: "AI receptionist and chat widget for dental offices.",
+              },
+              {
+                "@type": "SoftwareApplication",
+                name: "Salva AI",
+                applicationCategory: "BusinessApplication",
+                operatingSystem: "Web",
+                description:
+                  "24/7 AI receptionist and chat widget for dental practices. Answers calls, books appointments, and syncs with practice management software.",
+                offers: {
+                  "@type": "AggregateOffer",
+                  lowPrice: "0",
+                  highPrice: "749",
+                  priceCurrency: "USD",
+                },
+              },
+            ],
+          }),
+        }}
+      />
 
       {/* Nav */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -64,13 +102,13 @@ export default async function HomePage() {
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6 max-w-3xl mx-auto">
-            Your practice loses<br />
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">$150,000 a year</span><br />
-            to missed calls.
+            Every missed call<br />
+            is a <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">missed patient.</span><br />
+            Salva AI answers them all.
           </h1>
 
           <p className="text-xl text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
-            Salva AI answers every call and chat 24/7 — trained on your practice&apos;s FAQs, services, and hours so no new patient ever hits voicemail again.
+            Salva AI answers every call and chat 24/7, trained on your FAQs, services, and hours — so no new-patient inquiry ever hits voicemail again.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
@@ -84,7 +122,7 @@ export default async function HomePage() {
               href="/pricing"
               className="text-sm text-gray-300 hover:text-white px-7 py-3.5 rounded-xl border border-white/15 hover:border-white/30 transition-colors font-medium"
             >
-              See pricing →
+              Compare plans
             </Link>
           </div>
           <p className="text-xs text-gray-600 mb-14">14-day free trial. Cancel anytime.</p>
@@ -92,16 +130,16 @@ export default async function HomePage() {
           {/* Pain stats strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden max-w-2xl mx-auto">
             <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">35%</p>
-              <p className="text-xs text-gray-500 mt-1">of dental calls go unanswered</p>
+              <p className="text-2xl font-bold text-white tracking-tight">1 in 3</p>
+              <p className="text-xs text-gray-500 mt-1">new-patient calls go unanswered</p>
             </div>
             <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">78%</p>
-              <p className="text-xs text-gray-500 mt-1">hang up without leaving a voicemail</p>
+              <p className="text-2xl font-bold text-white tracking-tight">4 in 5</p>
+              <p className="text-xs text-gray-500 mt-1">callers hang up instead of leaving voicemail</p>
             </div>
             <div className="bg-gray-900 px-6 py-5">
               <p className="text-2xl font-bold text-white tracking-tight">$850</p>
-              <p className="text-xs text-gray-500 mt-1">lost per missed new patient call</p>
+              <p className="text-xs text-gray-500 mt-1">estimated value per missed new-patient call</p>
             </div>
           </div>
         </div>
@@ -136,7 +174,7 @@ export default async function HomePage() {
               Works exactly like your top staff
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto text-lg">
-              Salva AI comes pre-trained on three core workflows. No complex training needed — just turn it on.
+              Three core workflows, pre-trained and ready. Activate instantly — no setup required.
             </p>
           </div>
 
@@ -325,7 +363,7 @@ export default async function HomePage() {
 
       {/* Competitive nudge */}
       <div className="text-center pb-10">
-        <p className="text-sm text-gray-400">Most practices save $60–160/month vs competitors.</p>
+        <p className="text-sm text-gray-400">Often costs less than hiring a part-time receptionist.</p>
       </div>
 
       {/* CTA banner */}
@@ -429,18 +467,18 @@ const howItWorks = [
 
 const setupTimeline = [
   {
-    milestone: "Day 1",
+    milestone: "Week 1",
     title: "Chat widget live",
     description: "Copy one line of code to your website. Your AI receptionist starts answering patient questions immediately.",
   },
   {
-    milestone: "Day 2",
+    milestone: "Week 1–2",
     title: "Voice AI activated",
-    description: "Forward your practice number. Every call gets answered 24/7 — no missed patients, no voicemail.",
+    description: "Forward your practice number after setup. Every call gets answered 24/7 — no missed patients, no voicemail.",
   },
   {
-    milestone: "Day 3",
-    title: "ROI visible",
+    milestone: "Week 2–4",
+    title: "ROI tracking live",
     description: "See every conversation in your dashboard. Track leads captured, calls answered, and patient inquiries handled.",
   },
 ];

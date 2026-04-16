@@ -1,39 +1,37 @@
+// TODO: Replace with verified customer testimonials before enabling this section.
+// This component is currently gated off in app/page.tsx via {false && <SocialProof />}
 const testimonials = [
   {
-    quote:
-      "We were losing 40+ calls a month to voicemail. Salva AI answered every single one last month. Three new patients booked directly from after-hours calls we would have missed.",
-    name: "Dr. Sarah Chen",
-    title: "Owner, Westside Family Dental",
-    location: "San Diego, CA",
-    initials: "SC",
-    color: "bg-blue-600",
+    quote: "TODO: Add verified customer testimonial.",
+    name: "TODO: Customer Name",
+    title: "TODO: Role, Practice Name",
+    location: "TODO: City, State",
+    initials: "--",
+    color: "bg-gray-400",
   },
   {
-    quote:
-      "Setup took literally 8 minutes. I copied the code, pasted it, the widget was live. First patient chat came in at 11pm that same night — a new patient inquiry we would have lost.",
-    name: "Marcus Webb",
-    title: "Office Manager, Northbrook Dental Group",
-    location: "Chicago, IL",
-    initials: "MW",
-    color: "bg-indigo-600",
+    quote: "TODO: Add verified customer testimonial.",
+    name: "TODO: Customer Name",
+    title: "TODO: Role, Practice Name",
+    location: "TODO: City, State",
+    initials: "--",
+    color: "bg-gray-400",
   },
   {
-    quote:
-      "Our front desk was spending 2 hours a day answering the same 5 questions. The AI handles all of them now. Staff can actually focus on patients in the chair.",
-    name: "Dr. James Patel",
-    title: "Owner, Patel Orthodontics",
-    location: "Phoenix, AZ",
-    initials: "JP",
-    color: "bg-violet-600",
+    quote: "TODO: Add verified customer testimonial.",
+    name: "TODO: Customer Name",
+    title: "TODO: Role, Practice Name",
+    location: "TODO: City, State",
+    initials: "--",
+    color: "bg-gray-400",
   },
   {
-    quote:
-      "The voice AI sounds so natural that patients don't even realize they're talking to an AI. We've had parents specifically ask to speak with 'Claire' again on their next call.",
-    name: "Lisa Tran",
-    title: "Practice Manager, Lakeside Pediatric Dentistry",
-    location: "Seattle, WA",
-    initials: "LT",
-    color: "bg-cyan-600",
+    quote: "TODO: Add verified customer testimonial.",
+    name: "TODO: Customer Name",
+    title: "TODO: Role, Practice Name",
+    location: "TODO: City, State",
+    initials: "--",
+    color: "bg-gray-400",
   },
 ];
 

@@ -14,8 +14,42 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Salva AI — AI Receptionist for Dental Offices",
-  description: "Never miss a new patient call again. AI receptionist answers 24/7.",
+  metadataBase: new URL("https://salvaai.com"),
+  title: {
+    default: "Salva AI — AI Receptionist for Dental Offices",
+    template: "%s | Salva AI",
+  },
+  description:
+    "24/7 AI receptionist and chat widget for dental practices. Answer every new-patient call, book appointments, and sync with your practice management software.",
+  keywords: [
+    "AI receptionist",
+    "dental answering service",
+    "dental AI",
+    "new patient calls",
+    "OpenDental",
+    "dental chat widget",
+    "AI phone answering",
+  ],
+  openGraph: {
+    title: "Salva AI — AI Receptionist for Dental Offices",
+    description:
+      "24/7 AI answers calls and chats for your dental practice. Never miss a new patient.",
+    url: "https://salvaai.com",
+    siteName: "Salva AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Salva AI — AI Receptionist for Dental Offices",
+    description: "24/7 AI receptionist for dental offices. Answer every call, book more patients.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({

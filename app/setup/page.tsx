@@ -263,7 +263,7 @@ export default function SetupPage() {
             href="mailto:support@salvaai.com"
             className="shrink-0 text-sm bg-gray-900 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-700 transition-colors"
           >
-            Contact support
+            Get setup help
           </a>
         </div>
       </main>

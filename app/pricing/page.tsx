@@ -3,6 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 import { Check, X } from "lucide-react";
 import { supabaseAdmin } from "@/lib/supabase";
 import UpgradeButton from "@/components/UpgradeButton";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description:
+    "Simple, transparent pricing for dental AI receptionists. Start free — no credit card required. Upgrade to Pro for 24/7 voice AI.",
+  alternates: { canonical: "/pricing" },
+};
 
 const plans = [
   {
@@ -297,7 +305,7 @@ export default async function PricingPage() {
                   ) : (
                     <Link
                       href={href}
-                      aria-disabled={isCurrent}
+                      aria-current={isCurrent ? "page" : undefined}
                       className={`block text-center py-4 rounded-xl text-sm font-bold transition-colors shadow-lg ${
                         isCurrent
                           ? "bg-gray-100 text-gray-400 cursor-default pointer-events-none shadow-none"
@@ -364,7 +372,7 @@ export default async function PricingPage() {
             ) : (
               <Link
                 href={multiHref}
-                aria-disabled={multiIsCurrent}
+                aria-current={multiIsCurrent ? "page" : undefined}
                 className={`px-8 py-4 rounded-xl text-sm font-bold text-center transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] ${
                   multiIsCurrent
                     ? "bg-gray-800 text-gray-400 cursor-default pointer-events-none shadow-none"
@@ -379,8 +387,8 @@ export default async function PricingPage() {
         </div>
 
         {/* Fine print */}
-        <p className="text-center text-sm font-medium text-gray-400 mt-10 mb-20">
-          All paid plans start with a 14-day free trial. Credit card required — cancel anytime.
+        <p className="text-center text-sm font-medium text-gray-500 mt-10 mb-20">
+          14-day free trial on all paid plans. Cancel anytime — no fees.
         </p>
 
         {/* Competitor comparison Overhaul */}

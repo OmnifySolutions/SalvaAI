@@ -62,7 +62,7 @@ export default function ChatWidget({
     <div className="flex flex-col h-full bg-white font-sans">
       {/* Header */}
       <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-2 shrink-0">
-        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold">
+        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold" role="img" aria-label="AI receptionist">
           AI
         </div>
         <div>

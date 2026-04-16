@@ -3,11 +3,11 @@
 import React from "react";
 
 const stats = [
-  { number: "35%",      label: "of dental calls go unanswered" },
-  { number: "78%",      label: "hang up when they reach voicemail" },
-  { number: "65%",      label: "of missed calls are potential new patients" },
-  { number: "$8,000",   label: "lifetime value of a new patient" },
-  { number: "$150,000", label: "lost annually from missed calls" },
+  { number: "1 in 3",  label: "new-patient calls go unanswered at dental practices" },
+  { number: "4 in 5",  label: "callers hang up rather than leave a voicemail" },
+  { number: "#1",      label: "missed calls — the leading cause of lost new-patient revenue" },
+  { number: "$1,000+", label: "estimated lifetime value of a single new dental patient" },
+  { number: "24/7",    label: "coverage means zero missed opportunities, even at 11pm" },
 ];
 
 const duplicatedStats = [...stats, ...stats, ...stats]; // Enough to fill out the width

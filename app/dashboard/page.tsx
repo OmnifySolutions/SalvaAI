@@ -33,14 +33,14 @@ export default async function DashboardPage() {
   
   // Real data interaction count mixed with premium mocks
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen bg-gray-50">
       {/* Top Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-8">
           <Link href="/dashboard" className="font-bold text-gray-900 text-lg">Salva AI</Link>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <span className="text-gray-900 border-b-2 border-gray-900 pb-1">Overview</span>
-            <Link href="/settings" className="text-gray-500 hover:text-gray-900">Campaigns</Link>
+            <a href="#campaigns-section" className="text-gray-500 hover:text-gray-900">Campaigns</a>
             <Link href="/settings" className="text-gray-500 hover:text-gray-900 flex items-center gap-1.5"><Settings size={16}/> Settings</Link>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Intelligence Center</h1>
-            <p className="text-sm text-gray-500">Welcome back. Your AI agent is actively routing calls.</p>
+            <p className="text-sm text-gray-500">Welcome back. Your AI agent is answering calls and chats right now.</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-xl text-sm font-semibold">
@@ -94,7 +94,6 @@ export default async function DashboardPage() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="font-semibold text-gray-900">Recent Activity Stream</h2>
-                <Link href="/conversations" className="text-sm font-medium text-blue-600 hover:text-blue-700">View all</Link>
               </div>
               <div className="divide-y divide-gray-50">
                 {!conversations || conversations.length === 0 ? (
@@ -135,7 +134,7 @@ export default async function DashboardPage() {
           <div className="space-y-6">
             
             {/* Active Campaigns */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <div id="campaigns-section" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-semibold text-gray-900">Active Campaigns</h2>
                 <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
@@ -154,7 +153,11 @@ export default async function DashboardPage() {
                   <p className="text-[11px] text-gray-500">14 appointments booked via AI</p>
                 </div>
               </div>
-              <button className="w-full mt-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-xl transition-colors">
+              <button
+                disabled
+                title="Campaign creation coming soon"
+                className="w-full mt-4 py-2 bg-gray-50 text-gray-400 text-sm font-medium rounded-xl cursor-not-allowed opacity-60"
+              >
                 + New Campaign
               </button>
             </div>

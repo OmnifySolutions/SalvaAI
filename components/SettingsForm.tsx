@@ -274,7 +274,7 @@ export default function SettingsForm({ business }: { business: Business }) {
               </div>
 
               <div className="pt-6 border-t border-gray-100">
-                 <h3 className="font-semibold text-gray-900 mb-4">Smart Handoffs (Deflection)</h3>
+                 <h3 className="font-semibold text-gray-900 mb-4">Smart Handoffs — transfer complex calls to your team</h3>
                  <div className="space-y-3">
                    {DEFLECT_PRESETS.map(p => (
                       <label key={p.key} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100">
@@ -299,10 +299,10 @@ export default function SettingsForm({ business }: { business: Business }) {
           
           <div className={`p-6 rounded-2xl border-2 ${isOdConnected ? 'border-green-500 bg-green-50/30' : 'border-gray-200 bg-white shadow-sm'}`}>
             <div className="flex justify-between items-center mb-6">
-               <div className="flexItems-center space-y-1">
+               <div className="flex items-center space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-gray-900">Open Dental</span>
-                    {isOdConnected && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase uppercase tracking-wider">Connected</span>}
+                    {isOdConnected && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Connected</span>}
                   </div>
                   <p className="text-sm text-gray-500">Live scheduling and patient record sync</p>
                </div>

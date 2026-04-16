@@ -60,7 +60,7 @@ export default function OnboardingPage() {
               placeholder="Sunshine Family Dentistry"
               value={form.businessName}
               onChange={(e) => set("businessName", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -69,7 +69,7 @@ export default function OnboardingPage() {
             <select
               value={form.businessType}
               onChange={(e) => set("businessType", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="dental">Dental Office</option>
               <option value="orthodontics">Orthodontics</option>
@@ -96,7 +96,7 @@ export default function OnboardingPage() {
               placeholder="Cleanings, fillings, crowns, whitening..."
               value={form.services}
               onChange={(e) => set("services", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
             />
           </div>
 
