@@ -30,3 +30,13 @@ When the user needs to do something manually (in a UI, dashboard, console, etc.)
 - What to expect after each step
 - Where to find things (left sidebar, top right, etc.)
 Never assume the user knows where things are or how to navigate a UI. Be 95%+ confident in accuracy before sending instructions. If vague, the user will waste time asking clarifying questions.
+
+## Project context: SalvaAI
+
+- **Stack**: Next.js 16, React 19, Tailwind v4, Clerk auth, Supabase, Anthropic SDK, Twilio, Stripe
+- **Deployed via**: GitHub (`OmnifySolutions/SalvaAI`) → Vercel (auto-deploys on push to `master`)
+- **Brand scope**: Dental-only (general dental, orthodontics, oral surgery, pediatric). Do not drift to "small businesses" or other verticals.
+- **Copy policy**: No specific uncited statistics in marketing copy (FTC risk). Use qualitative or range-based language. All stats must have a verifiable source before using a specific number.
+- **SocialProof**: Component exists but is gated off via `{false && <SocialProof />}` in `app/page.tsx`. Do not enable until real verified customer quotes are collected.
+- **Dashboard wiring (Part D — PENDING)**: Appointments Booked (28), Total Patients Engaged (342), call-volume chart, revenue chart, and campaign card are all hardcoded. Full wiring plan is in `C:\Users\Daryll\.claude\plans\ok-so-run-through-virtual-planet.md`. Requires DB migrations, ingest updates, and a new `lib/dashboard.ts` helper. Switch to Opus before tackling Part D.
+- **tsconfig.json**: `plugins/` is excluded to suppress pre-existing TS error from Claude plugin cache — do not remove that exclusion.
