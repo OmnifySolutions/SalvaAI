@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Skill(update-config)",
+      "Bash(chmod +x *)",
+      "Bash(~/.claude/statusline-command.sh)",
+      "Bash(python -c ' *)",
+      "Bash(/c/Python314/python -c ' *)",
+      "Bash(bash ~/.claude/statusline-command.sh)",
+      "Bash(python.exe -c \"import json, sys; print\\(json.load\\(sys.stdin\\)\\)\")"
+    ]
+  }
+}
