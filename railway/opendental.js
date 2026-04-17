@@ -98,8 +98,8 @@ export async function getProviders(serverUrl, customerKey) {
 // Return up to 5 open slots within windowDays from today.
 // Each slot: { date, time, provider, providerId, operatoryId, aptDateTime }
 // providerName: optional string — if given, filter to matching provider only.
-// Default appointment length: 60 minutes.
-export async function getAvailability(serverUrl, customerKey, { windowDays = 7, providerName = null, timeZone = 'America/New_York' }) {
+// length: appointment duration in minutes (default 60). Passed to Open Dental openslots query.
+export async function getAvailability(serverUrl, customerKey, { windowDays = 7, providerName = null, timeZone = 'America/New_York', length = 60 }) {
   // Use practice timezone for date math to avoid UTC midnight off-by-one for US practices
   const now = new Date();
   const startDate = now.toLocaleDateString('en-CA', { timeZone }); // en-CA gives YYYY-MM-DD
@@ -121,7 +121,7 @@ export async function getAvailability(serverUrl, customerKey, { windowDays = 7, 
   const params = new URLSearchParams({
     startDate,
     stopDate,
-    length: '60',
+    length: String(Math.max(5, Math.round(length / 5) * 5)), // round to nearest 5-min increment
   });
   if (providers.length === 1) params.set('provNum', String(providers[0].ProvNum));
 
@@ -146,9 +146,12 @@ export async function getAvailability(serverUrl, customerKey, { windowDays = 7, 
 //   'pending'    → AptStatus 6 (Unscheduled — front desk must confirm)
 //   'collect_only' → never call this function; handle at caller level
 export async function createAppointment(serverUrl, customerKey, {
-  patientId, aptDateTime, operatoryId, providerId, reason, mode,
+  patientId, aptDateTime, operatoryId, providerId, reason, mode, length = 60,
 }) {
   const aptStatus = mode === 'pending' ? 6 : 1;
+  // Pattern: each character = 5 minutes; 'X' = scheduled time.
+  // e.g. 60 min = 12 X's, 30 min = 6 X's, 90 min = 18 X's.
+  const patternLength = Math.max(1, Math.round(length / 5));
   const body = {
     PatNum: patientId,
     AptDateTime: aptDateTime,
@@ -156,6 +159,7 @@ export async function createAppointment(serverUrl, customerKey, {
     ProvNum: providerId,
     ProcDescript: reason || 'General appointment',
     AptStatus: aptStatus,
+    Pattern: 'X'.repeat(patternLength),
   };
   try {
     const apt = await odFetch(serverUrl, customerKey, '/appointments', {

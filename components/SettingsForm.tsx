@@ -2,12 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Plus, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 
-// Types remain same
 type FAQ = { question: string; answer: string };
 type VoiceTone = "professional" | "warm" | "clinical";
+type Service = { name: string; durationMinutes: number; description: string };
+
+// Generic hook for managing arrays of items (add, update, remove)
+function useArrayState<T>(initial: T[], emptyItem: T) {
+  const [items, setItems] = useState(initial);
+  return {
+    items,
+    add: () => setItems((arr) => [...arr, emptyItem]),
+    update: (i: number, field: keyof T, value: T[keyof T]) =>
+      setItems((arr) => arr.map((item, idx) => (idx === i ? { ...item, [field]: value } : item))),
+    remove: (i: number) => setItems((arr) => arr.filter((_, idx) => idx !== i)),
+  };
+}
 
 type Business = {
   name: string;
@@ -32,6 +44,17 @@ type Business = {
   opendental_booking_window: number | null;
 };
 
+const DENTAL_DEFAULTS: Service[] = [
+  { name: "New Patient Exam", durationMinutes: 90, description: "Includes X-rays and full periodontal evaluation" },
+  { name: "Adult Cleaning (Prophy)", durationMinutes: 60, description: "" },
+  { name: "Child Cleaning", durationMinutes: 30, description: "" },
+  { name: "Crown Prep", durationMinutes: 90, description: "" },
+  { name: "Root Canal", durationMinutes: 90, description: "" },
+  { name: "Extraction", durationMinutes: 60, description: "" },
+  { name: "Emergency Visit", durationMinutes: 30, description: "Same-day pain triage" },
+  { name: "Consultation", durationMinutes: 30, description: "" },
+];
+
 // Presets remain same
 const TONES: { key: VoiceTone; label: string; subtitle: string }[] = [
   { key: "professional", label: "Professional & Efficient", subtitle: "Busy front desk. Direct, no filler." },
@@ -51,10 +74,11 @@ const SCENARIOS = [
 ];
 
 const TABS = [
-  { id: "profile", label: "Practice Profile", icon: User },
-  { id: "ai", label: "AI Configuration", icon: Bot },
-  { id: "voice", label: "Voice Settings", icon: PhoneCall },
-  { id: "integrations", label: "Integrations", icon: Zap },
+  { id: "profile",      label: "Practice Profile",  icon: User },
+  { id: "services",     label: "Services",           icon: LayoutList },
+  { id: "ai",          label: "AI Configuration",   icon: Bot },
+  { id: "voice",       label: "Voice Settings",      icon: PhoneCall },
+  { id: "integrations", label: "Integrations",       icon: Zap },
 ];
 
 export default function SettingsForm({ business }: { business: Business }) {
@@ -67,12 +91,33 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [name, setName] = useState(business.name);
   const [businessType, setBusinessType] = useState(business.business_type);
   const [hours, setHours] = useState<WeeklyHours>(() => parseHours(business.hours));
-  const [services, setServices] = useState(typeof business.services === "string" ? business.services : Array.isArray(business.services) ? business.services.map((s: { name: string }) => s.name).join(", ") : "");
-  
+
+  const initializeServices = (): Service[] => {
+    const raw = business.services;
+    if (Array.isArray(raw) && raw.length > 0) {
+      const first = raw[0] as Record<string, unknown>;
+      if (first && typeof first === "object" && "durationMinutes" in first) {
+        return raw as Service[];
+      }
+      return (raw as Array<{ name?: string } | string>).map((s) => ({
+        name: typeof s === "string" ? s : s.name ?? "",
+        durationMinutes: 60,
+        description: "",
+      }));
+    }
+    if (typeof raw === "string" && raw.trim()) {
+      return raw.split(",").map((s) => ({ name: s.trim(), durationMinutes: 60, description: "" }));
+    }
+    return DENTAL_DEFAULTS;
+  };
+
+  const { items: serviceItems, add: addService, update: updateService, remove: removeService } = useArrayState(initializeServices(), { name: "", durationMinutes: 60, description: "" });
+
   const [aiName, setAiName] = useState(business.ai_name ?? "Claire");
   const [aiGreeting, setAiGreeting] = useState(business.ai_greeting ?? "");
   const [customPrompt, setCustomPrompt] = useState(business.custom_prompt ?? "");
-  const [faqs, setFaqs] = useState<FAQ[]>(business.faqs ?? []);
+
+  const { items: faqs, add: addFaq, update: updateFaq, remove: removeFaq } = useArrayState(business.faqs ?? [], { question: "", answer: "" });
   
   const [voiceEnabled, setVoiceEnabled] = useState(business.voice_enabled ?? false);
   const [voiceTone, setVoiceTone] = useState<VoiceTone>(business.voice_tone ?? "professional");
@@ -87,12 +132,6 @@ export default function SettingsForm({ business }: { business: Business }) {
   const isOdConnected = !!business.opendental_api_key;
 
   const hasVoice = business.plan === "pro" || business.plan === "multi";
-
-  function addFaq() { setFaqs((f) => [...f, { question: "", answer: "" }]); }
-  function updateFaq(i: number, field: "question" | "answer", value: string) {
-    setFaqs((f) => f.map((faq, idx) => (idx === i ? { ...faq, [field]: value } : faq)));
-  }
-  function removeFaq(i: number) { setFaqs((f) => f.filter((_, idx) => idx !== i)); }
 
   function toggleDeflect(key: string) {
     setVoiceDeflectTopics((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]);
@@ -120,7 +159,7 @@ export default function SettingsForm({ business }: { business: Business }) {
       const res = await fetch("/api/settings", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name, businessType, hours, services, aiName, aiGreeting, customPrompt,
+          name, businessType, hours, services: serviceItems.filter((s) => s.name.trim()), aiName, aiGreeting, customPrompt,
           faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
           voiceEnabled, voiceTone, voiceEmergencyNumber: voiceEmergencyNumber || null, voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics, voiceScenarios, openDentalServerUrl: odServerUrl || null, openDentalApiKey: odApiKey || null,
@@ -184,12 +223,93 @@ export default function SettingsForm({ business }: { business: Business }) {
                 </div>
               </Field>
             </div>
-            <Field label="Services Offered" hint="Comma-separated primary treatments">
-              <textarea rows={2} value={services} onChange={e => setServices(e.target.value)} className={inputCls} />
-            </Field>
             <div className="pt-4">
               <Field label="Business Hours"><HoursPicker value={hours} onChange={setHours} /></Field>
             </div>
+          </div>
+        </div>
+
+        {/* SERVICES TAB */}
+        <div className={activeTab === "services" ? "block" : "hidden"}>
+          <div className="mb-8 border-b border-gray-100 pb-5 flex justify-between items-end">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Services</h2>
+              <p className="text-gray-500 text-sm mt-1">Define the treatments you offer and how long each one takes. Duration is used to book the right time slot in Open Dental.</p>
+            </div>
+            <button
+              type="button"
+              onClick={addService}
+              className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition-colors shrink-0"
+            >
+              + Add Service
+            </button>
+          </div>
+
+          <div className="max-w-2xl space-y-1">
+            {serviceItems.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <LayoutList size={32} className="mx-auto mb-3 text-gray-300" />
+                <p className="text-sm font-medium">No services yet</p>
+                <p className="text-xs mt-1">Add your first service above</p>
+              </div>
+            )}
+
+            {serviceItems.map((svc, i) => (
+              <div key={i} className="group flex gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-200 mb-3 hover:border-gray-300 transition-colors">
+                <div className="flex-1 space-y-3">
+                  <div className="flex gap-3 items-end">
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Service Name</p>
+                      <input
+                        type="text"
+                        placeholder="e.g. Adult Cleaning"
+                        value={svc.name}
+                        onChange={e => updateService(i, "name", e.target.value)}
+                        className="w-full text-sm font-semibold bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors"
+                      />
+                    </div>
+                    <div className="shrink-0">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1"><Clock size={10} />Duration</p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={5}
+                          step={5}
+                          value={svc.durationMinutes}
+                          onChange={e => updateService(i, "durationMinutes", Math.max(5, parseInt(e.target.value) || 5))}
+                          className="w-16 text-sm font-semibold text-center bg-white border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
+                        />
+                        <span className="text-xs text-gray-400 font-medium">min</span>
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Description (optional — shown to patients)"
+                    value={svc.description}
+                    onChange={e => updateService(i, "description", e.target.value)}
+                    className="w-full text-xs text-gray-500 bg-transparent border-b border-gray-200 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeService(i)}
+                  className="text-gray-300 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-all self-start mt-1"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            ))}
+
+            {serviceItems.length > 0 && (
+              <button
+                type="button"
+                onClick={addService}
+                className="w-full mt-2 border-2 border-dashed border-gray-200 rounded-2xl py-3 text-sm text-gray-400 font-medium hover:border-blue-300 hover:text-blue-500 transition-all"
+              >
+                + Add another service
+              </button>
+            )}
           </div>
         </div>
 

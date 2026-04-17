@@ -10,7 +10,23 @@
       "Bash(python -c ' *)",
       "Bash(/c/Python314/python -c ' *)",
       "Bash(bash ~/.claude/statusline-command.sh)",
-      "Bash(python.exe -c \"import json, sys; print\\(json.load\\(sys.stdin\\)\\)\")"
+      "Bash(python.exe -c \"import json, sys; print\\(json.load\\(sys.stdin\\)\\)\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\Daryll\\\\.claude\\\\statusline-command.ps1\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('statusLine', d.get\\('hooks',{}\\)\\), indent=2\\)\\)\")",
+      "Bash(claude *)",
+      "Bash(bash /c/Users/Daryll/.claude/statusline-command.sh)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\Daryll\\\\.claude\\\\statusline-command.ps1\")",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "Bash(git commit *)",
+      "Bash(npx tsc *)",
+      "Bash(node --input-type=module)",
+      "Bash(node --check C:/Users/Daryll/SalvaAI/railway/opendental.js)",
+      "Bash(node --check C:/Users/Daryll/SalvaAI/railway/server.js)",
+      "Skill(/commit)",
+      "Bash(grep -E '\\\\.\\(js|ts\\)$')",
+      "Bash(node --check railway/server.js)",
+      "Bash(node --check railway/opendental.js)"
     ]
   }
 }

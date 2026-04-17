@@ -2,6 +2,7 @@ import express from 'express';
 import expressWs from 'express-ws';
 import WebSocket from 'ws';
 import { findPatient, createPatient, getAvailability, createAppointment, OpenDentalError } from './opendental.js';
+import { loadProfile } from './profiles/index.js';
 
 // Prevent unhandled promise rejections from crashing the Railway process.
 // All per-call errors are caught locally; this is a safety net for anything missed.
@@ -98,7 +99,12 @@ async function sendSms(to, from, body) {
 }
 
 // ============================================================================
-// System prompt builder (phone-optimised, no markdown/lists)
+// System prompt builder — 5 composed layers:
+//   1. Identity (name + practice)
+//   2. Vertical profile (dental knowledge, triage, forbidden behaviors)
+//   3. Business config (hours, services with durations, FAQs)
+//   4. Scenario modules (new patient, booking, insurance, etc.)
+//   5. Custom instructions (practice's own overrides — last word)
 // ============================================================================
 function buildSystemPrompt(business) {
   const hours    = typeof business.hours    === 'string' ? safeParse(business.hours)    : (business.hours    || {});
@@ -110,28 +116,50 @@ function buildSystemPrompt(business) {
     .map(([day, v]) => `${day}: ${v.open}–${v.close}`)
     .join(', ');
 
+  // Services: prefer structured {name, durationMinutes} format; fall back to name-only
   const servicesText = Array.isArray(services)
-    ? services.map((s) => s.name || s).join(', ')
+    ? services.map((s) => {
+        if (s.name && s.durationMinutes) return `${s.name} (${s.durationMinutes} min)`;
+        return s.name || s;
+      }).join(', ')
     : String(services || '');
 
   const faqText = faqs
     .map((f) => `Q: ${f.question}\nA: ${f.answer}`)
     .join('\n\n');
 
-  // ── Tone ────────────────────────────────────────────────────────────────────
+  // ── Layer 1: Identity ───────────────────────────────────────────────────────
   const toneMap = {
-    professional: 'Direct and helpful. Skip the excessive empathy — no filler affirmations. Friendly but not warm. Think busy front desk.',
-    warm:         'Warm and approachable. You can show genuine care and take a moment to make callers feel at ease. Still efficient — do not ramble.',
+    professional: 'Direct and helpful. Skip excessive empathy — no filler affirmations. Friendly but not warm. Think busy front desk.',
+    warm:         'Warm and approachable. Show genuine care and take a moment to make callers feel at ease. Still efficient — do not ramble.',
     clinical:     'Precise and efficient. Minimal small talk. Callers expect professionalism, not warmth. Get to the point quickly.',
   };
   const toneText = toneMap[business.voice_tone] || toneMap.professional;
 
-  // ── Emergency ───────────────────────────────────────────────────────────────
-  const emergencyText = (business.voice_emergency_number || business.voice_emergency_message)
-    ? `Emergency handling: If a caller describes a dental emergency, ${business.voice_emergency_message || 'direct them to seek immediate care.'} ${business.voice_emergency_number ? `The emergency line is ${business.voice_emergency_number}.` : ''}`
-    : `If a caller describes a dental emergency, tell them you will flag it as urgent and have someone call them back immediately.`;
+  const identityLayer = `You are ${business.ai_name || 'Claire'}, the AI receptionist for ${business.name}.
 
-  // ── Deflection (PRIORITY — injected before scenarios) ───────────────────────
+You are answering a live phone call. Never use lists, bullet points, or any formatting — your words will be spoken aloud. Keep responses to one or two sentences. Longer only when a caller asks something detailed.
+
+Tone: ${toneText}
+Use the practice name naturally when it fits — "here at ${business.name}" or "at ${business.name} we..." — but don't force it into every response.`;
+
+  // ── Layer 2: Vertical profile (dental professional knowledge) ───────────────
+  const profile = loadProfile(business.vertical_profile || 'dental_general');
+  const profileLayer = profile.buildPromptLayer(business, services);
+
+  // ── Layer 3: Business config ────────────────────────────────────────────────
+  const emergencyText = (business.voice_emergency_number || business.voice_emergency_message)
+    ? `Practice emergency protocol: ${business.voice_emergency_message || 'Direct emergencies to seek immediate care.'} ${business.voice_emergency_number ? `Emergency line: ${business.voice_emergency_number}.` : ''}`
+    : '';
+
+  const businessLayer = `PRACTICE INFORMATION:
+- Name: ${business.name}
+- Hours: ${hoursText || 'See website for current hours'}
+- Services: ${servicesText || 'General dental care'}
+${emergencyText ? `\n${emergencyText}` : ''}
+${faqText ? `\nPRACTICE FAQs:\n${faqText}` : ''}`;
+
+  // ── Layer 4: Deflection + scenario modules ──────────────────────────────────
   const deflectLabels = {
     appointments:        'appointment requests or scheduling',
     insurance:           'insurance or billing questions',
@@ -145,53 +173,90 @@ function buildSystemPrompt(business) {
     .filter(Boolean);
 
   const deflectText = deflectTopics.length
-    ? `PRIORITY RULE — Deflect the following topics immediately. Do not attempt to handle them yourself. Tell the caller a team member will follow up. This overrides all other instructions:\n- ${deflectTopics.join('\n- ')}`
+    ? `PRIORITY RULE — Deflect these topics immediately. Tell the caller a team member will follow up. This overrides all other instructions:\n- ${deflectTopics.join('\n- ')}`
     : '';
 
-  // ── Scenarios (injected after deflection) ───────────────────────────────────
   const scenarioMap = {
-    new_patient:    'If a caller is a new patient or asks about becoming a patient: collect their name and preferred contact method, and tell them the office will be in touch shortly.',
-    appointment:    'If a caller wants to book or change an appointment: acknowledge the request, collect their name and preferred time, and tell them the office will confirm.',
-    insurance:      'If a caller asks about insurance verification: acknowledge, tell them the billing team handles this, and collect their name and callback number.',
-    post_procedure: 'If a caller has a concern after a recent procedure: show care, tell them you are routing this to the clinical team right away, and provide the emergency line if available.',
-    after_hours:    'If the caller is reaching out outside office hours: acknowledge the office is currently closed, offer to take a callback request, and provide the emergency line if available.',
+    new_patient:    'If a caller is a new patient: collect their name and preferred contact, tell them the office will be in touch shortly.',
+    appointment:    'If a caller wants to book or change an appointment: acknowledge, collect their name and preferred time, tell them the office will confirm.',
+    insurance:      'If a caller asks about insurance verification: tell them the billing team handles this and collect their name and callback number.',
+    post_procedure: 'If a caller has a concern after a recent procedure: show care, tell them you are routing this to the clinical team, and provide the emergency line if available.',
+    after_hours:    'If the caller is reaching out outside office hours: acknowledge the office is closed, offer to take a callback request, and provide the emergency line if available.',
   };
   const activeScenarios = (business.voice_scenarios || [])
     .map((s) => scenarioMap[s])
     .filter(Boolean);
 
   const scenarioText = activeScenarios.length
-    ? `Scenario guidance:\n${activeScenarios.join('\n')}`
+    ? `SCENARIO GUIDANCE:\n${activeScenarios.join('\n')}`
     : '';
 
-  return `You are ${business.ai_name || 'Claire'}, the AI receptionist for ${business.name}.
+  const scenarioLayer = [deflectText, scenarioText].filter(Boolean).join('\n\n');
 
-You are answering a live phone call. Never use lists, bullet points, or any formatting. Your words will be spoken aloud, so write exactly as you would speak. One or two sentences maximum — longer only when a caller asks something detailed.
+  // ── Layer 5: Custom instructions (practice override — last word) ────────────
+  const customLayer = business.custom_prompt
+    ? `ADDITIONAL PRACTICE INSTRUCTIONS (override anything above if there is a conflict):\n${business.custom_prompt}`
+    : '';
 
-Tone: ${toneText}
-Use the practice name naturally when it fits — e.g. "here at ${business.name}" or "at ${business.name} we..." — but don't force it into every response.
-
-Practice information:
-- Name: ${business.name}
-- Hours: ${hoursText || 'See website for current hours'}
-- Services: ${servicesText || 'General dental care'}
-${business.custom_prompt ? `\nAdditional instructions:\n${business.custom_prompt}` : ''}
-${faqText ? `\nFrequently asked questions:\n${faqText}` : ''}
-
-${emergencyText}
-${deflectText ? `\n${deflectText}` : ''}
-${scenarioText ? `\n${scenarioText}` : ''}
-
-General guidelines:
-- For clinical or medical questions, do not speculate — tell the caller a team member will follow up.
-- If you don't know something, offer to have the office follow up.
+  // ── Compose all layers ──────────────────────────────────────────────────────
+  return [
+    identityLayer,
+    profileLayer,
+    businessLayer,
+    scenarioLayer,
+    customLayer,
+    `GENERAL GUIDELINES:
 - Do not volunteer that you are an AI unless directly asked.
-- Never say "pause", "(pause)", "one moment", "hold on", "just a second", or any filler placeholder. If you need to check something, say so naturally in one sentence without placeholders.
-- You are a dental office receptionist. Only offer dental appointments and dental services. Never suggest non-dental appointment types.`;
+- Never say "pause", "(pause)", "one moment", "hold on", "just a second", or any filler placeholder.
+- You are a dental office receptionist. Only offer dental appointments and services. Never suggest non-dental appointment types.`,
+  ].filter(Boolean).join('\n\n');
 }
 
 function safeParse(s) {
   try { return JSON.parse(s); } catch { return {}; }
+}
+
+// ============================================================================
+// Service duration resolver — match caller's stated reason to a configured
+// service and return its duration in minutes. Falls back to keyword matching
+// against dental defaults, then to 60 if nothing matches.
+// ============================================================================
+
+// Pre-compiled keyword patterns to avoid regex compilation per-call
+const KEYWORD_DURATION_MAP = [
+  { patterns: [/new patient|first (visit|time|appointment)|new here/i], duration: 90 },
+  { patterns: [/crown|prep|build.?up|onlay|inlay|veneer/i], duration: 90 },
+  { patterns: [/root canal|endo|nerve|pulp/i], duration: 90 },
+  { patterns: [/child|kid|pediatric|my (son|daughter)|little one/i], duration: 30 },
+  { patterns: [/emergency|severe pain|unbearable|knocked.?out|broken|abscess|swelling/i], duration: 30 },
+  { patterns: [/consult|consultation|implant|ortho|invisalign|braces/i], duration: 30 },
+  { patterns: [/extract|wisdom|pull|remov/i], duration: 60 },
+  { patterns: [/clean|prophy|hygiene|check.?up|routine|exam/i], duration: 60 },
+];
+
+function resolveServiceDuration(business, reason) {
+  if (!reason) return 60;
+  const services = typeof business.services === 'string'
+    ? safeParse(business.services)
+    : (business.services || []);
+
+  if (Array.isArray(services) && services.length > 0) {
+    const reasonLower = reason.toLowerCase();
+    for (const svc of services) {
+      if (!svc.name || !svc.durationMinutes) continue;
+      const nameLower = svc.name.toLowerCase();
+      if (reasonLower.includes(nameLower)) return svc.durationMinutes;
+      const words = nameLower.split(/\s+/).filter((w) => w.length > 3);
+      if (words.some((w) => reasonLower.includes(w))) return svc.durationMinutes;
+    }
+  }
+
+  const reasonLower = reason.toLowerCase();
+  for (const { patterns, duration } of KEYWORD_DURATION_MAP) {
+    if (patterns.some((p) => p.test(reasonLower))) return duration;
+  }
+
+  return 60;
 }
 
 // ============================================================================
@@ -490,17 +555,33 @@ async function streamLLMAndSpeak(systemPrompt, messages, signal, ws, streamSid, 
 
   function flushTokenBuffer(forceFlush = false) {
     // Pull complete sentences out of the buffer and enqueue them.
-    let match;
-    while ((match = SENTENCE_END.exec(tokenBuffer)) !== null) {
-      const boundaryEnd = match.index + match[0].length;
-      const sentence    = tokenBuffer.slice(0, boundaryEnd).trim();
-      tokenBuffer       = tokenBuffer.slice(boundaryEnd).trimStart();
+    // Mid-stream: skip very short sentences (<40 chars, not ?/!) so they
+    // accumulate with the next sentence — short individual TTS chunks cause
+    // audible gaps that make the voice sound choppy.
+    let searchFrom = 0;
+    while (true) {
+      const remaining = tokenBuffer.slice(searchFrom);
+      const match = SENTENCE_END.exec(remaining);
+      if (!match) break;
+
+      const absoluteEnd = searchFrom + match.index + match[0].length;
+      const sentence = tokenBuffer.slice(0, absoluteEnd).trim();
+
+      if (!forceFlush && sentence.length < 40 && !/[?!]/.test(sentence)) {
+        // Short declarative — skip past this boundary, accumulate more text
+        searchFrom = absoluteEnd;
+        continue;
+      }
+
+      tokenBuffer = tokenBuffer.slice(absoluteEnd).trimStart();
+      searchFrom  = 0; // tokenBuffer changed — reset search
       if (sentence) {
         sentenceQueue.push(sentence);
         drainQueue();
       }
     }
-    // At end-of-stream, flush whatever remains (e.g. a sentence without punctuation)
+    // At end-of-stream, flush whatever remains (sentence without punctuation, or
+    // a short sentence we were holding back mid-stream)
     if (forceFlush && tokenBuffer.trim()) {
       sentenceQueue.push(tokenBuffer.trim());
       tokenBuffer = '';
@@ -702,21 +783,23 @@ app.ws('/media-stream', async (ws, req) => {
   console.log(`[Call] Params — conversationId: ${conversationId}, businessId: ${businessIdParam}`);
 
   // Per-call state
-  let streamSid        = null;
-  let business         = null;
-  let systemPrompt     = '';
-  const messages       = [];   // { role, content }[]
-  let callerPhone      = null;
-  let dgSocket         = null;
-  let isSpeaking       = false;
+  let streamSid         = null;
+  let business          = null;
+  let systemPrompt      = '';
+  const messages        = [];   // { role, content }[]
+  let callerPhone       = null;
+  let dgSocket          = null;
+  let isSpeaking        = false;
   let pendingTranscript = '';
-  let abortController  = null; // for barge-in cancellation
-  let cleanedUp        = false;
-  let turnId           = 0;    // increments each AI turn; guards stale finally blocks
-  let heardSentences   = [];   // sentences the caller actually heard before any barge-in
-  let keepAliveTimer   = null; // periodic mark event to prevent Twilio WebSocket idle drop
-  let silenceTimer     = null; // auto-disconnect after SILENCE_TIMEOUT_MS of no user speech
-  let bookingState     = { stage: 'idle', name: null, phone: null, dob: null, reason: null, providerPreference: null, availableSlots: [], chosenSlot: null, patientId: null };
+  let abortController   = null; // for barge-in cancellation
+  let cleanedUp         = false;
+  let turnId            = 0;    // increments each AI turn; guards stale finally blocks
+  let heardSentences    = [];   // sentences the caller actually heard before any barge-in
+  let keepAliveTimer    = null; // periodic mark event to prevent Twilio WebSocket idle drop
+  let silenceTimer      = null; // auto-disconnect after SILENCE_TIMEOUT_MS of no user speech
+  let bargeInTimer      = null; // debounce timer — confirms barge-in via partial transcript or timeout
+  let pendingBargeIn    = false; // SpeechStarted received; waiting for confirmation
+  let bookingState      = { stage: 'idle', name: null, phone: null, dob: null, reason: null, providerPreference: null, availableSlots: [], chosenSlot: null, patientId: null };
 
   const SILENCE_TIMEOUT_MS = 20_000;
 
@@ -771,6 +854,7 @@ app.ws('/media-stream', async (ws, req) => {
       language: 'en-US',
     });
 
+    if (dgSocket) dgSocket.removeAllListeners();
     dgSocket = new WebSocket(`wss://api.deepgram.com/v1/listen?${params}`, {
       headers: { Authorization: `Token ${DEEPGRAM_API_KEY}` },
     });
@@ -787,21 +871,36 @@ app.ws('/media-stream', async (ws, req) => {
       }
     });
 
+    // Confirm and execute a barge-in: abort TTS and clear Twilio audio buffer.
+    function executeBargeIn(reason) {
+      if (!pendingBargeIn && !isSpeaking) return;
+      if (bargeInTimer) { clearTimeout(bargeInTimer); bargeInTimer = null; }
+      pendingBargeIn = false;
+      if (isSpeaking && abortController) {
+        console.log(`[Barge-in] ${reason} — stopping AI`);
+        abortController.abort();
+        isSpeaking = false;
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ event: 'clear', streamSid }));
+        }
+      }
+    }
+
     dgSocket.on('message', async (raw) => {
       try {
         const data = JSON.parse(raw.toString());
 
-        // ── Fix 1: Abort on SpeechStarted (VAD fires ~50ms after speech begins,
-        //   before any transcript exists). This is what makes barge-in feel instant.
+        // SpeechStarted fires ~50ms after speech begins (VAD event — no transcript yet).
+        // Instead of immediately aborting, start a short debounce: real speech will
+        // confirm via a partial transcript, or the timer fires after 150ms as a fallback.
+        // This prevents coughs/background noise from triggering barge-in.
         if (data.type === 'SpeechStarted') {
-          resetSilenceTimer(); // user is speaking — reset the idle countdown
-          if (isSpeaking && abortController) {
-            console.log('[Barge-in] SpeechStarted — stopping AI immediately');
-            abortController.abort();
-            isSpeaking = false;
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ event: 'clear', streamSid }));
-            }
+          resetSilenceTimer();
+          if (isSpeaking && abortController && !pendingBargeIn) {
+            pendingBargeIn = true;
+            bargeInTimer = setTimeout(() => {
+              executeBargeIn('150ms timer (no partial transcript)');
+            }, 150);
           }
           return;
         }
@@ -809,6 +908,8 @@ app.ws('/media-stream', async (ws, req) => {
         // UtteranceEnd fires after utterance_end_ms of silence — treat as speech_final
         // so we don't drop the last utterance if the caller trails off without endpointing
         if (data.type === 'UtteranceEnd') {
+          pendingBargeIn = false;
+          if (bargeInTimer) { clearTimeout(bargeInTimer); bargeInTimer = null; }
           if (pendingTranscript) {
             const userText = pendingTranscript;
             pendingTranscript = '';
@@ -820,6 +921,12 @@ app.ws('/media-stream', async (ws, req) => {
         if (data.type !== 'Results') return;
 
         const transcript = data.channel?.alternatives?.[0]?.transcript || '';
+
+        // Partial transcript with ≥2 words confirms real speech — execute debounced barge-in
+        if (!data.is_final && pendingBargeIn && transcript.trim().split(/\s+/).length >= 2) {
+          executeBargeIn('partial transcript confirmed');
+        }
+
         if (!transcript || !data.is_final) return;
 
         pendingTranscript = (pendingTranscript + ' ' + transcript).trim();
@@ -922,6 +1029,8 @@ app.ws('/media-stream', async (ws, req) => {
           if (conversationId) saveMessage(conversationId, 'assistant', checkingMsg).catch(() => {});
 
           try {
+            const aptLength = resolveServiceDuration(business, bookingState.reason);
+            console.log(`[Booking] Service duration resolved: ${aptLength}min for "${bookingState.reason}"`);
             const slots = await getAvailability(
               business.opendental_server_url,
               business.opendental_api_key,
@@ -929,8 +1038,10 @@ app.ws('/media-stream', async (ws, req) => {
                 windowDays: business.opendental_booking_window || 7,
                 providerName: bookingState.providerPreference || null,
                 timeZone: business.timezone || 'America/New_York',
+                length: aptLength,
               }
             );
+            bookingState.aptLength = aptLength;
             if (!slots.length) throw new Error('No slots returned');
             bookingState.availableSlots = slots;
             console.log('[Booking] Got', slots.length, 'available slots');
@@ -984,7 +1095,7 @@ app.ws('/media-stream', async (ws, req) => {
             const apt = await createAppointment(
               business.opendental_server_url,
               business.opendental_api_key,
-              { patientId: patient.PatNum, aptDateTime: s.aptDateTime, operatoryId: s.operatoryId, providerId: s.providerId, reason: bookingState.reason, mode }
+              { patientId: patient.PatNum, aptDateTime: s.aptDateTime, operatoryId: s.operatoryId, providerId: s.providerId, reason: bookingState.reason, mode, length: bookingState.aptLength || 60 }
             );
             bookingState.stage = 'done';
 
@@ -1020,7 +1131,7 @@ app.ws('/media-stream', async (ws, req) => {
                 const newSlots = await getAvailability(
                   business.opendental_server_url,
                   business.opendental_api_key,
-                  { windowDays: business.opendental_booking_window || 7, timeZone: business.timezone || 'America/New_York' }
+                  { windowDays: business.opendental_booking_window || 7, timeZone: business.timezone || 'America/New_York', length: bookingState.aptLength || 60 }
                 );
                 if (!newSlots.length) throw new Error('No slots on retry');
                 bookingState.availableSlots = newSlots;
@@ -1083,6 +1194,8 @@ app.ws('/media-stream', async (ws, req) => {
       if (myTurn === turnId) {
         isSpeaking = false;
         abortController = null;
+        pendingBargeIn = false;
+        if (bargeInTimer) { clearTimeout(bargeInTimer); bargeInTimer = null; }
       }
     }
   }
@@ -1129,6 +1242,7 @@ app.ws('/media-stream', async (ws, req) => {
 
     if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
     if (silenceTimer)   { clearTimeout(silenceTimer);   silenceTimer   = null; }
+    if (bargeInTimer)   { clearTimeout(bargeInTimer);   bargeInTimer   = null; }
     if (dgSocket) dgSocket.close();
 
     // Abort any in-progress TTS
