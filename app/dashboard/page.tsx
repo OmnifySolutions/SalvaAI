@@ -165,14 +165,14 @@ export default async function DashboardPage() {
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="font-semibold text-gray-900">Recent Activity Stream</h2>
               </div>
-              <div className="divide-y divide-gray-50">
+              <ul className="divide-y divide-gray-50">
                 {!conversations || conversations.length === 0 ? (
-                  <div className="px-6 py-10 text-center text-gray-400 text-sm">
+                  <li className="px-6 py-10 text-center text-gray-400 text-sm">
                     No conversations yet. Your feed will populate automatically.
-                  </div>
+                  </li>
                 ) : (
                   conversations.map((conv) => (
-                    <div key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors cursor-pointer">
+                    <li key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors cursor-pointer">
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                           conv.channel === "voice" ? "bg-orange-50 text-orange-600" : "bg-blue-50 text-blue-600"
@@ -192,10 +192,10 @@ export default async function DashboardPage() {
                         </div>
                       </div>
                       <div className="text-sm text-gray-400">View →</div>
-                    </div>
+                    </li>
                   ))
                 )}
-              </div>
+              </ul>
             </div>
             
           </div>
@@ -211,11 +211,11 @@ export default async function DashboardPage() {
                   <TrendingUp size={16} />
                 </div>
               </div>
-              <div className="space-y-4">
+              <ul className="space-y-4">
                 {campaigns.length === 0 ? (
-                  <div className="text-xs text-gray-500 border border-dashed border-gray-200 rounded-xl p-4 text-center">
+                  <li className="text-xs text-gray-500 border border-dashed border-gray-200 rounded-xl p-4 text-center">
                     No active campaigns. Create one to re-engage past patients.
-                  </div>
+                  </li>
                 ) : (
                   campaigns.map((c) => {
                     const openPct =
@@ -223,7 +223,7 @@ export default async function DashboardPage() {
                         ? Math.round((c.open_count / c.recipients_count) * 100)
                         : 0;
                     return (
-                      <div key={c.id} className="border border-gray-100 rounded-xl p-4">
+                      <li key={c.id} className="border border-gray-100 rounded-xl p-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="font-medium text-sm text-gray-900">{c.name}</span>
                           <span className="text-xs text-blue-600 font-bold">{openPct}% Open</span>
@@ -234,11 +234,11 @@ export default async function DashboardPage() {
                         <p className="text-[11px] text-gray-500">
                           {c.appointments_booked} appointments booked via AI
                         </p>
-                      </div>
+                      </li>
                     );
                   })
                 )}
-              </div>
+              </ul>
               <Link
                 href="/settings#campaigns"
                 className="w-full mt-4 py-2 bg-gray-50 text-gray-500 text-sm font-medium rounded-xl block text-center hover:bg-gray-100 transition-colors"

@@ -89,18 +89,17 @@ export async function getCallVolumeSeries(
     return { name: days[d.getDay()], calls: 0, handled: 0, date: d.toDateString() };
   });
   try {
-    const { data, error } = await supabaseAdmin
-      .from("conversations")
-      .select("created_at, channel")
-      .eq("business_id", businessId)
-      .gte("created_at", nDaysAgo(7));
+    const { data, error } = await supabaseAdmin.rpc("get_daily_call_volume", {
+      biz_id: businessId,
+      since: nDaysAgo(7),
+    });
     if (error || !data) return buckets.map(({ name, calls, handled }) => ({ name, calls, handled }));
-    for (const row of data as Array<{ created_at: string; channel: string }>) {
-      const key = new Date(row.created_at).toDateString();
+    for (const row of data as Array<{ date: string; total: number; voice: number }>) {
+      const key = new Date(row.date).toDateString();
       const bucket = buckets.find((b) => b.date === key);
       if (!bucket) continue;
-      bucket.calls++;
-      if (row.channel === "voice") bucket.handled++;
+      bucket.calls = row.total;
+      bucket.handled = row.voice;
     }
   } catch {
     /* fall through to zeroed buckets */
@@ -200,15 +199,13 @@ export async function getPeakContactHours(
 ): Promise<Array<{ hour: number; count: number }>> {
   const buckets = Array.from({ length: 24 }, (_, hour) => ({ hour, count: 0 }));
   try {
-    const { data, error } = await supabaseAdmin
-      .from("conversations")
-      .select("created_at")
-      .eq("business_id", businessId)
-      .gte("created_at", nDaysAgo(30));
+    const { data, error } = await supabaseAdmin.rpc("get_hourly_contact_volume", {
+      biz_id: businessId,
+      since: nDaysAgo(30),
+    });
     if (error || !data) return buckets;
-    for (const row of data as Array<{ created_at: string }>) {
-      const h = new Date(row.created_at).getHours();
-      buckets[h].count++;
+    for (const row of data as Array<{ hour: number; count: number }>) {
+      if (row.hour >= 0 && row.hour < 24) buckets[row.hour].count = row.count;
     }
   } catch {
     /* fall through */
