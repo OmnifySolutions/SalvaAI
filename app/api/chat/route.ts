@@ -1,7 +1,14 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabaseAdmin } from "@/lib/supabase";
-import { classifyUrgency, detectAppointmentIntent, extractContact, isAfterHours } from "@/lib/classify";
+import {
+  classifyUrgency,
+  detectAppointmentIntent,
+  extractContact,
+  isAfterHours,
+  URGENCY_RANK,
+  UrgencyLevel,
+} from "@/lib/classify";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -102,9 +109,8 @@ export async function POST(req: NextRequest) {
       .eq("id", convId)
       .single();
 
-    const rank = { routine: 0, urgent: 1, emergency: 2 } as const;
     const newUrgency =
-      existing && rank[urgency] > rank[(existing.urgency as keyof typeof rank) ?? "routine"]
+      existing && URGENCY_RANK[urgency] > URGENCY_RANK[(existing.urgency as UrgencyLevel) ?? "routine"]
         ? urgency
         : undefined;
 

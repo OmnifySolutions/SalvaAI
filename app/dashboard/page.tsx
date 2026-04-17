@@ -27,6 +27,7 @@ import {
   getPeakContactHours,
   getEmergencyFlagCount,
 } from "@/lib/dashboard";
+import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -283,15 +284,24 @@ export default async function DashboardPage() {
   );
 }
 
-function StatWidget({ icon: Icon, label, value, trend, color }: any) {
-  const colorMap: Record<string, string> = {
-    blue: "text-blue-600 bg-blue-50",
-    green: "text-green-600 bg-green-50",
-    yellow: "text-orange-600 bg-orange-50",
-    purple: "text-purple-600 bg-purple-50",
-    red: "text-red-600 bg-red-50",
-    gray: "text-gray-600 bg-gray-100",
-  };
+type StatWidgetProps = {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  trend: string;
+  color: "blue" | "green" | "yellow" | "purple" | "red" | "gray";
+};
+
+const colorMap: Record<StatWidgetProps["color"], string> = {
+  blue: "text-blue-600 bg-blue-50",
+  green: "text-green-600 bg-green-50",
+  yellow: "text-orange-600 bg-orange-50",
+  purple: "text-purple-600 bg-purple-50",
+  red: "text-red-600 bg-red-50",
+  gray: "text-gray-600 bg-gray-100",
+};
+
+function StatWidget({ icon: Icon, label, value, trend, color }: StatWidgetProps) {
   
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">

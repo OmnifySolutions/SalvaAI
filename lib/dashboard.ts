@@ -39,24 +39,26 @@ export async function getAppointmentStats(businessId: string): Promise<{
   thisMonth: number;
   lastMonthDelta: number;
 }> {
-  const total = await safeCount((q) =>
-    q.select("id", { count: "exact", head: true })
-      .eq("business_id", businessId)
-      .eq("appointment_requested", true)
-  );
-  const thisMonth = await safeCount((q) =>
-    q.select("id", { count: "exact", head: true })
-      .eq("business_id", businessId)
-      .eq("appointment_requested", true)
-      .gte("created_at", startOfMonth())
-  );
-  const lastMonth = await safeCount((q) =>
-    q.select("id", { count: "exact", head: true })
-      .eq("business_id", businessId)
-      .eq("appointment_requested", true)
-      .gte("created_at", startOfPrevMonth())
-      .lt("created_at", startOfMonth())
-  );
+  const [total, thisMonth, lastMonth] = await Promise.all([
+    safeCount((q) =>
+      q.select("id", { count: "exact", head: true })
+        .eq("business_id", businessId)
+        .eq("appointment_requested", true)
+    ),
+    safeCount((q) =>
+      q.select("id", { count: "exact", head: true })
+        .eq("business_id", businessId)
+        .eq("appointment_requested", true)
+        .gte("created_at", startOfMonth())
+    ),
+    safeCount((q) =>
+      q.select("id", { count: "exact", head: true })
+        .eq("business_id", businessId)
+        .eq("appointment_requested", true)
+        .gte("created_at", startOfPrevMonth())
+        .lt("created_at", startOfMonth())
+    ),
+  ]);
   return { total, thisMonth, lastMonthDelta: thisMonth - lastMonth };
 }
 

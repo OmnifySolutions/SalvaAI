@@ -1,6 +1,9 @@
 // Lightweight classifiers used by chat + voice ingest to populate dashboard fields.
 // Keep these regex-based for speed; promote to an Anthropic call later if accuracy matters.
 
+export const URGENCY_RANK = { routine: 0, urgent: 1, emergency: 2 } as const;
+export type UrgencyLevel = "emergency" | "urgent" | "routine";
+
 type HoursEntry = { open: string | null; close: string | null; enabled: boolean };
 type HoursMap = Record<string, HoursEntry>;
 
@@ -23,7 +26,7 @@ const APPOINTMENT_KEYWORDS = [
 const PHONE_RE = /(\+?\d[\d\s().-]{7,}\d)/;
 const EMAIL_RE = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/;
 
-export function classifyUrgency(text: string): "emergency" | "urgent" | "routine" {
+export function classifyUrgency(text: string): UrgencyLevel {
   const lower = text.toLowerCase();
   if (EMERGENCY_KEYWORDS.some((k) => lower.includes(k))) return "emergency";
   if (URGENT_KEYWORDS.some((k) => lower.includes(k))) return "urgent";
