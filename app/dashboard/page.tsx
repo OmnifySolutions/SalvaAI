@@ -4,29 +4,23 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
 import SignOutButton from "@/components/SignOutButton";
-import UpgradeButton from "@/components/UpgradeButton";
 import DashboardCharts from "@/components/DashboardCharts";
 import {
-  MessageSquare,
   PhoneCall,
-  CalendarCheck,
-  TrendingUp,
-  Users,
+  MessageSquare,
   Settings,
   Moon,
   AlertTriangle,
 } from "lucide-react";
 import {
   getAppointmentStats,
-  getUniqueVisitors,
   getCallVolumeSeries,
-  getRevenueSeries,
-  getActiveCampaigns,
   getAfterHoursCount,
   getUrgencyBreakdown,
   getPeakContactHours,
   getEmergencyFlagCount,
 } from "@/lib/dashboard";
+import DashboardStats from "@/components/DashboardStats";
 import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -43,14 +37,11 @@ export default async function DashboardPage() {
   if (!business) redirect("/onboarding");
 
   // Get recent conversations + all dashboard metrics in parallel.
-  const avgApptValue = (business.avg_appointment_value as number | null) ?? 150;
   const [
-    { data: conversations },
+    { data: feedConversations },
+    { data: allConversations },
     appointments,
-    visitors,
     callVolume,
-    revenue,
-    campaigns,
     afterHours,
     urgency,
     peakHours,
@@ -62,11 +53,13 @@ export default async function DashboardPage() {
       .eq("business_id", business.id)
       .order("created_at", { ascending: false })
       .limit(5),
+    supabaseAdmin
+      .from("conversations")
+      .select("id, channel, created_at")
+      .eq("business_id", business.id)
+      .order("created_at", { ascending: false }),
     getAppointmentStats(business.id),
-    getUniqueVisitors(business.id),
     getCallVolumeSeries(business.id),
-    getRevenueSeries(business.id, avgApptValue),
-    getActiveCampaigns(business.id),
     getAfterHoursCount(business.id),
     getUrgencyBreakdown(business.id),
     getPeakContactHours(business.id),
@@ -86,7 +79,6 @@ export default async function DashboardPage() {
           <Link href="/dashboard" className="font-bold text-gray-900 text-lg">Salva AI</Link>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <span className="text-gray-900 border-b-2 border-gray-900 pb-1">Overview</span>
-            <a href="#campaigns-section" className="text-gray-500 hover:text-gray-900">Campaigns</a>
             <Link href="/settings" className="text-gray-500 hover:text-gray-900 flex items-center gap-1.5"><Settings size={16}/> Settings</Link>
           </div>
         </div>
@@ -121,13 +113,13 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Premium Stat Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <StatWidget icon={PhoneCall} label="Total Interactions" value={business.interaction_count} trend="All time" color="blue" />
-          <StatWidget icon={CalendarCheck} label="Appointments Booked" value={appointments.total} trend={appointmentTrend} color="green" />
-          <StatWidget icon={MessageSquare} label="Active Chats" value={conversations?.filter(c => c.status === "active").length || 0} trend="Live" color="yellow" />
-          <StatWidget icon={Users} label="Total Patients Engaged" value={visitors.total} trend="All time" color="purple" />
-        </div>
+        {/* Stats Row with date filter */}
+        <DashboardStats
+          allConversations={allConversations ?? []}
+          totalInteractions={business.interaction_count ?? 0}
+          appointmentsTotal={appointments.total}
+          appointmentTrend={appointmentTrend}
+        />
 
         {/* Secondary Stat Row — after-hours + emergency */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -150,8 +142,6 @@ export default async function DashboardPage() {
         {/* Recharts Inject */}
         <DashboardCharts
           callVolumeData={callVolume}
-          revenueData={revenue.series}
-          revenueTotal={revenue.total}
           urgencyData={urgency}
           peakHoursData={peakHours}
         />
@@ -166,12 +156,12 @@ export default async function DashboardPage() {
                 <h2 className="font-semibold text-gray-900">Recent Activity Stream</h2>
               </div>
               <ul className="divide-y divide-gray-50">
-                {!conversations || conversations.length === 0 ? (
+                {!feedConversations || feedConversations.length === 0 ? (
                   <li className="px-6 py-10 text-center text-gray-400 text-sm">
                     No conversations yet. Your feed will populate automatically.
                   </li>
                 ) : (
-                  conversations.map((conv) => (
+                  feedConversations.map((conv) => (
                     <li key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors cursor-pointer">
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -203,50 +193,6 @@ export default async function DashboardPage() {
           {/* Right Sidebar */}
           <div className="space-y-6">
             
-            {/* Active Campaigns */}
-            <div id="campaigns-section" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="font-semibold text-gray-900">Active Campaigns</h2>
-                <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-                  <TrendingUp size={16} />
-                </div>
-              </div>
-              <ul className="space-y-4">
-                {campaigns.length === 0 ? (
-                  <li className="text-xs text-gray-500 border border-dashed border-gray-200 rounded-xl p-4 text-center">
-                    No active campaigns. Create one to re-engage past patients.
-                  </li>
-                ) : (
-                  campaigns.map((c) => {
-                    const openPct =
-                      c.recipients_count > 0
-                        ? Math.round((c.open_count / c.recipients_count) * 100)
-                        : 0;
-                    return (
-                      <li key={c.id} className="border border-gray-100 rounded-xl p-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-sm text-gray-900">{c.name}</span>
-                          <span className="text-xs text-blue-600 font-bold">{openPct}% Open</span>
-                        </div>
-                        <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
-                          <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${openPct}%` }}></div>
-                        </div>
-                        <p className="text-[11px] text-gray-500">
-                          {c.appointments_booked} appointments booked via AI
-                        </p>
-                      </li>
-                    );
-                  })
-                )}
-              </ul>
-              <Link
-                href="/settings#campaigns"
-                className="w-full mt-4 py-2 bg-gray-50 text-gray-500 text-sm font-medium rounded-xl block text-center hover:bg-gray-100 transition-colors"
-              >
-                + New Campaign
-              </Link>
-            </div>
-
             {/* Quick Actions / Upgrades */}
             {business.plan === "free" && (
               <div className="bg-gray-900 rounded-3xl border border-gray-800 p-8 text-white shadow-2xl relative overflow-hidden group">
@@ -259,9 +205,9 @@ export default async function DashboardPage() {
                   Start answering calls 24/7. Upgrade to Pro to enable your Voice Agent and OpenDental sync.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <UpgradeButton plan="pro" className="w-full text-sm bg-white hover:bg-gray-100 text-gray-900 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex justify-center items-center gap-2">
-                    Buy Pro — $219/mo
-                  </UpgradeButton>
+                  <Link href="/pricing" className="w-full text-sm bg-white hover:bg-gray-100 text-gray-900 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex justify-center items-center gap-2">
+                    View Plans →
+                  </Link>
                 </div>
               </div>
             )}

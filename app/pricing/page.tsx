@@ -19,7 +19,7 @@ const plans = [
     period: "forever",
     description: "Try it risk-free with your first 50 patient interactions.",
     features: [
-      "50 AI interactions / month",
+      "50 AI interactions total",
       "Chat widget",
       "Basic FAQ support",
       "Salva AI branding",
@@ -149,7 +149,7 @@ const faqs = [
   },
   {
     q: "What happens when the Free plan's 50 interaction limit is reached?",
-    a: "The widget lets patients know to call the office directly. Upgrade to Basic or Pro for unlimited interactions.",
+    a: "Once your 50-interaction trial is used, the widget lets patients know to call the office directly. Upgrade to Basic or Pro for unlimited interactions.",
   },
   {
     q: "Is patient data safe?",

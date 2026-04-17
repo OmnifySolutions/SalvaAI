@@ -27,6 +27,8 @@ import StatsCarousel from "@/components/StatsCarousel";
 import DashboardMockup from "@/components/DashboardMockup";
 import SocialProof from "@/components/SocialProof";
 import AudioDemo from "@/components/AudioDemo";
+import FloatingChatWidget from "@/components/FloatingChatWidget";
+import CustomizabilityDemo from "@/components/CustomizabilityDemo";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -145,13 +147,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Animated chat card spread */}
-      <section className="pb-32 px-6 bg-gray-50">
-        <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
-          Real conversations, handled automatically
-        </p>
-        <ChatCardSpread />
-      </section>
+      {/* Audio demo */}
+      <AudioDemo />
 
       {/* Stats */}
       <section className="border-y border-gray-100 bg-gray-50 overflow-hidden">
@@ -160,8 +157,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Audio demo */}
-      <AudioDemo />
+      {/* Animated chat card spread */}
+      <section className="pb-32 px-6 bg-gray-50">
+        <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
+          Real conversations, handled automatically
+        </p>
+        <ChatCardSpread />
+      </section>
 
       {/* Playbook / Workflows */}
       <section className="bg-white py-24 border-t border-gray-100">
@@ -249,6 +251,9 @@ export default async function HomePage() {
         </div>
       </div>
       </section>
+
+      {/* AI Customizability Demo */}
+      <CustomizabilityDemo />
 
       {/* PMS Integration */}
       <section className="bg-gray-900 py-24 text-white overflow-hidden relative">
@@ -384,6 +389,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Floating chat widget */}
+      <FloatingChatWidget businessId={process.env.NEXT_PUBLIC_DEMO_BUSINESS_ID ?? ""} />
+
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
@@ -467,17 +475,17 @@ const howItWorks = [
 
 const setupTimeline = [
   {
-    milestone: "Week 1",
+    milestone: "Day 1",
     title: "Chat widget live",
-    description: "Copy one line of code to your website. Your AI receptionist starts answering patient questions immediately.",
+    description: "Copy one line of code to your website. Your AI receptionist starts answering patient questions within minutes.",
   },
   {
-    milestone: "Week 1–2",
+    milestone: "Day 2",
     title: "Voice AI activated",
-    description: "Forward your practice number after setup. Every call gets answered 24/7 — no missed patients, no voicemail.",
+    description: "Forward your practice number and every call gets answered 24/7 — no missed patients, no voicemail.",
   },
   {
-    milestone: "Week 2–4",
+    milestone: "Day 3",
     title: "ROI tracking live",
     description: "See every conversation in your dashboard. Track leads captured, calls answered, and patient inquiries handled.",
   },

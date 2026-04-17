@@ -8,8 +8,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  AreaChart,
-  Area,
   CartesianGrid,
   PieChart,
   Pie,
@@ -18,15 +16,11 @@ import {
 } from "recharts";
 
 type CallPoint = { name: string; calls: number; handled: number };
-type RevenuePoint = { name: string; revenue: number };
 type UrgencyData = { emergency: number; urgent: number; routine: number };
 type HourPoint = { hour: number; count: number };
 
 type Props = {
   callVolumeData?: CallPoint[];
-  revenueData?: RevenuePoint[];
-  revenueTotal?: number;
-  revenueDelta?: number;
   urgencyData?: UrgencyData;
   peakHoursData?: HourPoint[];
 };
@@ -39,14 +33,10 @@ const formatHour = (h: number) => {
 
 export default function DashboardCharts({
   callVolumeData = [],
-  revenueData = [],
-  revenueTotal = 0,
-  revenueDelta = 0,
   urgencyData = { emergency: 0, urgent: 0, routine: 0 },
   peakHoursData = [],
 }: Props) {
   const hasCalls = callVolumeData.some((d) => d.calls > 0);
-  const hasRevenue = revenueData.some((d) => d.revenue > 0);
   const urgencyTotal = urgencyData.emergency + urgencyData.urgent + urgencyData.routine;
   const hasHours = peakHoursData.some((d) => d.count > 0);
 
@@ -62,7 +52,7 @@ export default function DashboardCharts({
 
   return (
     <div className="space-y-6 mb-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <ChartPanel title="Call Volume Handled" subtitle="AI agent vs. total inquiries" badge="Last 7 days">
           {hasCalls ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -83,38 +73,6 @@ export default function DashboardCharts({
           )}
         </ChartPanel>
 
-        <ChartPanel
-          title="Revenue Saved"
-          subtitle="Based on AI-booked appointments"
-          badge={
-            hasRevenue
-              ? `+$${revenueTotal.toLocaleString()}${revenueDelta !== 0 ? ` (${revenueDelta > 0 ? "+" : ""}${revenueDelta}%)` : ""}`
-              : "$0"
-          }
-        >
-          {hasRevenue ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#16a34a" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#9ca3af" }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#9ca3af" }} tickFormatter={(value) => `$${value}`} />
-                <Tooltip
-                  contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-                  itemStyle={{ color: "#16a34a" }}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <EmptyState label="No AI-booked appointments yet." />
-          )}
-        </ChartPanel>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

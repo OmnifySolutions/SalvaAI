@@ -44,6 +44,19 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 
 ## Pre-Launch Checklist (Approved Build Queue)
 
+### ✅ Recently Completed
+
+**Website & Dashboard Overhaul (2026-04-18)** — 16 polishing changes
+- ✅ Reordered homepage: AudioDemo → StatsCarousel → ChatCardSpread (audio has priority)
+- ✅ Added interactive "AI Customizability Demo" section showing toggle-based AI response changes
+- ✅ Floating chat widget on homepage (reads `NEXT_PUBLIC_DEMO_BUSINESS_ID`, displays at bottom-right)
+- ✅ Updated pricing free tier: "50 interactions total" (was "/month") to emphasize trial graduation
+- ✅ Dashboard redesign: removed "Total Patients Engaged", added "Phone Calls" stat, renamed "Active Chats" to "Chats", removed Campaigns section, added date filters (Today/Week/Month/Quarter/All time)
+- ✅ Settings improvements: removed greeting hint, added Patient FAQs help text, fixed "telephony" typo, added "Do's & Don'ts" tab with green/red textareas
+- ✅ DashboardCharts: removed "Revenue Saved" panel entirely
+- ✅ Created new components: FloatingChatWidget, CustomizabilityDemo, DashboardStats (with client-side date filtering)
+- ⚠️ **Manual step required**: Run Supabase migration to add `ai_dos` and `ai_donts` TEXT columns; set `NEXT_PUBLIC_DEMO_BUSINESS_ID` env var
+
 ### 🔧 Active Next Steps
 
 **Item 23: Voice call UX tuning** — PARTIALLY COMPLETE, needs final validation

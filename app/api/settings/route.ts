@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     name, businessType, hours, services,
-    aiName, aiGreeting, customPrompt, faqs, voiceEnabled,
+    aiName, aiGreeting, customPrompt, faqs, aiDos, aiDonts, voiceEnabled,
     voiceTone, voiceEmergencyNumber, voiceEmergencyMessage,
     voiceDeflectTopics, voiceScenarios,
     openDentalServerUrl, openDentalApiKey, openDentalBookingMode, openDentalBookingWindow,
@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
       ai_greeting: aiGreeting,
       custom_prompt: customPrompt,
       faqs: faqs ?? [],
+      ai_dos: aiDos ?? null,
+      ai_donts: aiDonts ?? null,
       voice_enabled: voiceEnabled ?? false,
       voice_tone: voiceTone ?? "professional",
       voice_emergency_number: voiceEmergencyNumber ?? null,

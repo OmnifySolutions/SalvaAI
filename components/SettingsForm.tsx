@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 
 type FAQ = { question: string; answer: string };
@@ -42,6 +42,8 @@ type Business = {
   opendental_api_key: string | null;
   opendental_booking_mode: "autonomous" | "pending" | "collect_only" | null;
   opendental_booking_window: number | null;
+  ai_dos: string | null;
+  ai_donts: string | null;
 };
 
 const DENTAL_DEFAULTS: Service[] = [
@@ -78,6 +80,7 @@ const TABS = [
   { id: "services",     label: "Services",           icon: LayoutList },
   { id: "ai",          label: "AI Configuration",   icon: Bot },
   { id: "voice",       label: "Voice Settings",      icon: PhoneCall },
+  { id: "dos_donts",   label: "Do's & Don'ts",       icon: ToggleLeft },
   { id: "integrations", label: "Integrations",       icon: Zap },
 ];
 
@@ -116,6 +119,8 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [aiName, setAiName] = useState(business.ai_name ?? "Claire");
   const [aiGreeting, setAiGreeting] = useState(business.ai_greeting ?? "");
   const [customPrompt, setCustomPrompt] = useState(business.custom_prompt ?? "");
+  const [aiDos, setAiDos] = useState(business.ai_dos ?? "");
+  const [aiDonts, setAiDonts] = useState(business.ai_donts ?? "");
 
   const { items: faqs, add: addFaq, update: updateFaq, remove: removeFaq } = useArrayState(business.faqs ?? [], { question: "", answer: "" });
   
@@ -161,6 +166,7 @@ export default function SettingsForm({ business }: { business: Business }) {
         body: JSON.stringify({
           name, businessType, hours, services: serviceItems.filter((s) => s.name.trim()), aiName, aiGreeting, customPrompt,
           faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
+          aiDos: aiDos || null, aiDonts: aiDonts || null,
           voiceEnabled, voiceTone, voiceEmergencyNumber: voiceEmergencyNumber || null, voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics, voiceScenarios, openDentalServerUrl: odServerUrl || null, openDentalApiKey: odApiKey || null,
         }),
@@ -322,17 +328,18 @@ export default function SettingsForm({ business }: { business: Business }) {
           <div className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                <Field fixedHintHeight label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
-               <Field hint="What the AI says when picking up" label="Custom Greeting"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder="Hi, thanks for calling..." /></Field>
+               <Field label="Custom Greeting"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder="Hi, thanks for calling..." /></Field>
             </div>
             <Field label="System Prompt" hint="Direct operating instructions for the LLM">
               <textarea rows={4} value={customPrompt} onChange={e => setCustomPrompt(e.target.value)} className={inputCls} placeholder="Always offer the new patient special..." />
             </Field>
 
             <div className="pt-6 mt-6 border-t border-gray-100">
-               <div className="flex justify-between items-center mb-4">
+               <div className="flex justify-between items-center mb-2">
                  <h3 className="font-semibold text-gray-900">Patient FAQs</h3>
-                 <button type="button" onClick={addFaq} className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold">+ Rule</button>
+                 <button type="button" onClick={addFaq} className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold">+ Add FAQ</button>
                </div>
+               <p className="text-sm text-gray-500 mb-4">Add your practice&apos;s most common questions and answers below. Your AI will use these to respond accurately to patients.</p>
                {faqs.map((faq, i) => (
                  <div key={i} className="flex gap-3 mb-3 bg-gray-50 p-3 rounded-xl border border-gray-200 relative group">
                     <div className="flex-1 space-y-2">
@@ -351,7 +358,7 @@ export default function SettingsForm({ business }: { business: Business }) {
           <div className="mb-8 border-b border-gray-100 pb-5 flex justify-between items-end">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Voice Calling</h2>
-              <p className="text-gray-500 text-sm mt-1">Configure your telephony and routing.</p>
+              <p className="text-gray-500 text-sm mt-1">Configure your telephone and routing.</p>
             </div>
             {hasVoice && (
               <label className="flex items-center gap-3 cursor-pointer">
@@ -406,6 +413,54 @@ export default function SettingsForm({ business }: { business: Business }) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* DO'S & DON'TS TAB */}
+        <div className={activeTab === "dos_donts" ? "block" : "hidden"}>
+          <div className="mb-8 border-b border-gray-100 pb-5">
+            <h2 className="text-2xl font-bold text-gray-900">Do&apos;s &amp; Don&apos;ts</h2>
+            <p className="text-gray-500 text-sm mt-1">Control exactly what your AI will and won&apos;t say. These rules are applied on every conversation.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+            {/* Do's */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 rounded-full bg-green-100 border border-green-300 flex items-center justify-center shrink-0">
+                  <Check size={11} className="text-green-600 stroke-[3]" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-sm">Do&apos;s</h3>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">Things you want your AI to always do or say.</p>
+              <textarea
+                rows={10}
+                value={aiDos}
+                onChange={e => setAiDos(e.target.value)}
+                placeholder={"Always offer the next available appointment\nConfirm insurance before booking\nMention the new patient special\nAsk for patient name and best callback number"}
+                className="flex-1 w-full border-2 border-green-200 focus:border-green-400 rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all bg-green-50/30 placeholder-gray-300 leading-relaxed"
+              />
+            </div>
+
+            {/* Don'ts */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 rounded-full bg-red-100 border border-red-300 flex items-center justify-center shrink-0">
+                  <X size={11} className="text-red-500 stroke-[3]" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-sm">Don&apos;ts</h3>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">Things you never want your AI to do or say.</p>
+              <textarea
+                rows={10}
+                value={aiDonts}
+                onChange={e => setAiDonts(e.target.value)}
+                placeholder={"Never quote prices over the phone\nDo not book same-day appointments\nNever discuss clinical diagnoses\nDo not mention competitor practices"}
+                className="flex-1 w-full border-2 border-red-200 focus:border-red-400 rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all bg-red-50/30 placeholder-gray-300 leading-relaxed"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-4 max-w-xl">
+            One rule per line. These are merged with your system prompt and applied to both voice calls and chat conversations.
+          </p>
         </div>
 
         {/* INTEGRATIONS TAB */}
