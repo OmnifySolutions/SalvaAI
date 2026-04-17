@@ -39,17 +39,19 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - **Copy policy**: No specific uncited statistics in marketing copy (FTC risk). Use qualitative or range-based language. All stats must have a verifiable source before using a specific number.
 - **SocialProof**: Component exists but is gated off via `{false && <SocialProof />}` in `app/page.tsx`. Do not enable until real verified customer quotes are collected.
 - **Dashboard wiring (Part D — COMPLETE)**: All metrics wired to real data (appointments, unique visitors, after-hours, urgency breakdown, peak contact hours, campaigns). Migration applied 2026-04-17. Code reviewed and optimized (type safety, parallelization, semantic HTML, ChartPanel wrapper). See memory `project_part_d_complete.md` for implementation details and pending RPC optimizations.
+- **Voice AI tuning (Item 23 — PARTIAL COMPLETION)**: Implemented 5-layer prompt architecture with vertical profile system (dental_general), service duration awareness, sentence buffering (choppiness fix), and barge-in debounce (150ms VAD filter). Code quality pass completed 2026-04-17 (critical: timer cleanup, regex pre-compilation, listener cleanup, CRUD hook extraction). Still need: end-to-end Open Dental booking validation, microphone permission UI flow. See memory `voice_ai_tuning_complete.md` for architecture and code quality fixes.
 - **tsconfig.json**: `plugins/` is excluded to suppress pre-existing TS error from Claude plugin cache — do not remove that exclusion.
 
 ## Pre-Launch Checklist (Approved Build Queue)
 
 ### 🔧 Active Next Steps
 
-**Item 23: Voice call UX tuning** — MUST FIX before launch
-- Microphone permission prompt doesn't appear until tab switch (browser SDK issue)
-- Barge-in too aggressive — cuts off AI mid-sentence (echo or VAD sensitivity)
-- LLM reasoning/flow needs tuning — better dental context, appointment flow
-- Open Dental booking not confirmed end-to-end (got cut off before appointment created)
+**Item 23: Voice call UX tuning** — PARTIALLY COMPLETE, needs final validation
+- ✅ LLM reasoning/flow: Implemented 5-layer prompt + vertical profile system + service duration resolution
+- ✅ Barge-in: Fixed with 150ms debounce + 2-word partial transcript confirmation (prevents false triggers on coughs)
+- ✅ Choppy audio: Implemented sentence buffering (accumulates short sentences <40 chars before TTS)
+- ✅ Code quality: Critical timer cleanup, regex pre-compilation, listener cleanup, CRUD consolidation
+- ⏳ Remaining: End-to-end Open Dental booking validation (needs ngrok), microphone permission UI flow
 
 ### 🟡 Pending (Blocked)
 
