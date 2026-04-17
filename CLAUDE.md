@@ -40,3 +40,27 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - **SocialProof**: Component exists but is gated off via `{false && <SocialProof />}` in `app/page.tsx`. Do not enable until real verified customer quotes are collected.
 - **Dashboard wiring (Part D — COMPLETE)**: All metrics wired to real data (appointments, unique visitors, after-hours, urgency breakdown, peak contact hours, campaigns). Migration applied 2026-04-17. Code reviewed and optimized (type safety, parallelization, semantic HTML, ChartPanel wrapper). See memory `project_part_d_complete.md` for implementation details and pending RPC optimizations.
 - **tsconfig.json**: `plugins/` is excluded to suppress pre-existing TS error from Claude plugin cache — do not remove that exclusion.
+
+## Pre-Launch Checklist (Approved Build Queue)
+
+### 🔧 Active Next Steps
+
+**Item 23: Voice call UX tuning** — MUST FIX before launch
+- Microphone permission prompt doesn't appear until tab switch (browser SDK issue)
+- Barge-in too aggressive — cuts off AI mid-sentence (echo or VAD sensitivity)
+- LLM reasoning/flow needs tuning — better dental context, appointment flow
+- Open Dental booking not confirmed end-to-end (got cut off before appointment created)
+
+### 🟡 Pending (Blocked)
+
+**Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
+
+**Item 25: Switch back to Claude Haiku** — BLOCKED: Anthropic credits exhausted; currently using Groq LLM
+
+**Item 26: Enable social proof section** — BLOCKED: Needs first real customer review (flip `{false &&` to `{true &&}` in `app/page.tsx`)
+
+### 🔴 Current Blockers
+
+- **Anthropic credits** — Out of credits; Groq LLM active (impacts Item 25)
+- **Twilio trial account** — Plays watermark on calls; needs paid upgrade to remove
+- **Open Dental ngrok** — Local testing requires ngrok tunnel for end-to-end booking validation
