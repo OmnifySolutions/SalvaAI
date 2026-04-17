@@ -65,7 +65,13 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Business not found" }, { status: 404 });
   }
 
-  // Check interaction limit for basic plan
+  // Check interaction limits
+  if (business.plan === "free" && business.interaction_count >= 50) {
+    return Response.json(
+      { error: "Free trial limit (50 interactions) reached. Please upgrade to continue." },
+      { status: 403 }
+    );
+  }
   if (business.plan === "basic" && business.interaction_count >= 500) {
     return Response.json(
       { error: "Monthly interaction limit reached. Please upgrade." },
@@ -101,13 +107,16 @@ export async function POST(req: NextRequest) {
     }
     convId = newConv.id;
   } else {
-    // Upgrade existing conversation fields as new signal arrives.
-    // Urgency: only escalate, never downgrade.
+    // Verify conversation belongs to this business (security: prevent cross-business access)
     const { data: existing } = await supabaseAdmin
       .from("conversations")
-      .select("urgency, appointment_requested, visitor_phone, visitor_email")
+      .select("urgency, appointment_requested, visitor_phone, visitor_email, business_id")
       .eq("id", convId)
       .single();
+
+    if (!existing || existing.business_id !== businessId) {
+      return Response.json({ error: "Conversation not found" }, { status: 404 });
+    }
 
     const newUrgency =
       existing && URGENCY_RANK[urgency] > URGENCY_RANK[(existing.urgency as UrgencyLevel) ?? "routine"]
@@ -158,6 +167,13 @@ export async function POST(req: NextRequest) {
     ? business.services.map((s: { name: string }) => s.name).join(", ")
     : (business.services as string) || "Please call us to learn about our services.";
 
+  const dosText = business.ai_dos
+    ? `DO: ${business.ai_dos.split('\n').filter(Boolean).join('\n• ')}`
+    : '';
+  const dontsText = business.ai_donts
+    ? `DON'T: ${business.ai_donts.split('\n').filter(Boolean).join('\n• ')}`
+    : '';
+
   const systemPrompt = `You are a friendly AI receptionist named ${business.ai_name ?? "Claire"} for ${business.name}, a ${business.business_type}.
 
 Your job is to help patients/clients by answering common questions, providing information, and helping them schedule appointments.
@@ -167,6 +183,8 @@ Services: ${servicesText}
 
 Frequently Asked Questions:
 ${faqText}
+
+${dosText ? `\nCustom Guidelines:\n${dosText}\n${dontsText}` : ''}
 
 Important rules:
 - Keep responses concise (2-4 sentences max)
