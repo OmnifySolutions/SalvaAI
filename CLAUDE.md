@@ -61,7 +61,14 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Free tier interaction limit: Added enforcement for 50-interaction lifetime trial limit (free plan)
 - ✅ Conversation access control: Added `business_id` verification to prevent cross-business conversation access
 - ✅ Do's & Don'ts enforcement: Integrated `ai_dos` and `ai_donts` into Claude system prompt so custom rules actually affect AI responses
-- ⚠️ **Next**: Animate CustomizabilityDemo component (cycle through 5-second scenarios) and remove "Custom AI Name" toggle, add "Insurance Questions" toggle
+
+**CustomizabilityDemo Polish (2026-04-18)** — Interactive demo refinements
+- ✅ Removed auto-cycling animation; back to manual click-through
+- ✅ Removed "Custom AI Name" toggle, added "Insurance Questions" toggle with ShieldCheck icon
+- ✅ Fixed toggle state: each setting can be toggled on/off independently (not exclusive)
+- ✅ Live preview shows on/off responses for focused toggle
+- ✅ Added hand-drawn orange arrow (outlined style, white interior) bouncing above first card
+- ⏳ **Next**: Replace arrow SVG with custom PNG/SVG image asset (user creating design)
 
 ### 🔧 Active Next Steps
 
