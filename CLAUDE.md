@@ -57,6 +57,12 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Created new components: FloatingChatWidget, CustomizabilityDemo, DashboardStats (with client-side date filtering)
 - ⚠️ **Manual step required**: Run Supabase migration to add `ai_dos` and `ai_donts` TEXT columns; set `NEXT_PUBLIC_DEMO_BUSINESS_ID` env var
 
+**Chat API Security Fixes (2026-04-18)** — 3 critical vulnerabilities closed
+- ✅ Free tier interaction limit: Added enforcement for 50-interaction lifetime trial limit (free plan)
+- ✅ Conversation access control: Added `business_id` verification to prevent cross-business conversation access
+- ✅ Do's & Don'ts enforcement: Integrated `ai_dos` and `ai_donts` into Claude system prompt so custom rules actually affect AI responses
+- ⚠️ **Next**: Animate CustomizabilityDemo component (cycle through 5-second scenarios) and remove "Custom AI Name" toggle, add "Insurance Questions" toggle
+
 ### 🔧 Active Next Steps
 
 **Item 23: Voice call UX tuning** — PARTIALLY COMPLETE, needs final validation
