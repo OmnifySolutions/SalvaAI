@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabaseAdmin } from "@/lib/supabase";
+import { classifyUrgency, detectAppointmentIntent, extractContact, isAfterHours } from "@/lib/classify";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -65,18 +66,56 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Classify this user message for dashboard metrics.
+  const urgency = classifyUrgency(message);
+  const appointmentIntent = detectAppointmentIntent(message);
+  const contact = extractContact(message);
+  const afterHours = isAfterHours(business.hours as never);
+
   // Get or create conversation
   let convId = conversationId;
   if (!convId) {
     const { data: newConv, error: convError } = await supabaseAdmin
       .from("conversations")
-      .insert({ business_id: businessId, channel: "chat", status: "active" })
+      .insert({
+        business_id: businessId,
+        channel: "chat",
+        status: "active",
+        urgency,
+        is_after_hours: afterHours,
+        appointment_requested: appointmentIntent,
+        visitor_phone: contact.phone ?? null,
+        visitor_email: contact.email ?? null,
+      })
       .select("id")
       .single();
     if (convError || !newConv) {
       return Response.json({ error: "Failed to create conversation" }, { status: 500 });
     }
     convId = newConv.id;
+  } else {
+    // Upgrade existing conversation fields as new signal arrives.
+    // Urgency: only escalate, never downgrade.
+    const { data: existing } = await supabaseAdmin
+      .from("conversations")
+      .select("urgency, appointment_requested, visitor_phone, visitor_email")
+      .eq("id", convId)
+      .single();
+
+    const rank = { routine: 0, urgent: 1, emergency: 2 } as const;
+    const newUrgency =
+      existing && rank[urgency] > rank[(existing.urgency as keyof typeof rank) ?? "routine"]
+        ? urgency
+        : undefined;
+
+    const patch: Record<string, unknown> = {};
+    if (newUrgency) patch.urgency = newUrgency;
+    if (appointmentIntent && !existing?.appointment_requested) patch.appointment_requested = true;
+    if (contact.phone && !existing?.visitor_phone) patch.visitor_phone = contact.phone;
+    if (contact.email && !existing?.visitor_email) patch.visitor_email = contact.email;
+    if (Object.keys(patch).length > 0) {
+      await supabaseAdmin.from("conversations").update(patch).eq("id", convId);
+    }
   }
 
   // Save user message

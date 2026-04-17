@@ -6,7 +6,27 @@ import Link from "next/link";
 import SignOutButton from "@/components/SignOutButton";
 import UpgradeButton from "@/components/UpgradeButton";
 import DashboardCharts from "@/components/DashboardCharts";
-import { MessageSquare, PhoneCall, CalendarCheck, TrendingUp, Users, Settings } from "lucide-react";
+import {
+  MessageSquare,
+  PhoneCall,
+  CalendarCheck,
+  TrendingUp,
+  Users,
+  Settings,
+  Moon,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  getAppointmentStats,
+  getUniqueVisitors,
+  getCallVolumeSeries,
+  getRevenueSeries,
+  getActiveCampaigns,
+  getAfterHoursCount,
+  getUrgencyBreakdown,
+  getPeakContactHours,
+  getEmergencyFlagCount,
+} from "@/lib/dashboard";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -21,17 +41,42 @@ export default async function DashboardPage() {
 
   if (!business) redirect("/onboarding");
 
-  // Get recent conversations
-  const { data: conversations } = await supabaseAdmin
-    .from("conversations")
-    .select("id, channel, status, created_at, ended_at")
-    .eq("business_id", business.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  // Get recent conversations + all dashboard metrics in parallel.
+  const avgApptValue = (business.avg_appointment_value as number | null) ?? 150;
+  const [
+    { data: conversations },
+    appointments,
+    visitors,
+    callVolume,
+    revenue,
+    campaigns,
+    afterHours,
+    urgency,
+    peakHours,
+    emergencyFlags,
+  ] = await Promise.all([
+    supabaseAdmin
+      .from("conversations")
+      .select("id, channel, status, created_at, ended_at")
+      .eq("business_id", business.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    getAppointmentStats(business.id),
+    getUniqueVisitors(business.id),
+    getCallVolumeSeries(business.id),
+    getRevenueSeries(business.id, avgApptValue),
+    getActiveCampaigns(business.id),
+    getAfterHoursCount(business.id),
+    getUrgencyBreakdown(business.id),
+    getPeakContactHours(business.id),
+    getEmergencyFlagCount(business.id),
+  ]);
 
-  const interactionLimit = business.plan === "free" ? 50 : "Unlimited";
-  
-  // Real data interaction count mixed with premium mocks
+  const appointmentTrend =
+    appointments.lastMonthDelta === 0
+      ? "This month"
+      : `${appointments.lastMonthDelta > 0 ? "+" : ""}${appointments.lastMonthDelta} vs last month`;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Nav */}
@@ -76,15 +121,39 @@ export default async function DashboardPage() {
         </div>
 
         {/* Premium Stat Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <StatWidget icon={PhoneCall} label="Total Interactions" value={business.interaction_count} trend="+12% this week" color="blue" />
-          <StatWidget icon={CalendarCheck} label="Appointments Booked" value="28" trend="+4 from AI" color="green" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <StatWidget icon={PhoneCall} label="Total Interactions" value={business.interaction_count} trend="All time" color="blue" />
+          <StatWidget icon={CalendarCheck} label="Appointments Booked" value={appointments.total} trend={appointmentTrend} color="green" />
           <StatWidget icon={MessageSquare} label="Active Chats" value={conversations?.filter(c => c.status === "active").length || 0} trend="Live" color="yellow" />
-          <StatWidget icon={Users} label="Total Patients Engaged" value="342" trend="All time" color="purple" />
+          <StatWidget icon={Users} label="Total Patients Engaged" value={visitors.total} trend="All time" color="purple" />
+        </div>
+
+        {/* Secondary Stat Row — after-hours + emergency */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <StatWidget
+            icon={Moon}
+            label="After-Hours Handled"
+            value={afterHours.count}
+            trend={`${afterHours.pct}% of total volume`}
+            color="blue"
+          />
+          <StatWidget
+            icon={AlertTriangle}
+            label="Emergency Flags"
+            value={emergencyFlags.count}
+            trend="Last 30 days"
+            color={emergencyFlags.count > 0 ? "red" : "gray"}
+          />
         </div>
 
         {/* Recharts Inject */}
-        <DashboardCharts />
+        <DashboardCharts
+          callVolumeData={callVolume}
+          revenueData={revenue.series}
+          revenueTotal={revenue.total}
+          urgencyData={urgency}
+          peakHoursData={peakHours}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Feed / Left Column */}
@@ -142,24 +211,39 @@ export default async function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="border border-gray-100 rounded-xl p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium text-sm text-gray-900">Hygiene Recall (6mo)</span>
-                    <span className="text-xs text-blue-600 font-bold">24% Open</span>
+                {campaigns.length === 0 ? (
+                  <div className="text-xs text-gray-500 border border-dashed border-gray-200 rounded-xl p-4 text-center">
+                    No active campaigns. Create one to re-engage past patients.
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
-                    <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: "24%" }}></div>
-                  </div>
-                  <p className="text-[11px] text-gray-500">14 appointments booked via AI</p>
-                </div>
+                ) : (
+                  campaigns.map((c) => {
+                    const openPct =
+                      c.recipients_count > 0
+                        ? Math.round((c.open_count / c.recipients_count) * 100)
+                        : 0;
+                    return (
+                      <div key={c.id} className="border border-gray-100 rounded-xl p-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-sm text-gray-900">{c.name}</span>
+                          <span className="text-xs text-blue-600 font-bold">{openPct}% Open</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
+                          <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${openPct}%` }}></div>
+                        </div>
+                        <p className="text-[11px] text-gray-500">
+                          {c.appointments_booked} appointments booked via AI
+                        </p>
+                      </div>
+                    );
+                  })
+                )}
               </div>
-              <button
-                disabled
-                title="Campaign creation coming soon"
-                className="w-full mt-4 py-2 bg-gray-50 text-gray-400 text-sm font-medium rounded-xl cursor-not-allowed opacity-60"
+              <Link
+                href="/settings#campaigns"
+                className="w-full mt-4 py-2 bg-gray-50 text-gray-500 text-sm font-medium rounded-xl block text-center hover:bg-gray-100 transition-colors"
               >
                 + New Campaign
-              </button>
+              </Link>
             </div>
 
             {/* Quick Actions / Upgrades */}
@@ -205,6 +289,8 @@ function StatWidget({ icon: Icon, label, value, trend, color }: any) {
     green: "text-green-600 bg-green-50",
     yellow: "text-orange-600 bg-orange-50",
     purple: "text-purple-600 bg-purple-50",
+    red: "text-red-600 bg-red-50",
+    gray: "text-gray-600 bg-gray-100",
   };
   
   return (

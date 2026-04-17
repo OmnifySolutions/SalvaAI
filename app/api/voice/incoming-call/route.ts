@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAfterHours } from '@/lib/classify';
 import twilio from 'twilio';
 
 export async function POST(request: NextRequest) {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     // Find the business by their Twilio number
     const { data: businesses } = await supabaseAdmin
       .from('businesses')
-      .select('id')
+      .select('id, hours')
       .eq('twilio_sid', to)
       .single();
 
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create conversation record
+    const afterHours = isAfterHours(businesses.hours as never);
     const { data: conversation } = await supabaseAdmin
       .from('conversations')
       .insert({
@@ -36,7 +38,10 @@ export async function POST(request: NextRequest) {
         channel: 'voice',
         twilio_call_sid: callSid,
         caller_phone: from,
+        visitor_phone: from,
         status: 'active',
+        urgency: 'routine',
+        is_after_hours: afterHours,
       })
       .select()
       .single();
