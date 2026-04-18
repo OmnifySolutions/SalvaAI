@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { Calendar, Moon, ShieldCheck, ListChecks } from "lucide-react";
 
 const configs = [
@@ -10,7 +11,7 @@ const configs = [
     description: "AI books appointments directly into your calendar",
     question: "Can I book an appointment for Tuesday?",
     on: "Of course! I can book that right now. Morning or afternoon works better for you?",
-    off: "Absolutely! I'll pass this along and our team will reach out within 24 hours to confirm.",
+    off: "Absolutely! I'll connect you through one of our team members.",
   },
   {
     key: "afterhours",
@@ -44,21 +45,16 @@ const configs = [
 type ConfigKey = typeof configs[number]["key"];
 
 export default function CustomizabilityDemo() {
-  const [active, setActive] = useState<Set<ConfigKey>>(new Set(["booking"]));
+  const [active, setActive] = useState<ConfigKey | null>(null);
   const [focused, setFocused] = useState<ConfigKey>("booking");
 
   function toggle(key: ConfigKey) {
-    setActive((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+    setActive(active === key ? null : key);
     setFocused(key);
   }
 
   const focusedConfig = configs.find((c) => c.key === focused)!;
-  const isOn = active.has(focused);
+  const isOn = active === focused;
 
   return (
     <section className="bg-gray-50 py-24 border-t border-gray-100">
@@ -73,10 +69,13 @@ export default function CustomizabilityDemo() {
           <p className="text-gray-500 max-w-xl mx-auto text-lg">
             Toggle any behavior on or off. Your AI does exactly what you want — and nothing you don&apos;t.
           </p>
+          <p className="text-sm font-semibold text-blue-600 mt-6 bg-blue-50 inline-block px-4 py-2 rounded-lg">
+            🧠 Works for voice calls, chat, and all AI interactions
+          </p>
         </div>
 
-        {/* Hand-drawn outlined arrow — sits above + overlaps the first card */}
-        <div className="flex justify-center relative -mb-8 pointer-events-none z-10">
+        {/* Hand-drawn arrow — sits above + overlaps the first card */}
+        <div className="flex justify-center relative -mb-12 pointer-events-none z-10">
           <style>{`
             @keyframes arrowBounce {
               0%, 100% { transform: translateY(0px); }
@@ -86,25 +85,14 @@ export default function CustomizabilityDemo() {
               animation: arrowBounce 1.6s ease-in-out infinite;
             }
           `}</style>
-          <svg
-            width="70"
-            height="90"
-            viewBox="0 0 70 90"
+          <Image
+            src="/Arrow.svg"
+            alt="Arrow pointing to first feature"
+            width={140}
+            height={180}
             className="bouncing-arrow"
             style={{ opacity: 0.65 }}
-          >
-            {/* Stem — thick orange outer, white inner on top = outlined look */}
-            <path d="M 35 6 C 33 18, 30 32, 28 52" stroke="#f97316" strokeWidth="11" strokeLinecap="round" fill="none"/>
-            <path d="M 35 6 C 33 18, 30 32, 28 52" stroke="white" strokeWidth="5" strokeLinecap="round" fill="none"/>
-
-            {/* Left barb */}
-            <path d="M 28 52 L 10 34" stroke="#f97316" strokeWidth="11" strokeLinecap="round" fill="none"/>
-            <path d="M 28 52 L 10 34" stroke="white" strokeWidth="5" strokeLinecap="round" fill="none"/>
-
-            {/* Right barb */}
-            <path d="M 28 52 L 46 34" stroke="#f97316" strokeWidth="11" strokeLinecap="round" fill="none"/>
-            <path d="M 28 52 L 46 34" stroke="white" strokeWidth="5" strokeLinecap="round" fill="none"/>
-          </svg>
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -112,19 +100,17 @@ export default function CustomizabilityDemo() {
           <div className="relative">
             <div className="space-y-3">
               {configs.map((c) => {
-                const on = active.has(c.key);
+                const on = active === c.key;
                 const isFocused = focused === c.key;
                 return (
                   <div
                     key={c.key}
                     onClick={() => toggle(c.key)}
                     className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                      isFocused
-                        ? on
+                      on
+                        ? isFocused
                           ? "border-blue-400 bg-blue-50"
-                          : "border-gray-300 bg-gray-100"
-                        : on
-                        ? "border-blue-200 bg-blue-50/30 hover:border-blue-300"
+                          : "border-blue-200 bg-blue-50/30 hover:border-blue-300"
                         : "border-gray-200 bg-white hover:border-gray-300"
                     }`}
                   >
