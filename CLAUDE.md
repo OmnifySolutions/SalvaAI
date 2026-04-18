@@ -46,8 +46,8 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 
 ### ✅ Recently Completed
 
-**Website & Dashboard Overhaul (2026-04-18)** — 16 polishing changes
-- ✅ Reordered homepage: AudioDemo → StatsCarousel → ChatCardSpread (audio has priority)
+**Website & Dashboard Overhaul (2026-04-18)** — 17 polishing changes
+- ✅ Reordered homepage: AudioDemo → CustomizabilityDemo → StatsCarousel → ChatCardSpread (audio → customize flow)
 - ✅ Added interactive "AI Customizability Demo" section showing toggle-based AI response changes
 - ✅ Floating chat widget on homepage (reads `NEXT_PUBLIC_DEMO_BUSINESS_ID`, displays at bottom-right)
 - ✅ Updated pricing free tier: "50 interactions total" (was "/month") to emphasize trial graduation
