@@ -150,6 +150,9 @@ export default async function HomePage() {
       {/* Audio demo */}
       <AudioDemo />
 
+      {/* AI Customizability Demo */}
+      <CustomizabilityDemo />
+
       {/* Stats */}
       <section className="border-y border-gray-100 bg-gray-50 overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 py-4">
@@ -251,9 +254,6 @@ export default async function HomePage() {
         </div>
       </div>
       </section>
-
-      {/* AI Customizability Demo */}
-      <CustomizabilityDemo />
 
       {/* PMS Integration */}
       <section className="bg-gray-900 py-24 text-white overflow-hidden relative">
