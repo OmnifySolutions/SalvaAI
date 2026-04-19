@@ -86,6 +86,9 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Implemented SalvaAI-specific system prompt (team member positioning, pricing, features)
 - ✅ SalvaAI-aware fallback mock responses (pricing, voice AI, setup, integrations, HIPAA)
 - ✅ Added logging for API errors
+- ✅ Consolidated Groq API keys: using original key (`(REDACTED)`) for both voice and chat (already proven working in Railway)
+- ✅ Added `GROQ_API_KEY` to Vercel environment variables
+- ✅ Verified `.env.local` configured correctly
 
 ### 🟡 Pending (Blocked/In Progress)
 
