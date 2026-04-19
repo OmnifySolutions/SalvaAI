@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
+import { FEATURE_DEFINITIONS, GROUP_LABELS, type FeatureDefinition } from "@/lib/ai-features";
 
 type FAQ = { question: string; answer: string };
 type VoiceTone = "professional" | "warm" | "clinical";
@@ -44,6 +45,7 @@ type Business = {
   opendental_booking_window: number | null;
   ai_dos: string | null;
   ai_donts: string | null;
+  ai_features: string[] | null;
 };
 
 const DENTAL_DEFAULTS: Service[] = [
@@ -79,6 +81,7 @@ const TABS = [
   { id: "profile",      label: "Practice Profile",  icon: User },
   { id: "services",     label: "Services",           icon: LayoutList },
   { id: "ai",          label: "AI Configuration",   icon: Bot },
+  { id: "features",    label: "Features",            icon: Sparkles },
   { id: "voice",       label: "Voice Settings",      icon: PhoneCall },
   { id: "dos_donts",   label: "Do's & Don'ts",       icon: ToggleLeft },
   { id: "integrations", label: "Integrations",       icon: Zap },
@@ -121,6 +124,7 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [customPrompt, setCustomPrompt] = useState(business.custom_prompt ?? "");
   const [aiDos, setAiDos] = useState(business.ai_dos ?? "");
   const [aiDonts, setAiDonts] = useState(business.ai_donts ?? "");
+  const [aiFeatures, setAiFeatures] = useState<string[]>(business.ai_features ?? []);
 
   const { items: faqs, add: addFaq, update: updateFaq, remove: removeFaq } = useArrayState(business.faqs ?? [], { question: "", answer: "" });
   
@@ -144,6 +148,20 @@ export default function SettingsForm({ business }: { business: Business }) {
   function toggleScenario(key: string) {
     setVoiceScenarios((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]);
   }
+  function toggleFeature(key: string) {
+    setAiFeatures((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]);
+  }
+
+  const featureIconMap: Record<string, React.ReactNode> = {
+    CalendarCheck: <CalendarCheck size={18} />,
+    Moon: <Moon size={18} />,
+    ListOrdered: <ListOrdered size={18} />,
+    Siren: <Siren size={18} />,
+    ShieldCheck: <ShieldCheck size={18} />,
+    UserPlus: <UserPlus size={18} />,
+    DollarSign: <DollarSign size={18} />,
+    CreditCard: <CreditCard size={18} />,
+  };
 
   async function handleTestConnection() {
     setOdTestStatus("testing");
@@ -166,7 +184,7 @@ export default function SettingsForm({ business }: { business: Business }) {
         body: JSON.stringify({
           name, businessType, hours, services: serviceItems.filter((s) => s.name.trim()), aiName, aiGreeting, customPrompt,
           faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
-          aiDos: aiDos || null, aiDonts: aiDonts || null,
+          aiDos: aiDos || null, aiDonts: aiDonts || null, aiFeatures,
           voiceEnabled, voiceTone, voiceEmergencyNumber: voiceEmergencyNumber || null, voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics, voiceScenarios, openDentalServerUrl: odServerUrl || null, openDentalApiKey: odApiKey || null,
         }),
@@ -413,6 +431,51 @@ export default function SettingsForm({ business }: { business: Business }) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* FEATURES TAB */}
+        <div className={activeTab === "features" ? "block" : "hidden"}>
+          <div className="mb-8 border-b border-gray-100 pb-5">
+            <h2 className="text-2xl font-bold text-gray-900">AI Features</h2>
+            <p className="text-gray-500 text-sm mt-1">Toggle capabilities on or off. Active features are applied to both chat and voice interactions.</p>
+          </div>
+          <div className="space-y-8 max-w-3xl">
+            {(Object.keys(GROUP_LABELS) as Array<FeatureDefinition['group']>).map((group) => {
+              const groupFeatures = FEATURE_DEFINITIONS.filter((f) => f.group === group);
+              return (
+                <div key={group}>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{GROUP_LABELS[group]}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {groupFeatures.map((feature) => {
+                      const isOn = aiFeatures.includes(feature.key);
+                      return (
+                        <div
+                          key={feature.key}
+                          onClick={() => toggleFeature(feature.key)}
+                          className={`flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                            isOn ? 'border-blue-500 bg-blue-50/40' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'
+                          }`}
+                        >
+                          <div className={`mt-0.5 shrink-0 ${isOn ? 'text-blue-600' : 'text-gray-400'}`}>
+                            {featureIconMap[feature.icon]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-semibold leading-tight ${isOn ? 'text-blue-900' : 'text-gray-800'}`}>{feature.label}</p>
+                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{feature.description}</p>
+                          </div>
+                          <div className="shrink-0 mt-0.5">
+                            <div className={`relative w-11 h-6 rounded-full transition-colors ${isOn ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${isOn ? 'left-6' : 'left-1'}`} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* DO'S & DON'TS TAB */}

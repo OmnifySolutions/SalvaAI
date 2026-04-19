@@ -28,7 +28,20 @@
       "Bash(node --check railway/server.js)",
       "Bash(node --check railway/opendental.js)",
       "Bash(git push *)",
-      "Bash(curl -s http://localhost:3000)"
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(git pull *)",
+      "Bash(npm install *)",
+      "Bash(npm search *)",
+      "Bash(grep -E \"\\\\.\\(md|tsx|ts\\)$\")",
+      "Bash(taskkill /PID 11712 /F)",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill *)",
+      "Bash(awk '{print $2}')",
+      "Bash(netstat -tuln)",
+      "Bash(curl -s http://localhost:3001)",
+      "Bash(npm update *)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
+      "Bash(git status *)"
     ]
   }
 }

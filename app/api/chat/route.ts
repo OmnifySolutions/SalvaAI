@@ -10,6 +10,7 @@ import {
   URGENCY_RANK,
   UrgencyLevel,
 } from "@/lib/classify";
+import { buildFeatureLayer } from "@/lib/ai-features";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -194,7 +195,7 @@ Frequently Asked Questions:
 ${faqText}
 
 ${dosText ? `\nCustom Guidelines:\n${dosText}\n${dontsText}` : ''}
-
+${buildFeatureLayer(business.ai_features ?? [])}
 Important rules:
 - Keep responses concise (2-4 sentences max)
 - Never collect or store personal health information (PHI)

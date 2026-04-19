@@ -29,6 +29,7 @@ export type Business = {
   stripe_subscription_id: string | null;
   interaction_count: number;
   interaction_reset_date: string;
+  ai_features: string[] | null;
   voice_enabled: boolean;
   twilio_sid: string | null;
   created_at: string;

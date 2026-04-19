@@ -3,6 +3,7 @@ import expressWs from 'express-ws';
 import WebSocket from 'ws';
 import { findPatient, createPatient, getAvailability, createAppointment, OpenDentalError } from './opendental.js';
 import { loadProfile } from './profiles/index.js';
+import { buildFeatureLayer } from './ai-features.js';
 
 // Prevent unhandled promise rejections from crashing the Railway process.
 // All per-call errors are caught locally; this is a safety net for anything missed.
@@ -193,6 +194,9 @@ ${faqText ? `\nPRACTICE FAQs:\n${faqText}` : ''}`;
 
   const scenarioLayer = [deflectText, scenarioText].filter(Boolean).join('\n\n');
 
+  // ── Layer 4b: AI Feature toggles ────────────────────────────────────────────
+  const featureLayer = buildFeatureLayer(business.ai_features ?? []);
+
   // ── Layer 5: Custom instructions (practice override — last word) ────────────
   const customLayer = business.custom_prompt
     ? `ADDITIONAL PRACTICE INSTRUCTIONS (override anything above if there is a conflict):\n${business.custom_prompt}`
@@ -204,6 +208,7 @@ ${faqText ? `\nPRACTICE FAQs:\n${faqText}` : ''}`;
     profileLayer,
     businessLayer,
     scenarioLayer,
+    featureLayer,
     customLayer,
     `GENERAL GUIDELINES:
 - Do not volunteer that you are an AI unless directly asked.

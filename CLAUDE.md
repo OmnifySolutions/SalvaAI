@@ -86,9 +86,18 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Implemented SalvaAI-specific system prompt (team member positioning, pricing, features)
 - ✅ SalvaAI-aware fallback mock responses (pricing, voice AI, setup, integrations, HIPAA)
 - ✅ Added logging for API errors
-- ✅ Consolidated Groq API keys: using original key (`(REDACTED)`) for both voice and chat (already proven working in Railway)
+- ✅ Consolidated Groq API keys: using original key (stored in Vercel env, proven working in Railway) for both voice and chat
 - ✅ Added `GROQ_API_KEY` to Vercel environment variables
 - ✅ Verified `.env.local` configured correctly
+
+**Item 32: AI Features toggle system** — COMPLETE (2026-04-19)
+- ✅ New "Features" tab in settings (between AI Config and Voice Settings)
+- ✅ 8 feature toggles across 3 groups: Booking & Availability (instant_booking, after_hours_handling, waitlist_offers), Clinical & Triage (emergency_detection, insurance_questions, new_patient_flow), Financial (pricing_transparency, payment_plans)
+- ✅ Each toggle injects contextual instructions into system prompt (both chat and voice)
+- ✅ `instant_booking` toggle now controls `opendental_booking_mode` (ON=autonomous, OFF=pending)
+- ✅ Features stored as JSONB array in `ai_features` column
+- ✅ Shared `FEATURE_DEFINITIONS` (lib/ai-features.ts + railway/ai-features.js) ensures consistent prompt injection
+- ⚠️ **Manual step required**: Run Supabase migration `ALTER TABLE businesses ADD COLUMN IF NOT EXISTS ai_features JSONB DEFAULT '[]'`
 
 ### 🟡 Pending (Blocked/In Progress)
 

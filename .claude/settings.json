@@ -1,4 +1,7 @@
 {
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [],
+  "disabledMcpjsonServers": [],
   "hooks": {
     "PostToolUse": [
       {

@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { VALID_FEATURE_KEYS } from "@/lib/ai-features";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -9,20 +10,21 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     name, businessType, hours, services,
-    aiName, aiGreeting, customPrompt, faqs, aiDos, aiDonts, voiceEnabled,
+    aiName, aiGreeting, customPrompt, faqs, aiDos, aiDonts, aiFeatures, voiceEnabled,
     voiceTone, voiceEmergencyNumber, voiceEmergencyMessage,
     voiceDeflectTopics, voiceScenarios,
-    openDentalServerUrl, openDentalApiKey, openDentalBookingMode, openDentalBookingWindow,
+    openDentalServerUrl, openDentalApiKey, openDentalBookingWindow,
   } = body;
 
-  const validModes = ['autonomous', 'pending', 'collect_only'];
   const validWindows = [3, 7, 14];
-  if (openDentalBookingMode && !validModes.includes(openDentalBookingMode)) {
-    return Response.json({ error: "Invalid booking mode" }, { status: 400 });
-  }
   if (openDentalBookingWindow != null && !validWindows.includes(Number(openDentalBookingWindow))) {
     return Response.json({ error: "Invalid booking window" }, { status: 400 });
   }
+
+  const safeFeatures = Array.isArray(aiFeatures)
+    ? aiFeatures.filter((k: string) => VALID_FEATURE_KEYS.has(k))
+    : [];
+  const bookingMode = safeFeatures.includes('instant_booking') ? 'autonomous' : 'pending';
 
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
 
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
       faqs: faqs ?? [],
       ai_dos: aiDos ?? null,
       ai_donts: aiDonts ?? null,
+      ai_features: safeFeatures,
       voice_enabled: voiceEnabled ?? false,
       voice_tone: voiceTone ?? "professional",
       voice_emergency_number: voiceEmergencyNumber ?? null,
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
       voice_scenarios: voiceScenarios ?? [],
       opendental_server_url: openDentalServerUrl?.trim() || null,
       opendental_api_key: openDentalApiKey?.trim() || null,
-      opendental_booking_mode: openDentalBookingMode ?? 'autonomous',
+      opendental_booking_mode: bookingMode,
       opendental_booking_window: openDentalBookingWindow ?? 7,
     })
     .eq("clerk_user_id", userId);
