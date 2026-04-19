@@ -46,11 +46,13 @@ export default function ChatWidget({
       setConversationId(data.conversationId);
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     } catch (err) {
+      console.error("Chat API error:", err);
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, I'm having trouble responding right now. Please call our office directly.",
+          content: `Error: ${errorMsg}`,
         },
       ]);
     } finally {

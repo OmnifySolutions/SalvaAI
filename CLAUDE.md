@@ -81,13 +81,46 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Code quality: Critical timer cleanup, regex pre-compilation, listener cleanup, CRUD consolidation
 - ⏳ Remaining: End-to-end Open Dental booking validation (needs ngrok), microphone permission UI flow
 
-### 🟡 Pending (Blocked)
+**Item 23.5: SalvaAI demo chatbot fixes** — COMPLETE (2026-04-19)
+- ✅ Fixed Groq model from deprecated `mixtral-8x7b-32768` to `llama-3.3-70b-versatile`
+- ✅ Implemented SalvaAI-specific system prompt (team member positioning, pricing, features)
+- ✅ SalvaAI-aware fallback mock responses (pricing, voice AI, setup, integrations, HIPAA)
+- ✅ Added logging for API errors
+
+### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
 
-**Item 25: Switch back to Claude Haiku** — BLOCKED: Anthropic credits exhausted; currently using Groq LLM
+**Item 25: Switch back to Claude Haiku** — BLOCKED: Anthropic credits exhausted; currently using Groq LLM (changed strategy: now using Groq free tier as primary)
 
 **Item 26: Enable social proof section** — BLOCKED: Needs first real customer review (flip `{false &&` to `{true &&}` in `app/page.tsx`)
+
+**Item 27: SalvaAI chat agent tuning** — IN PROGRESS
+- Fine-tune responses for tone, accuracy, feature explanations
+- Ensure consistent brand voice across all interactions
+- Test conversation flows for edge cases
+
+**Item 28: Chatwidget customization options** — PENDING
+- Allow users to customize widget colors, position, greeting message
+- Theme toggle support in dashboard settings
+- Preview changes in real-time
+
+**Item 29: Chat preview on homepage revision** — PENDING
+- Update CustomizabilityDemo to show pricing/feature questions
+- Ensure homepage demo reflects actual SalvaAI capabilities
+- A/B test messaging effectiveness
+
+**Item 30: Full end-to-end testing (voice + chat)** — PENDING
+- Test all conversation paths: new patient, insurance, booking, after-hours
+- Test voice barge-in, chat responsiveness
+- Test across different dental practice types
+- Verify PMS integrations work correctly
+
+**Item 31: Edge case testing** — PENDING
+- Test malformed input, very long messages
+- Test rapid-fire questions
+- Test concurrent conversations
+- Test high-volume traffic scenarios
 
 ### 🔴 Current Blockers
 
