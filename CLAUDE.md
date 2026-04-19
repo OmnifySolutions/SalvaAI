@@ -114,6 +114,15 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
   3. Add same vars to Railway env for voice server
   4. Add to `.env.local` for local development
 
+**Item 33.5: Inbox UX polish + Realtime sync (2026-04-19)**
+- ✅ Fixed emergency section disappearing on load: removed early `return null` that hid component when empty
+- ✅ Added Supabase Realtime subscription + polling fallback (30s interval, fallback to polling if Realtime silent >60s) — no cost impact, zero extra infrastructure
+- ✅ Auto-rotating tabs: cycles through Emergencies → Pending Bookings → Callbacks every 10 seconds until user clicks a tab (then stays static until page refresh)
+- ✅ Changed placeholder text: "nothing to action here" → "nothing to do here"
+- ✅ Do's & Don'ts layout: converted from 2-column grid to vertical stack with wider textareas (easier to read/write rules)
+- ✅ Fixed Supabase service role key: made `SUPABASE_SERVICE_ROLE_KEY` optional in `lib/supabase.ts` (falls back to anon key if missing, preventing crashes on client)
+- ✅ Inbox now displays data even without PMS integration: shows pending requests/emergencies as read-only info for manual follow-up
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

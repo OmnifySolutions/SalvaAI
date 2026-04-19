@@ -604,9 +604,9 @@ export default function SettingsForm({ business }: { business: Business }) {
             <h2 className="text-2xl font-bold text-gray-900">Do&apos;s &amp; Don&apos;ts</h2>
             <p className="text-gray-500 text-sm mt-1">Control exactly what your AI will and won&apos;t say. These rules are applied on every conversation.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+          <div className="space-y-6 max-w-2xl">
             {/* Do's */}
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-5 h-5 rounded-full bg-green-100 border border-green-300 flex items-center justify-center shrink-0">
                   <Check size={11} className="text-green-600 stroke-[3]" />
@@ -615,16 +615,16 @@ export default function SettingsForm({ business }: { business: Business }) {
               </div>
               <p className="text-xs text-gray-400 mb-3">Things you want your AI to always do or say.</p>
               <textarea
-                rows={10}
+                rows={8}
                 value={aiDos}
                 onChange={e => setAiDos(e.target.value)}
                 placeholder={"Always offer the next available appointment\nConfirm insurance before booking\nMention the new patient special\nAsk for patient name and best callback number"}
-                className="flex-1 w-full border-2 border-green-200 focus:border-green-400 rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all bg-green-50/30 placeholder-gray-300 leading-relaxed"
+                className="w-full border-2 border-green-200 focus:border-green-400 rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all bg-green-50/30 placeholder-gray-300 leading-relaxed"
               />
             </div>
 
             {/* Don'ts */}
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-5 h-5 rounded-full bg-red-100 border border-red-300 flex items-center justify-center shrink-0">
                   <X size={11} className="text-red-500 stroke-[3]" />
@@ -633,11 +633,11 @@ export default function SettingsForm({ business }: { business: Business }) {
               </div>
               <p className="text-xs text-gray-400 mb-3">Things you never want your AI to do or say.</p>
               <textarea
-                rows={10}
+                rows={8}
                 value={aiDonts}
                 onChange={e => setAiDonts(e.target.value)}
                 placeholder={"Never quote prices over the phone\nDo not book same-day appointments\nNever discuss clinical diagnoses\nDo not mention competitor practices"}
-                className="flex-1 w-full border-2 border-red-200 focus:border-red-400 rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all bg-red-50/30 placeholder-gray-300 leading-relaxed"
+                className="w-full border-2 border-red-200 focus:border-red-400 rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all bg-red-50/30 placeholder-gray-300 leading-relaxed"
               />
             </div>
           </div>

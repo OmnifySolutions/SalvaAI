@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AlertTriangle, Calendar, Phone, MessageSquare, PhoneCall, CheckCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 type InboxItem = {
   id: string;
@@ -38,12 +39,17 @@ export default function InboxSection() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("emergencies");
   const [resolving, setResolving] = useState<string | null>(null);
+  const [isRotating, setIsRotating] = useState(true);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastHeartbeatRef = useRef<number>(Date.now());
 
   async function fetchInbox() {
     try {
       const res = await fetch("/api/inbox");
       const json = await res.json();
       setItems(json.items ?? []);
+      lastHeartbeatRef.current = Date.now();
     } catch {
       // silently fail — dashboard still works
     } finally {
@@ -51,7 +57,48 @@ export default function InboxSection() {
     }
   }
 
-  useEffect(() => { fetchInbox(); }, []);
+  useEffect(() => {
+    fetchInbox();
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    try {
+      channel = supabase
+        .channel("conversations", { config: { broadcast: { self: true } } })
+        .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => {
+          fetchInbox();
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn("Realtime unavailable, using polling fallback", e);
+    }
+
+    pollIntervalRef.current = setInterval(() => {
+      const timeSinceHeartbeat = Date.now() - lastHeartbeatRef.current;
+      if (timeSinceHeartbeat > 60000) fetchInbox();
+    }, 30000);
+
+    return () => {
+      if (channel) channel.unsubscribe();
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isRotating) return;
+
+    rotationIntervalRef.current = setInterval(() => {
+      setActiveTab((prev) => {
+        const tabs: Tab[] = ["emergencies", "bookings", "callbacks"];
+        const currentIndex = tabs.indexOf(prev);
+        return tabs[(currentIndex + 1) % tabs.length];
+      });
+    }, 10000);
+
+    return () => {
+      if (rotationIntervalRef.current) clearInterval(rotationIntervalRef.current);
+    };
+  }, [isRotating]);
 
   async function resolve(id: string) {
     setResolving(id);
@@ -78,8 +125,6 @@ export default function InboxSection() {
   ];
 
   const totalUnresolved = items.length;
-  if (!loading && totalUnresolved === 0) return null;
-
   const activeItems = activeTab === "emergencies" ? emergencies : activeTab === "bookings" ? bookings : callbacks;
 
   return (
@@ -101,7 +146,10 @@ export default function InboxSection() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              setIsRotating(false);
+            }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               activeTab === tab.id
                 ? tab.id === "emergencies"
@@ -132,7 +180,7 @@ export default function InboxSection() {
         ) : activeItems.length === 0 ? (
           <li className="px-6 py-10 text-center">
             <CheckCircle size={28} className="mx-auto text-green-400 mb-2" />
-            <p className="text-sm text-gray-400 font-medium">All clear — nothing to action here.</p>
+            <p className="text-sm text-gray-400 font-medium">All clear — nothing to do here.</p>
           </li>
         ) : (
           activeItems.map((item) => (
