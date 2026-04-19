@@ -139,6 +139,14 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Nav links updated on homepage and pricing page
 - ✅ All CTAs use "Start free trial" (no "no credit card" language)
 
+**Item 35: /how-it-works interactive polish & feature refinements (2026-04-20)** — COMPLETE
+- ✅ Hero button: Changed "See pricing" to orange "How it works" CTA with anchor link to settings section (stands out with shadow effect)
+- ✅ Settings section: Auto-rotate through all 8 tabs every 4 seconds, starting at Profile; rotation stops on user click (manual control)
+- ✅ Populated all Settings tabs with dummy data: Profile (practice name/email/tz), Services (6 service checkboxes), Features (status toggles), Do's & Don'ts (rules textareas), Integrations (connected services with status)
+- ✅ AI Features section: Implement radio-button behavior (only one feature can be ON at a time; clicking enabled feature turns all OFF) matching CustomizabilityDemo on homepage
+- ✅ Dashboard preview: Removed internal max-w constraint, display at natural 1200px width with overflow:hidden for natural edge cutoff (no scaling/cropping internals)
+- ✅ Checkmark spacing: Improved vertical alignment and consistent gap-4 spacing between bullet points
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
