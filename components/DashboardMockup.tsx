@@ -2,7 +2,7 @@ import { ShieldCheck, MessageSquare, PhoneCall } from "lucide-react";
 
 export default function DashboardMockup() {
   return (
-    <div role="img" aria-label="Dashboard preview showing call volume, revenue saved, and patient stats" className="w-full max-w-[1000px] mx-auto rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-gray-200 ring-1 ring-black/5 bg-[#fafafa]">
+    <div role="img" aria-label="Dashboard preview showing call volume, revenue saved, and patient stats" className="w-[1200px] rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-gray-200 ring-1 ring-black/5 bg-[#fafafa]">
       {/* Browser chrome */}
       <div className="bg-gray-100 px-5 py-3 flex items-center gap-2 border-b border-gray-200">
         <span className="w-3.5 h-3.5 rounded-full bg-red-400 shadow-sm border border-black/5" />

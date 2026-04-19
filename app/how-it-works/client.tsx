@@ -277,10 +277,10 @@ function HeroSection() {
             Start free trial
           </Link>
           <Link
-            href="/pricing"
-            className="border border-white/15 text-gray-300 px-7 py-3.5 rounded-xl font-semibold hover:border-white/30 transition-colors"
+            href="#settings"
+            className="bg-orange-500 text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-orange-600 transition-colors shadow-lg hover:shadow-orange-500/50"
           >
-            See pricing
+            How it works
           </Link>
         </div>
       </div>
@@ -301,7 +301,7 @@ function DashboardSection() {
   return (
     <section className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <div>
             <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
               Analytics
@@ -312,10 +312,10 @@ function DashboardSection() {
             <p className="text-gray-500 text-lg mb-8 leading-relaxed">
               Your dashboard shows exactly how your AI is performing — at a glance, the moment you log in.
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-5">
               {bullets.map((b) => (
-                <li key={b.label} className="flex items-start gap-3">
-                  <CheckCircle2 size={20} className="text-blue-600 mt-0.5 shrink-0" />
+                <li key={b.label} className="flex items-start gap-4">
+                  <CheckCircle2 size={20} className="text-blue-600 mt-1 shrink-0" />
                   <div>
                     <span className="font-semibold text-gray-900">{b.label}</span>
                     <span className="text-gray-500"> — {b.desc}</span>
@@ -324,7 +324,7 @@ function DashboardSection() {
               ))}
             </ul>
           </div>
-          <div className="overflow-hidden rounded-3xl shadow-xl">
+          <div className="overflow-hidden rounded-3xl shadow-xl" style={{ height: "520px", width: "100%" }}>
             <DashboardMockup />
           </div>
         </div>
@@ -337,20 +337,16 @@ function DashboardSection() {
 
 function AIFeaturesSection() {
   const [focused, setFocused] = useState("instant_booking");
-  const [enabled, setEnabled] = useState(new Set<string>());
+  const [enabled, setEnabled] = useState<string | null>("instant_booking");
 
   function handleToggle(key: string) {
     setFocused(key);
-    setEnabled((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
+    setEnabled(enabled === key ? null : key);
   }
 
   const focusedFeature = FEATURE_DEFINITIONS.find((f) => f.key === focused);
   const qa = FEATURE_QA[focused];
-  const isOn = enabled.has(focused);
+  const isOn = enabled === focused;
 
   return (
     <section className="bg-gray-50 py-24 border-t border-gray-100">
@@ -382,7 +378,7 @@ function AIFeaturesSection() {
                   {FEATURE_DEFINITIONS.filter((f) => f.group === group).map((feature) => {
                     const Icon = ICON_MAP[feature.icon];
                     const isFocused = focused === feature.key;
-                    const isEnabled = enabled.has(feature.key);
+                    const isEnabled = enabled === feature.key;
                     return (
                       <button
                         key={feature.key}
@@ -473,11 +469,23 @@ function AIFeaturesSection() {
 // ─── Settings Mockup Section ──────────────────────────────────────────────────
 
 function SettingsMockupSection() {
-  const [activeTab, setActiveTab] = useState("ai");
+  const [activeTab, setActiveTab] = useState("profile");
   const [tone, setTone] = useState("professional");
+  const [userClicked, setUserClicked] = useState(false);
+
+  useEffect(() => {
+    if (userClicked) return;
+    const tabIds = SETTINGS_TABS.map((t) => t.id);
+    let currentIndex = 0;
+    const id = setInterval(() => {
+      currentIndex = (currentIndex + 1) % tabIds.length;
+      setActiveTab(tabIds[currentIndex]);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [userClicked]);
 
   return (
-    <section className="bg-white py-24 border-t border-gray-100">
+    <section id="settings" className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
@@ -515,7 +523,10 @@ function SettingsMockupSection() {
                   <li key={id}>
                     <button
                       type="button"
-                      onClick={() => setActiveTab(id)}
+                      onClick={() => {
+                        setActiveTab(id);
+                        setUserClicked(true);
+                      }}
                       className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
                         activeTab === id
                           ? "bg-white text-blue-600 font-semibold shadow-sm ring-1 ring-gray-200"
@@ -665,21 +676,153 @@ function SettingsMockupSection() {
                   </div>
                 )}
 
-                {!["ai", "voice", "notifications"].includes(activeTab) && (
-                  <div className="flex flex-col items-center justify-center h-48 text-gray-400 gap-3">
-                    {(() => {
-                      const tab = SETTINGS_TABS.find((t) => t.id === activeTab);
-                      if (!tab) return null;
-                      const Icon = tab.icon;
-                      return (
-                        <>
-                          <Icon size={28} className="text-gray-300" />
-                          <p className="text-sm text-center max-w-xs">
-                            {tab.label} settings are available in your dashboard after signing up.
-                          </p>
-                        </>
-                      );
-                    })()}
+                {activeTab === "profile" && (
+                  <div className="space-y-5 max-w-lg">
+                    <h3 className="text-lg font-bold text-gray-900">Practice Profile</h3>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
+                        Practice Name
+                      </label>
+                      <input
+                        readOnly
+                        value="Bright Smiles Dental"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
+                        Practice Email
+                      </label>
+                      <input
+                        readOnly
+                        value="info@brightsmilesdental.com"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
+                        Time Zone
+                      </label>
+                      <input
+                        readOnly
+                        value="Eastern (EST)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "features" && (
+                  <div className="space-y-5 max-w-lg">
+                    <h3 className="text-lg font-bold text-gray-900">AI Features</h3>
+                    <div className="space-y-3">
+                      {[
+                        { name: "Instant Booking", status: "Enabled" },
+                        { name: "After-Hours Handling", status: "Enabled" },
+                        { name: "Emergency Detection", status: "Enabled" },
+                        { name: "Insurance Questions", status: "Disabled" },
+                      ].map((f) => (
+                        <div
+                          key={f.name}
+                          className="flex items-center justify-between p-4 rounded-2xl border border-gray-200"
+                        >
+                          <div>
+                            <div className="font-semibold text-sm text-gray-900">{f.name}</div>
+                          </div>
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-full ${
+                              f.status === "Enabled"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            {f.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "services" && (
+                  <div className="space-y-5 max-w-lg">
+                    <h3 className="text-lg font-bold text-gray-900">Practice Services</h3>
+                    <div className="space-y-2">
+                      {[
+                        "General Cleaning & Exams",
+                        "Root Canal Therapy",
+                        "Crowns & Bridges",
+                        "Orthodontics",
+                        "Teeth Whitening",
+                        "Extractions",
+                      ].map((service) => (
+                        <div
+                          key={service}
+                          className="flex items-center gap-3 p-3 rounded-xl border border-gray-200"
+                        >
+                          <input type="checkbox" checked readOnly className="rounded" />
+                          <span className="text-sm text-gray-700">{service}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "dos" && (
+                  <div className="space-y-5 max-w-lg">
+                    <h3 className="text-lg font-bold text-gray-900">Do's & Don'ts</h3>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-2">Do's</label>
+                      <textarea
+                        readOnly
+                        rows={4}
+                        value={DOS_ITEMS.join("\n")}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-2">Don'ts</label>
+                      <textarea
+                        readOnly
+                        rows={4}
+                        value={DONTS_ITEMS.join("\n")}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "integrations" && (
+                  <div className="space-y-5 max-w-lg">
+                    <h3 className="text-lg font-bold text-gray-900">Connected Integrations</h3>
+                    <div className="space-y-3">
+                      {[
+                        { name: "Open Dental", status: "Connected", color: "green" },
+                        { name: "Twilio", status: "Connected", color: "green" },
+                        { name: "Resend (Email)", status: "Not Connected", color: "gray" },
+                      ].map((i) => (
+                        <div
+                          key={i.name}
+                          className="flex items-center justify-between p-4 rounded-2xl border border-gray-200"
+                        >
+                          <div className="font-semibold text-sm text-gray-900">{i.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full animate-pulse ${
+                                i.color === "green" ? "bg-green-500" : "bg-gray-300"
+                              }`}
+                            />
+                            <span
+                              className={`text-xs font-bold ${
+                                i.color === "green" ? "text-green-700" : "text-gray-500"
+                              }`}
+                            >
+                              {i.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
