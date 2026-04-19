@@ -194,6 +194,7 @@ export default async function PricingPage() {
           <div className="flex items-center gap-8">
             <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
+              <Link href="/how-it-works" className="hover:text-gray-800 transition-colors">How it works</Link>
               <Link href="/pricing" className="text-gray-900 font-medium">Pricing</Link>
               <Link href="/#features" className="hover:text-gray-800 transition-colors">Features</Link>
             </div>

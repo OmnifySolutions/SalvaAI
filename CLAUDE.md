@@ -123,6 +123,22 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Fixed Supabase service role key: made `SUPABASE_SERVICE_ROLE_KEY` optional in `lib/supabase.ts` (falls back to anon key if missing, preventing crashes on client)
 - ✅ Inbox now displays data even without PMS integration: shows pending requests/emergencies as read-only info for manual follow-up
 
+**Item 34: /how-it-works marketing page (2026-04-20)** — COMPLETE
+- ✅ Built comprehensive 9-section product tour page at `/how-it-works`
+- ✅ Section 1: Hero with gradient headline, two CTAs (Start free trial, See pricing)
+- ✅ Section 2: Dashboard Analytics — 2-col layout with real `DashboardMockup` component + bullet points
+- ✅ Section 3: AI Features (most complex) — 8 clickable toggles grouped by category (Booking, Clinical, Financial) with live chat preview that updates on every click
+- ✅ Section 4: Settings Mockup — Interactive 8-tab sidebar, 3 fully detailed panels (AI Config, Voice, Notifications)
+- ✅ Section 5: Inbox Demo — Auto-rotating 3-tab mockup, notification channel cards with toggle UI
+- ✅ Section 6: Do's & Don'ts — IntersectionObserver typewriter animation, items appear sequentially as user scrolls in
+- ✅ Section 7: Voice AI — Tone selector (Professional/Warm/Clinical) with live transcript swap per tone
+- ✅ Section 8: Integrations — Open Dental featured card + 6 "coming soon" cards
+- ✅ Section 9: Final CTA — "Ready to transform...", two primary CTAs
+- ✅ Added `middleware.ts` with Clerk publicRoutes: `/`, `/pricing`, `/how-it-works`, sign-in/sign-up
+- ✅ Animations: `animate-typewriter` (0.4s stagger), `animate-fade-slide` (0.25s entrance)
+- ✅ Nav links updated on homepage and pricing page
+- ✅ All CTAs use "Start free trial" (no "no credit card" language)
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

@@ -73,6 +73,7 @@ export default async function HomePage() {
           <div className="flex items-center gap-8">
             <span className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</span>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
+              <Link href="/how-it-works" className="hover:text-gray-800 transition-colors">How it works</Link>
               <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
               <a href="#features" className="hover:text-gray-800 transition-colors">Features</a>
             </div>

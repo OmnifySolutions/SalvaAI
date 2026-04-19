@@ -43,7 +43,9 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
       "Bash(git status *)",
       "Bash(xargs grep *)",
-      "Bash(git diff *)"
+      "Bash(git diff *)",
+      "Bash(find C:\\\\\\\\Users\\\\\\\\Daryll\\\\\\\\SalvaAI -name \"middleware.ts\" -o -name \"middleware.js\")",
+      "Bash(ls -la C:\\\\\\\\Users\\\\\\\\Daryll\\\\\\\\SalvaAI\\\\\\\\app)"
     ]
   }
 }
