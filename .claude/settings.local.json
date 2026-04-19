@@ -41,7 +41,9 @@
       "Bash(curl -s http://localhost:3001)",
       "Bash(npm update *)",
       "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "Bash(xargs grep *)",
+      "Bash(git diff *)"
     ]
   }
 }

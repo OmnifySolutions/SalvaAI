@@ -23,6 +23,11 @@ const APPOINTMENT_KEYWORDS = [
   "opening", "slot", "come in",
 ];
 
+const CALLBACK_KEYWORDS = [
+  "call me back", "callback", "call back", "reach me", "contact me",
+  "get back to me", "return my call", "give me a call",
+];
+
 const PHONE_RE = /(\+?\d[\d\s().-]{7,}\d)/;
 const EMAIL_RE = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/;
 
@@ -36,6 +41,11 @@ export function classifyUrgency(text: string): UrgencyLevel {
 export function detectAppointmentIntent(text: string): boolean {
   const lower = text.toLowerCase();
   return APPOINTMENT_KEYWORDS.some((k) => lower.includes(k));
+}
+
+export function detectCallbackIntent(text: string): boolean {
+  const lower = text.toLowerCase();
+  return CALLBACK_KEYWORDS.some((k) => lower.includes(k));
 }
 
 export function extractContact(text: string): { phone?: string; email?: string } {

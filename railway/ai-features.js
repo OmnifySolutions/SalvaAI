@@ -9,7 +9,7 @@ const FEATURE_DEFINITIONS = [
   },
   {
     key: 'after_hours_handling',
-    label: 'After Hours Handling',
+    label: 'Disable After Hours Handling',
     group: 'booking',
     promptInstruction:
       'When a patient contacts outside business hours, acknowledge that the office is currently closed. Offer to take a callback request (collect their name and best number). If an emergency line is configured, provide it for urgent dental situations.',
@@ -63,7 +63,16 @@ const FEATURE_DEFINITIONS = [
 const VALID_FEATURE_KEYS = new Set(FEATURE_DEFINITIONS.map((f) => f.key));
 
 function buildFeatureLayer(enabledFeatures) {
-  const enabled = FEATURE_DEFINITIONS.filter((f) => enabledFeatures.includes(f.key));
+  // Special handling: after_hours_handling is inverted (enabled by default, disabled when toggled ON)
+  const isAfterHoursDisabled = enabledFeatures.includes('after_hours_handling');
+
+  const enabled = FEATURE_DEFINITIONS.filter((f) => {
+    if (f.key === 'after_hours_handling') {
+      return !isAfterHoursDisabled; // Apply instruction when NOT disabled
+    }
+    return enabledFeatures.includes(f.key);
+  });
+
   if (!enabled.length) return '';
   const instructions = enabled.map((f) => `- ${f.promptInstruction}`).join('\n');
   return `\n## Active AI Features\n${instructions}`;

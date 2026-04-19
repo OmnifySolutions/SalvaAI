@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 import { FEATURE_DEFINITIONS, GROUP_LABELS, type FeatureDefinition } from "@/lib/ai-features";
 
@@ -46,6 +46,12 @@ type Business = {
   ai_dos: string | null;
   ai_donts: string | null;
   ai_features: string[] | null;
+  notify_on_emergency: boolean | null;
+  notify_emergency_phone: string | null;
+  notify_emergency_email: string | null;
+  notify_emergency_whatsapp: string | null;
+  notify_on_new_booking: boolean | null;
+  notify_on_callback: boolean | null;
 };
 
 const DENTAL_DEFAULTS: Service[] = [
@@ -78,13 +84,14 @@ const SCENARIOS = [
 ];
 
 const TABS = [
-  { id: "profile",      label: "Practice Profile",  icon: User },
-  { id: "services",     label: "Services",           icon: LayoutList },
-  { id: "ai",          label: "AI Configuration",   icon: Bot },
-  { id: "features",    label: "Features",            icon: Sparkles },
-  { id: "voice",       label: "Voice Settings",      icon: PhoneCall },
-  { id: "dos_donts",   label: "Do's & Don'ts",       icon: ToggleLeft },
-  { id: "integrations", label: "Integrations",       icon: Zap },
+  { id: "profile",       label: "Practice Profile",  icon: User },
+  { id: "services",      label: "Services",           icon: LayoutList },
+  { id: "ai",           label: "AI Configuration",   icon: Bot },
+  { id: "features",     label: "Features",            icon: Sparkles },
+  { id: "notifications", label: "Notifications",      icon: Bell },
+  { id: "voice",        label: "Voice Settings",      icon: PhoneCall },
+  { id: "dos_donts",    label: "Do's & Don'ts",       icon: ToggleLeft },
+  { id: "integrations",  label: "Integrations",       icon: Zap },
 ];
 
 export default function SettingsForm({ business }: { business: Business }) {
@@ -125,6 +132,21 @@ export default function SettingsForm({ business }: { business: Business }) {
   const [aiDos, setAiDos] = useState(business.ai_dos ?? "");
   const [aiDonts, setAiDonts] = useState(business.ai_donts ?? "");
   const [aiFeatures, setAiFeatures] = useState<string[]>(business.ai_features ?? []);
+
+  const [notifySettings, setNotifySettings] = useState({
+    emergency: {
+      enabled: business.notify_on_emergency ?? true,
+      phone: business.notify_emergency_phone ?? "",
+      email: business.notify_emergency_email ?? "",
+      whatsapp: business.notify_emergency_whatsapp ?? "",
+    },
+    booking: { enabled: business.notify_on_new_booking ?? false },
+    callback: { enabled: business.notify_on_callback ?? false },
+  });
+
+  const updateNotify = (key: 'emergency' | 'booking' | 'callback', field: string, value: unknown) => {
+    setNotifySettings((s) => ({ ...s, [key]: { ...s[key], [field]: value } }));
+  };
 
   const { items: faqs, add: addFaq, update: updateFaq, remove: removeFaq } = useArrayState(business.faqs ?? [], { question: "", answer: "" });
   
@@ -185,6 +207,12 @@ export default function SettingsForm({ business }: { business: Business }) {
           name, businessType, hours, services: serviceItems.filter((s) => s.name.trim()), aiName, aiGreeting, customPrompt,
           faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
           aiDos: aiDos || null, aiDonts: aiDonts || null, aiFeatures,
+          notifyOnEmergency: notifySettings.emergency.enabled,
+          notifyEmergencyPhone: notifySettings.emergency.phone || null,
+          notifyEmergencyEmail: notifySettings.emergency.email || null,
+          notifyEmergencyWhatsapp: notifySettings.emergency.whatsapp || null,
+          notifyOnNewBooking: notifySettings.booking.enabled,
+          notifyOnCallback: notifySettings.callback.enabled,
           voiceEnabled, voiceTone, voiceEmergencyNumber: voiceEmergencyNumber || null, voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics, voiceScenarios, openDentalServerUrl: odServerUrl || null, openDentalApiKey: odApiKey || null,
         }),
@@ -439,34 +467,46 @@ export default function SettingsForm({ business }: { business: Business }) {
             <h2 className="text-2xl font-bold text-gray-900">AI Features</h2>
             <p className="text-gray-500 text-sm mt-1">Toggle capabilities on or off. Active features are applied to both chat and voice interactions.</p>
           </div>
-          <div className="space-y-8 max-w-3xl">
+          <div className="max-w-2xl">
             {(Object.keys(GROUP_LABELS) as Array<FeatureDefinition['group']>).map((group) => {
               const groupFeatures = FEATURE_DEFINITIONS.filter((f) => f.group === group);
               return (
-                <div key={group}>
+                <div key={group} className="mb-8">
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{GROUP_LABELS[group]}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     {groupFeatures.map((feature) => {
                       const isOn = aiFeatures.includes(feature.key);
                       return (
                         <div
                           key={feature.key}
                           onClick={() => toggleFeature(feature.key)}
-                          className={`flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                            isOn ? 'border-blue-500 bg-blue-50/40' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'
+                          className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                            isOn ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
                           }`}
                         >
-                          <div className={`mt-0.5 shrink-0 ${isOn ? 'text-blue-600' : 'text-gray-400'}`}>
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                              isOn ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'
+                            }`}
+                          >
                             {featureIconMap[feature.icon]}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-semibold leading-tight ${isOn ? 'text-blue-900' : 'text-gray-800'}`}>{feature.label}</p>
-                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{feature.description}</p>
+                          <div className="flex-1">
+                            <p className={`font-semibold text-sm ${isOn ? 'text-gray-900' : 'text-gray-500'}`}>
+                              {feature.label}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">{feature.description}</p>
                           </div>
-                          <div className="shrink-0 mt-0.5">
-                            <div className={`relative w-11 h-6 rounded-full transition-colors ${isOn ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${isOn ? 'left-6' : 'left-1'}`} />
-                            </div>
+                          <div
+                            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                              isOn ? 'bg-blue-600' : 'bg-gray-200'
+                            }`}
+                          >
+                            <span
+                              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                                isOn ? 'left-6' : 'left-1'
+                              }`}
+                            />
                           </div>
                         </div>
                       );
@@ -475,6 +515,86 @@ export default function SettingsForm({ business }: { business: Business }) {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* NOTIFICATIONS TAB */}
+        <div className={activeTab === "notifications" ? "block" : "hidden"}>
+          <div className="mb-8 border-b border-gray-100 pb-5">
+            <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
+            <p className="text-gray-500 text-sm mt-1">Get alerted when your AI handles important situations. All flagged items also appear in your dashboard inbox.</p>
+          </div>
+          <div className="max-w-2xl space-y-4">
+
+            {/* Emergency Alerts */}
+            <div className={`rounded-2xl border-2 overflow-hidden transition-all ${notifySettings.emergency.enabled ? 'border-red-300 bg-red-50/30' : 'border-gray-200 bg-white'}`}>
+              <div
+                onClick={() => updateNotify('emergency', 'enabled', !notifySettings.emergency.enabled)}
+                className="flex items-center gap-4 p-4 cursor-pointer"
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${notifySettings.emergency.enabled ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  <Siren size={20} strokeWidth={1.5} />
+                </div>
+                <div className="flex-1">
+                  <p className={`font-semibold text-sm ${notifySettings.emergency.enabled ? 'text-gray-900' : 'text-gray-500'}`}>Emergency Alerts</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Get notified immediately when a patient reports a dental emergency.</p>
+                </div>
+                <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${notifySettings.emergency.enabled ? 'bg-red-500' : 'bg-gray-200'}`}>
+                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${notifySettings.emergency.enabled ? 'left-6' : 'left-1'}`} />
+                </div>
+              </div>
+              {notifySettings.emergency.enabled && (
+                <div className="px-4 pb-4 space-y-3 border-t border-red-100 pt-4">
+                  <p className="text-xs text-gray-500 font-medium">Add at least one contact below. Leave any field empty to skip that channel.</p>
+                  <Field label="SMS / Phone number">
+                    <input type="tel" value={notifySettings.emergency.phone} onChange={e => updateNotify('emergency', 'phone', e.target.value)} className={inputCls} placeholder="+1 (555) 000-0000" />
+                  </Field>
+                  <Field label="Email address">
+                    <input type="email" value={notifySettings.emergency.email} onChange={e => updateNotify('emergency', 'email', e.target.value)} className={inputCls} placeholder="doctor@practice.com" />
+                  </Field>
+                  <Field label="WhatsApp number">
+                    <input type="tel" value={notifySettings.emergency.whatsapp} onChange={e => updateNotify('emergency', 'whatsapp', e.target.value)} className={inputCls} placeholder="+1 (555) 000-0000" />
+                    <p className="text-[11px] text-gray-400 mt-1">WhatsApp requires Twilio WhatsApp setup. Contact support to enable.</p>
+                  </Field>
+                </div>
+              )}
+            </div>
+
+            {/* New Booking Requests */}
+            <div
+              onClick={() => updateNotify('booking', 'enabled', !notifySettings.booking.enabled)}
+              className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${notifySettings.booking.enabled ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${notifySettings.booking.enabled ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                <CalendarCheck size={20} strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <p className={`font-semibold text-sm ${notifySettings.booking.enabled ? 'text-gray-900' : 'text-gray-500'}`}>New Booking Requests</p>
+                <p className="text-xs text-gray-400 mt-0.5">Get notified when a patient submits a booking request. Uses your emergency contact details above.</p>
+              </div>
+              <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${notifySettings.booking.enabled ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${notifySettings.booking.enabled ? 'left-6' : 'left-1'}`} />
+              </div>
+            </div>
+
+            {/* Callback Requests */}
+            <div
+              onClick={() => updateNotify('callback', 'enabled', !notifySettings.callback.enabled)}
+              className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${notifySettings.callback.enabled ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${notifySettings.callback.enabled ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                <PhoneCall size={20} strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <p className={`font-semibold text-sm ${notifySettings.callback.enabled ? 'text-gray-900' : 'text-gray-500'}`}>Callback Requests</p>
+                <p className="text-xs text-gray-400 mt-0.5">Get notified when a patient asks to be called back. Uses your emergency contact details above.</p>
+              </div>
+              <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${notifySettings.callback.enabled ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${notifySettings.callback.enabled ? 'left-6' : 'left-1'}`} />
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-400 pt-2">All flagged conversations also appear in the <strong>Action Required</strong> inbox on your dashboard, regardless of these notification settings.</p>
           </div>
         </div>
 

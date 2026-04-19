@@ -20,8 +20,8 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   },
   {
     key: 'after_hours_handling',
-    label: 'After Hours Handling',
-    description: 'Custom responses when patients contact outside business hours.',
+    label: 'Disable After Hours Handling',
+    description: 'Turn off custom responses for after-hours contacts. By default, the AI acknowledges closed hours.',
     icon: 'Moon',
     group: 'booking',
     promptInstruction:
@@ -94,7 +94,16 @@ export const GROUP_LABELS: Record<string, string> = {
 export const VALID_FEATURE_KEYS = new Set(FEATURE_DEFINITIONS.map((f) => f.key));
 
 export function buildFeatureLayer(enabledFeatures: string[]): string {
-  const enabled = FEATURE_DEFINITIONS.filter((f) => enabledFeatures.includes(f.key));
+  // Special handling: after_hours_handling is inverted (enabled by default, disabled when toggled ON)
+  const isAfterHoursDisabled = enabledFeatures.includes('after_hours_handling');
+
+  const enabled = FEATURE_DEFINITIONS.filter((f) => {
+    if (f.key === 'after_hours_handling') {
+      return !isAfterHoursDisabled; // Apply instruction when NOT disabled
+    }
+    return enabledFeatures.includes(f.key);
+  });
+
   if (!enabled.length) return '';
   const instructions = enabled.map((f) => `- ${f.promptInstruction}`).join('\n');
   return `\n## Active AI Features\n${instructions}`;

@@ -5,12 +5,14 @@ import { supabaseAdmin } from "@/lib/supabase";
 import {
   classifyUrgency,
   detectAppointmentIntent,
+  detectCallbackIntent,
   extractContact,
   isAfterHours,
   URGENCY_RANK,
   UrgencyLevel,
 } from "@/lib/classify";
 import { buildFeatureLayer } from "@/lib/ai-features";
+import { sendEmergencyNotification, sendBookingNotification, sendCallbackNotification } from "@/lib/notifications";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -87,12 +89,19 @@ export async function POST(req: NextRequest) {
   // Classify this user message for dashboard metrics.
   const urgency = classifyUrgency(message);
   const appointmentIntent = detectAppointmentIntent(message);
+  const callbackIntent = detectCallbackIntent(message);
   const contact = extractContact(message);
   const afterHours = isAfterHours(business.hours as never);
 
   // Get or create conversation
   let convId = conversationId;
+  let isNewConversation = false;
+  let newlyEmergency = false;
+  let newlyBooking = false;
+  let newlyCallback = false;
+
   if (!convId) {
+    isNewConversation = true;
     const { data: newConv, error: convError } = await supabaseAdmin
       .from("conversations")
       .insert({
@@ -102,8 +111,10 @@ export async function POST(req: NextRequest) {
         urgency,
         is_after_hours: afterHours,
         appointment_requested: appointmentIntent,
+        callback_requested: callbackIntent,
         visitor_phone: contact.phone ?? null,
         visitor_email: contact.email ?? null,
+        appointment_notes: appointmentIntent ? message.slice(0, 500) : null,
       })
       .select("id")
       .single();
@@ -111,11 +122,14 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "Failed to create conversation" }, { status: 500 });
     }
     convId = newConv.id;
+    if (urgency === "emergency") newlyEmergency = true;
+    if (appointmentIntent) newlyBooking = true;
+    if (callbackIntent) newlyCallback = true;
   } else {
     // Verify conversation belongs to this business (security: prevent cross-business access)
     const { data: existing } = await supabaseAdmin
       .from("conversations")
-      .select("urgency, appointment_requested, visitor_phone, visitor_email, business_id")
+      .select("urgency, appointment_requested, callback_requested, visitor_phone, visitor_email, business_id")
       .eq("id", convId)
       .single();
 
@@ -123,20 +137,46 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "Conversation not found" }, { status: 404 });
     }
 
+    const prevUrgency = (existing.urgency as UrgencyLevel) ?? "routine";
     const newUrgency =
-      existing && URGENCY_RANK[urgency] > URGENCY_RANK[(existing.urgency as UrgencyLevel) ?? "routine"]
-        ? urgency
-        : undefined;
+      URGENCY_RANK[urgency] > URGENCY_RANK[prevUrgency] ? urgency : undefined;
 
     const patch: Record<string, unknown> = {};
-    if (newUrgency) patch.urgency = newUrgency;
-    if (appointmentIntent && !existing?.appointment_requested) patch.appointment_requested = true;
-    if (contact.phone && !existing?.visitor_phone) patch.visitor_phone = contact.phone;
-    if (contact.email && !existing?.visitor_email) patch.visitor_email = contact.email;
+    if (newUrgency) {
+      patch.urgency = newUrgency;
+      if (newUrgency === "emergency") newlyEmergency = true;
+    }
+    if (appointmentIntent && !existing.appointment_requested) {
+      patch.appointment_requested = true;
+      patch.appointment_notes = message.slice(0, 500);
+      newlyBooking = true;
+    }
+    if (callbackIntent && !existing.callback_requested) {
+      patch.callback_requested = true;
+      newlyCallback = true;
+    }
+    if (contact.phone && !existing.visitor_phone) patch.visitor_phone = contact.phone;
+    if (contact.email && !existing.visitor_email) patch.visitor_email = contact.email;
     if (Object.keys(patch).length > 0) {
       await supabaseAdmin.from("conversations").update(patch).eq("id", convId);
     }
   }
+
+  // Fire notifications in parallel (non-blocking)
+  const convForNotification = {
+    id: convId!,
+    channel: "chat" as const,
+    visitor_name: null,
+    visitor_phone: contact.phone ?? null,
+    urgency,
+    appointment_notes: appointmentIntent ? message.slice(0, 500) : null,
+    summary: null,
+  };
+  Promise.all([
+    newlyEmergency ? sendEmergencyNotification(business, convForNotification) : Promise.resolve(),
+    newlyBooking ? sendBookingNotification(business, convForNotification) : Promise.resolve(),
+    newlyCallback ? sendCallbackNotification(business, convForNotification) : Promise.resolve(),
+  ]).catch((err) => console.error("[Notifications] Failed:", err));
 
   // Save user message
   await supabaseAdmin.from("messages").insert({

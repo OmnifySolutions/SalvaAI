@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
     voiceTone, voiceEmergencyNumber, voiceEmergencyMessage,
     voiceDeflectTopics, voiceScenarios,
     openDentalServerUrl, openDentalApiKey, openDentalBookingWindow,
+    notifyOnEmergency, notifyEmergencyPhone, notifyEmergencyEmail, notifyEmergencyWhatsapp,
+    notifyOnNewBooking, notifyOnCallback,
   } = body;
 
   const validWindows = [3, 7, 14];
@@ -52,6 +54,12 @@ export async function POST(req: NextRequest) {
       opendental_api_key: openDentalApiKey?.trim() || null,
       opendental_booking_mode: bookingMode,
       opendental_booking_window: openDentalBookingWindow ?? 7,
+      notify_on_emergency: notifyOnEmergency ?? true,
+      notify_emergency_phone: notifyEmergencyPhone?.trim() || null,
+      notify_emergency_email: notifyEmergencyEmail?.trim() || null,
+      notify_emergency_whatsapp: notifyEmergencyWhatsapp?.trim() || null,
+      notify_on_new_booking: notifyOnNewBooking ?? false,
+      notify_on_callback: notifyOnCallback ?? false,
     })
     .eq("clerk_user_id", userId);
 

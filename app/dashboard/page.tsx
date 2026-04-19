@@ -21,6 +21,7 @@ import {
   getEmergencyFlagCount,
 } from "@/lib/dashboard";
 import DashboardStats from "@/components/DashboardStats";
+import InboxSection from "@/components/InboxSection";
 import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -112,6 +113,9 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* Action Required Inbox */}
+        <InboxSection />
 
         {/* Stats Row with date filter */}
         <DashboardStats

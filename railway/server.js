@@ -4,6 +4,7 @@ import WebSocket from 'ws';
 import { findPatient, createPatient, getAvailability, createAppointment, OpenDentalError } from './opendental.js';
 import { loadProfile } from './profiles/index.js';
 import { buildFeatureLayer } from './ai-features.js';
+import { sendEmergencyNotification, sendBookingNotification } from './notifications.js';
 
 // Prevent unhandled promise rejections from crashing the Railway process.
 // All per-call errors are caught locally; this is a safety net for anything missed.
@@ -1282,6 +1283,23 @@ app.ws('/media-stream', async (ws, req) => {
       sendSms(ownerPhone, twilioNumber, smsBody).catch((e) =>
         console.error('[SMS]', e.message)
       );
+    }
+
+    // Send booking notification if call ended with collected data
+    // (Emergency classification happens during call via system prompt; no need to re-scan at end)
+    if (business && conversationId && (bookingState.stage === 'collecting' || bookingState.stage === 'done')) {
+      const convSummary = {
+        id: conversationId,
+        channel: 'voice',
+        visitor_name: bookingState.name ?? null,
+        visitor_phone: callerPhone,
+        urgency: 'routine',
+        appointment_notes: bookingState.reason
+          ? `${bookingState.reason}${bookingState.name ? ` — ${bookingState.name}` : ''}`
+          : null,
+        summary,
+      };
+      sendBookingNotification(business, convSummary).catch((e) => console.error('[BookingNotif]', e.message));
     }
   }
 

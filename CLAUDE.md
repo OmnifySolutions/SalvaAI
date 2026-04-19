@@ -99,6 +99,21 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Shared `FEATURE_DEFINITIONS` (lib/ai-features.ts + railway/ai-features.js) ensures consistent prompt injection
 - ⚠️ **Manual step required**: Run Supabase migration `ALTER TABLE businesses ADD COLUMN IF NOT EXISTS ai_features JSONB DEFAULT '[]'`
 
+**Item 33: Inbox + Notifications System** — COMPLETE (2026-04-19)
+- ✅ **Dashboard Inbox** (`components/InboxSection.tsx`): Three-tab view (Emergencies | Pending Bookings | Callbacks) with priority sorting
+- ✅ **Notification triggers** wired into both chat (`app/api/chat/route.ts`) and voice (`railway/server.js`) APIs
+- ✅ **Three notification channels**: SMS (Twilio), Email (Resend), WhatsApp (Twilio), all with graceful fallback if not configured
+- ✅ **Settings tab** (`components/SettingsForm.tsx`): "Notifications" tab with toggles for Emergency/Booking/Callback alerts + contact field management
+- ✅ **Inbox API** (`app/api/inbox/route.ts`): GET unresolved items, POST to mark resolved; filters by type and priority
+- ✅ **Callback detection** (`lib/classify.ts`): Added `detectCallbackIntent()` alongside existing appointment/urgency classification
+- ✅ **Database schema** (`supabase/migrations/20260419_inbox_notifications.sql`): `resolved_at`, `appointment_notes` on conversations; notification config on businesses
+- ✅ **Code quality**: Parallelized notifications via Promise.all(), removed duplicate emergency classification in voice server, consolidated 6 notification state vars into 1 nested object
+- ⚠️ **Manual steps required**: 
+  1. Run Supabase migration: `supabase/migrations/20260419_inbox_notifications.sql`
+  2. Add to Vercel env: `RESEND_API_KEY` (free account at resend.com) + `RESEND_FROM_EMAIL` (onboarding@resend.dev or custom domain)
+  3. Add same vars to Railway env for voice server
+  4. Add to `.env.local` for local development
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
