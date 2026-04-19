@@ -78,4 +78,4 @@ function buildFeatureLayer(enabledFeatures) {
   return `\n## Active AI Features\n${instructions}`;
 }
 
-module.exports = { FEATURE_DEFINITIONS, VALID_FEATURE_KEYS, buildFeatureLayer };
+export { FEATURE_DEFINITIONS, VALID_FEATURE_KEYS, buildFeatureLayer };
