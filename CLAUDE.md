@@ -147,6 +147,19 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Dashboard preview: Removed internal max-w constraint, display at natural 1200px width with overflow:hidden for natural edge cutoff (no scaling/cropping internals)
 - ✅ Checkmark spacing: Improved vertical alignment and consistent gap-4 spacing between bullet points
 
+**Item 35.5: Dashboard preview & homepage CTA refinements (2026-04-20)** — COMPLETE
+- ✅ **Homepage hero CTA shuffle**: Orange "How it works" button moved to homepage (replacing "Compare plans"), placed above "Start 14-day free trial" in centered column layout
+- ✅ **How-it-works page**: Only "Start free trial" button displayed (orange "How it works" removed), button has glow-pulse animation + wider padding (px-12)
+- ✅ **Added glow-pulse animation** to globals.css (orange glow effect that pulses every 2s)
+- ✅ **DashboardMockup complete rebuild**: Matched exact design from Image #1 (Intelligence Center layout)
+  - Header: "Intelligence Center" + subtitle + "Agent Active" status badge
+  - Action Required section: 3 tabs (Emergencies, Pending Bookings, Callbacks) with "All clear" empty state
+  - Overview section: Date filter buttons (All time selected by default)
+  - 6 stat cards (2-column grid): Total Interactions (0), Appointments Booked (0), Phone Calls (29), Chats (2), After-Hours Handled (0), Emergency Flags (0)
+- ✅ **Removed "Revenue Saved" chart** from dashboard (was removed in Item 35 but needed full rebuild)
+- ✅ **Removed "After-hours coverage" checkmark** from left-side bullets, replaced with "Inbox notifications"
+- ✅ **Dashboard scales properly** in both homepage and how-it-works page (0.625 scale factor fits in 520px height container)
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

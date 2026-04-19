@@ -122,10 +122,10 @@ export default async function HomePage() {
               Start 14-day free trial
             </Link>
             <Link
-              href="/pricing"
-              className="text-sm text-gray-300 hover:text-white px-7 py-3.5 rounded-xl border border-white/15 hover:border-white/30 transition-colors font-medium"
+              href="/how-it-works"
+              className="bg-orange-500 text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-orange-600 transition-colors shadow-lg hover:shadow-orange-500/50"
             >
-              Compare plans
+              How it works
             </Link>
           </div>
           <p className="text-xs text-gray-600 mb-14">14-day free trial. Cancel anytime.</p>

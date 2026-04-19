@@ -269,18 +269,12 @@ function HeroSection() {
         <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
           For dentists who want to know exactly what they&rsquo;re getting — and office managers who want to understand every control. Every feature, every setting, all in one place.
         </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
+        <div className="flex items-center justify-center">
           <Link
             href="/sign-up"
-            className="bg-white text-gray-900 px-7 py-3.5 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+            className="bg-white text-gray-900 px-12 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors animate-glow-pulse"
           >
             Start free trial
-          </Link>
-          <Link
-            href="#settings"
-            className="bg-orange-500 text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-orange-600 transition-colors shadow-lg hover:shadow-orange-500/50"
-          >
-            How it works
           </Link>
         </div>
       </div>
@@ -295,7 +289,7 @@ function DashboardSection() {
     { label: "Total interactions", desc: "Every chat and call, tracked automatically" },
     { label: "Appointments booked", desc: "See how many patients converted to bookings" },
     { label: "Phone calls handled", desc: "Total voice calls answered by your AI" },
-    { label: "After-hours coverage", desc: "Contacts handled outside office hours" },
+    { label: "Inbox notifications", desc: "Emergencies, bookings, and callbacks in one place" },
   ];
 
   return (
@@ -312,20 +306,22 @@ function DashboardSection() {
             <p className="text-gray-500 text-lg mb-8 leading-relaxed">
               Your dashboard shows exactly how your AI is performing — at a glance, the moment you log in.
             </p>
-            <ul className="space-y-5">
+            <ul>
               {bullets.map((b) => (
-                <li key={b.label} className="flex items-start gap-4">
-                  <CheckCircle2 size={20} className="text-blue-600 mt-1 shrink-0" />
+                <li key={b.label} className="flex gap-4 mb-5 last:mb-0" style={{ alignItems: "flex-start", minHeight: "40px" }}>
+                  <CheckCircle2 size={20} className="text-blue-600 shrink-0" style={{ marginTop: "1px", minWidth: "20px" }} />
                   <div>
-                    <span className="font-semibold text-gray-900">{b.label}</span>
-                    <span className="text-gray-500"> — {b.desc}</span>
+                    <div className="font-semibold text-gray-900 text-base leading-normal">{b.label}</div>
+                    <div className="text-gray-500 text-sm leading-normal"> — {b.desc}</div>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
           <div className="overflow-hidden rounded-3xl shadow-xl" style={{ height: "520px", width: "100%" }}>
-            <DashboardMockup />
+            <div style={{ transform: "scale(0.625)", transformOrigin: "top left", width: "100%", height: "100%" }}>
+              <DashboardMockup />
+            </div>
           </div>
         </div>
       </div>
