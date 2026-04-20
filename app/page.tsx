@@ -397,10 +397,13 @@ export default async function HomePage() {
       <footer className="border-t border-gray-100 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
           <span className="font-semibold text-gray-700">Salva AI</span>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link href="/how-it-works" className="hover:text-gray-600 transition-colors">How it works</Link>
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
             <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>
+            <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-gray-600 transition-colors">Terms</Link>
+            <Link href="/baa" className="hover:text-gray-600 transition-colors">BAA</Link>
           </div>
           <span>© {new Date().getFullYear()} Salva AI</span>
         </div>

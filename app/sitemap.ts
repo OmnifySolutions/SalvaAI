@@ -9,10 +9,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: "https://salvaai.com/how-it-works",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: "https://salvaai.com/pricing",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    {
+      url: "https://salvaai.com/privacy",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: "https://salvaai.com/terms",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: "https://salvaai.com/baa",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
     },
     {
       url: "https://salvaai.com/setup",

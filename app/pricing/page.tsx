@@ -472,9 +472,12 @@ export default async function PricingPage() {
       <footer className="border-t border-gray-200 bg-white px-6 py-10 mt-16">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-medium text-gray-400">
           <Link href="/" className="font-bold text-gray-900 tracking-tight text-lg">Salva AI</Link>
-          <div className="flex gap-8">
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
             <Link href="/sign-in" className="hover:text-gray-800 transition-colors">Sign in</Link>
+            <Link href="/privacy" className="hover:text-gray-800 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-gray-800 transition-colors">Terms</Link>
+            <Link href="/baa" className="hover:text-gray-800 transition-colors">BAA</Link>
           </div>
           <span>© {new Date().getFullYear()} Salva AI</span>
         </div>
