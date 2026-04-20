@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Logo from "@/components/Logo";
 import type { LucideIcon } from "lucide-react";
 import {
   Bot,
@@ -439,8 +440,8 @@ export default function FAQPage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight">
-              Salva AI
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <Logo width={110} height={27} />
             </Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
               <Link href="/how-it-works" className="hover:text-gray-800 transition-colors">How it works</Link>
@@ -458,8 +459,11 @@ export default function FAQPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gray-950 py-20">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <section className="relative bg-gray-950 py-20 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 flex items-start justify-center">
+          <div className="w-[900px] h-[500px] bg-blue-600/10 rounded-full blur-3xl -translate-y-1/4 animate-glow-float" />
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Help Center
           </div>
@@ -542,7 +546,9 @@ export default function FAQPage() {
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <Link href="/" className="font-semibold text-gray-700">Salva AI</Link>
+          <Link href="/" className="transition-opacity hover:opacity-80">
+            <Logo width={100} height={26} />
+          </Link>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link href="/how-it-works" className="hover:text-gray-600 transition-colors">How it works</Link>
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>

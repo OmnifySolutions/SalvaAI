@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Copy, ExternalLink, ChevronRight } from "lucide-react";
+import Logo from "@/components/Logo";
 
 type Platform = "squarespace" | "wix" | "wordpress" | "html";
 type Carrier  = "gsm" | "voip" | "us";
@@ -40,10 +41,11 @@ export default function SetupPage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</Link>
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <Logo width={110} height={27} />
+            </Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
               <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
-              <Link href="/#features" className="hover:text-gray-800 transition-colors">Features</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -271,7 +273,9 @@ export default function SetupPage() {
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8 mt-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <Link href="/" className="font-semibold text-gray-700">Salva AI</Link>
+          <Link href="/" className="transition-opacity hover:opacity-80">
+            <Logo width={100} height={26} />
+          </Link>
           <div className="flex gap-6">
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
             <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>

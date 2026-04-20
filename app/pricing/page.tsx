@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Check, X } from "lucide-react";
 import { supabaseAdmin } from "@/lib/supabase";
 import UpgradeButton from "@/components/UpgradeButton";
+import Logo from "@/components/Logo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -206,11 +207,13 @@ export default async function PricingPage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</Link>
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <Logo width={110} height={27} />
+            </Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
               <Link href="/how-it-works" className="hover:text-gray-800 transition-colors">How it works</Link>
               <Link href="/pricing" className="text-gray-900 font-medium">Pricing</Link>
-              <Link href="/#features" className="hover:text-gray-800 transition-colors">Features</Link>
+              <Link href="/faq" className="hover:text-gray-800 transition-colors">FAQ</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -471,10 +474,12 @@ export default async function PricingPage() {
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white px-6 py-10 mt-16">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-medium text-gray-400">
-          <Link href="/" className="font-bold text-gray-900 tracking-tight text-lg">Salva AI</Link>
+          <Link href="/" className="transition-opacity hover:opacity-80">
+            <Logo width={100} height={26} />
+          </Link>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
-            <Link href="/sign-in" className="hover:text-gray-800 transition-colors">Sign in</Link>
+            <Link href="/faq" className="hover:text-gray-800 transition-colors">FAQ</Link>
             <Link href="/privacy" className="hover:text-gray-800 transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-gray-800 transition-colors">Terms</Link>
             <Link href="/baa" className="hover:text-gray-800 transition-colors">BAA</Link>

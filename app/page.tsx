@@ -29,6 +29,7 @@ import SocialProof from "@/components/SocialProof";
 import AudioDemo from "@/components/AudioDemo";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 import CustomizabilityDemo from "@/components/CustomizabilityDemo";
+import Logo from "@/components/Logo";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -71,11 +72,13 @@ export default async function HomePage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <span className="font-bold text-gray-900 text-lg tracking-tight">Salva AI</span>
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <Logo width={110} height={27} />
+            </Link>
             <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
               <Link href="/how-it-works" className="hover:text-gray-800 transition-colors">How it works</Link>
               <Link href="/pricing" className="hover:text-gray-800 transition-colors">Pricing</Link>
-              <a href="#features" className="hover:text-gray-800 transition-colors">Features</a>
+              <Link href="/faq" className="hover:text-gray-800 transition-colors">FAQ</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -96,7 +99,7 @@ export default async function HomePage() {
       <section className="relative bg-gray-950 overflow-hidden">
         {/* Subtle radial glow behind headline */}
         <div className="pointer-events-none absolute inset-0 flex items-start justify-center">
-          <div className="w-[900px] h-[500px] bg-blue-600/10 rounded-full blur-3xl -translate-y-1/4" />
+          <div className="w-[900px] h-[500px] bg-blue-600/10 rounded-full blur-3xl -translate-y-1/4 animate-glow-float" />
         </div>
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-blue-300 text-xs font-semibold px-3 py-1.5 rounded-full mb-8 tracking-wide uppercase">
@@ -396,11 +399,11 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <span className="font-semibold text-gray-700">Salva AI</span>
+          <Logo width={110} height={28} />
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link href="/how-it-works" className="hover:text-gray-600 transition-colors">How it works</Link>
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
-            <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>
+            <Link href="/faq" className="hover:text-gray-600 transition-colors">FAQ</Link>
             <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-gray-600 transition-colors">Terms</Link>
             <Link href="/baa" className="hover:text-gray-600 transition-colors">BAA</Link>

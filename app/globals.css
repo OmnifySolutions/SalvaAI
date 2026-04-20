@@ -73,3 +73,34 @@ body {
 .animate-glow-pulse {
   animation: glow-pulse 2s ease-in-out infinite;
 }
+
+@keyframes glow-float {
+  0% { transform: translate(-250px, 150px); opacity: 0.5; }
+  25% { transform: translate(200px, -200px); opacity: 0.15; }
+  50% { transform: translate(250px, 200px); opacity: 0.18; }
+  75% { transform: translate(-200px, -250px); opacity: 0.16; }
+  100% { transform: translate(-250px, 150px); opacity: 0.5; }
+}
+
+@keyframes shimmer-sweep {
+  0% { transform: translate(-300px, -300px) rotate(45deg); opacity: 0; }
+  25% { opacity: 0.15; }
+  50% { transform: translate(300px, 300px) rotate(45deg); opacity: 0.2; }
+  75% { opacity: 0.1; }
+  100% { transform: translate(600px, 600px) rotate(45deg); opacity: 0; }
+}
+
+.animate-glow-float {
+  animation: glow-float 15s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-glow-float::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+  border-radius: 50%;
+  animation: shimmer-sweep 15s ease-in-out infinite;
+  pointer-events: none;
+}

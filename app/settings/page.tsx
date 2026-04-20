@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
 import SettingsForm from "@/components/SettingsForm";
+import Logo from "@/components/Logo";
 
 export default async function SettingsPage() {
   const { userId } = await auth();
@@ -19,7 +20,9 @@ export default async function SettingsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <Link href="/dashboard" className="font-bold text-gray-900 text-lg">Salva AI</Link>
+        <Link href="/dashboard" className="transition-opacity hover:opacity-80">
+          <Logo width={110} height={27} />
+        </Link>
         <Link 
           href="/dashboard" 
           className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors"

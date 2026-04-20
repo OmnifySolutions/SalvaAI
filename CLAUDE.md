@@ -217,6 +217,24 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Logo component now cleanly renders transparent logo across all 12 pages without blend modes or CSS workarounds
 - ✅ Cleared Next.js cache to ensure fresh logo rendering
 
+**Item 39: Hero section animations + UI refinements (2026-04-21)** — COMPLETE
+- ✅ **Animated glow effect**: Added `glow-float` animation to all hero sections (homepage, how-it-works, FAQ, BAA, Privacy, Terms)
+  - Glow moves 200-250px across the section (smooth, obvious movement)
+  - 15-second cycle for slow, elegant motion
+  - Opacity varies 0.4-0.5 for breathing effect
+- ✅ **Shimmer overlay**: Added faint white shimmer that sweeps diagonally across the glow
+  - Synchronized with glow movement (same 15s duration)
+  - Opacity 0-0.2 for subtle luxury feel
+  - Pseudo-element (::after) for clean implementation
+- ✅ **Added hero sections to Privacy & Terms pages**: Matching FAQ/BAA style with dark bg-gray-950 + animated glow
+  - Privacy: Shield icon + "Data Protection" badge
+  - Terms: FileText icon + "Service Terms" badge
+- ✅ **Reduced header logo sizes**: Standardized all pages to 110×27 (was 120×30 or 130×32)
+  - Updated 10 files: homepage, how-it-works, FAQ, BAA, Privacy, Terms, Pricing, Setup, Dashboard, Settings
+- ✅ **Cleaned up header navigation**: Removed "Features" links from homepage, pricing, and setup pages
+  - Simplified to: How it works, Pricing, FAQ (consistent across all pages)
+- ✅ **Files modified**: app/globals.css (new animations), 9 page files (hero sections + logo sizes + nav)
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

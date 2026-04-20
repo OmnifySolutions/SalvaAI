@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Logo from "./Logo";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -128,8 +129,9 @@ export default function ChatWidget({
       </form>
 
       {/* Powered by */}
-      <div className="text-center text-xs text-gray-400 pb-2">
-        Powered by <span className="font-medium">Salva AI</span>
+      <div className="flex items-center justify-center gap-1 text-center text-xs text-gray-400 pb-2">
+        <span>Powered by</span>
+        <Logo width={60} height={16} />
       </div>
     </div>
   );

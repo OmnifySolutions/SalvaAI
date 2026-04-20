@@ -22,6 +22,7 @@ import {
 } from "@/lib/dashboard";
 import DashboardStats from "@/components/DashboardStats";
 import InboxSection from "@/components/InboxSection";
+import Logo from "@/components/Logo";
 import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -77,7 +78,9 @@ export default async function DashboardPage() {
       {/* Top Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-8">
-          <Link href="/dashboard" className="font-bold text-gray-900 text-lg">Salva AI</Link>
+          <Link href="/dashboard" className="transition-opacity hover:opacity-80">
+            <Logo width={110} height={27} />
+          </Link>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <span className="text-gray-900 border-b-2 border-gray-900 pb-1">Overview</span>
             <Link href="/settings" className="text-gray-500 hover:text-gray-900 flex items-center gap-1.5"><Settings size={16}/> Settings</Link>
