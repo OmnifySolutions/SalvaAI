@@ -235,6 +235,14 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
   - Simplified to: How it works, Pricing, FAQ (consistent across all pages)
 - ✅ **Files modified**: app/globals.css (new animations), 9 page files (hero sections + logo sizes + nav)
 
+**Item 40: Comprehensive QA test document (2026-04-21)** — COMPLETE
+- ✅ Created `TESTING.md` with 120+ manual test checkboxes organized in 11 sections
+- ✅ Sections: Chat API, Voice Calls, Voice Booking, Dashboard, Settings (8 tabs), Stripe, Auth, Widget, Marketing Pages, Edge Cases, Environment
+- ✅ Added 🤖 and ⚠️ annotations for codebase-verified items and inverted-logic gotchas
+- ✅ Included comment spaces under each item for tester notes
+- ✅ Sign-off table with Status/Tester/Date columns for tracking progress
+- ✅ Identified critical vs. high vs. medium vs. low priority tests based on codebase analysis
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
