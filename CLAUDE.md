@@ -160,6 +160,14 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ **Removed "After-hours coverage" checkmark** from left-side bullets, replaced with "Inbox notifications"
 - ✅ **Dashboard scales properly** in both homepage and how-it-works page (0.625 scale factor fits in 520px height container)
 
+**Item 36: Domain & email setup (2026-04-20)** — COMPLETE
+- ✅ **Domain purchased**: getsalvaai.com (€9.33/yr via Namecheap, waiting for activation)
+- ✅ **Email infrastructure decided**: Gmail + email forwarding + "Send As" feature
+  - Emails to support@getsalvaai.com will forward to daryllvasconcellos@gmail.com
+  - Reply from Gmail using "Send As" to maintain professional support@getsalvaai.com appearance
+  - Zero additional cost, reliable, used by most startups initially
+- ⏳ **Pending**: Domain activation (usually 24-48 hours), then configure email forwarding on registrar control panel
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
