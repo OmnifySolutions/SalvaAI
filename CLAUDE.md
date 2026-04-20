@@ -198,6 +198,18 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
   - CTA copy consistency: "Get started free" across all primary CTAs
 - ✅ **Files modified** (8 total): app/page.tsx, app/pricing/page.tsx, app/how-it-works/page.tsx, app/how-it-works/client.tsx, components/StatsCarousel.tsx, components/ChatCardSpread.tsx, components/DashboardMockup.tsx, lib/ai-features.ts
 
+**Item 37.5: Settings mockup preview polish (2026-04-21)** — COMPLETE
+- ✅ **Profile tab**: Added Business Hours display (7-day schedule), Specialty dropdown selector, 2-column grid layout
+- ✅ **Services tab**: Updated to show 6 services with duration in minutes, Clock icon, and descriptions (matches real form)
+- ✅ **AI Config tab**: Added Patient FAQs section with 3 sample FAQs (Q&A format), improved layout
+- ✅ **Features tab**: Added icons + descriptions for features grouped by category (Booking, Clinical, Financial), proper blue toggle styling
+- ✅ **Notifications tab**: Made Emergency Alerts **expandable** (shows contact fields when enabled), matching real form behavior with collapsible sections
+- ✅ **Voice Settings tab**: Complete redesign with blue virtual number badge, Acoustic Tone selector, **Smart Handoffs** section with 3 checkable items, Accept Calls toggle in header
+- ✅ **Do's & Don'ts tab**: Green/red styling with checkmark/X icons, 4 sample items per section, proper textarea styling
+- ✅ **Integrations tab**: Complete redesign with Open Dental "Connected" badge, Server URL + API Key fields, Test Sync button, upcoming integrations list
+- ✅ **Realistic dummy data**: All tabs now show live account data (multiple services, FAQs, notifications enabled, connected integrations)
+- ✅ All 8 tabs now **1:1 identical** to actual SettingsForm component — perfect marketing preview
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

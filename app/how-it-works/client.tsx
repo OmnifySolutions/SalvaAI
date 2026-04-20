@@ -26,6 +26,8 @@ import {
   Check,
   X,
   PhoneCall,
+  ChevronDown,
+  Clock,
 } from "lucide-react";
 
 // ─── Static data ──────────────────────────────────────────────────────────────
@@ -468,6 +470,8 @@ function SettingsMockupSection() {
   const [activeTab, setActiveTab] = useState("profile");
   const [tone, setTone] = useState("professional");
   const [userClicked, setUserClicked] = useState(false);
+  const [emergencyEnabled, setEmergencyEnabled] = useState(true);
+  const [bookingEnabled, setBookingEnabled] = useState(true);
 
   useEffect(() => {
     if (userClicked) return;
@@ -541,223 +545,325 @@ function SettingsMockupSection() {
             <div className="flex-1 p-8 overflow-auto">
               <div key={activeTab} className="animate-fade-slide">
                 {activeTab === "ai" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">AI Configuration</h3>
+                  <div className="space-y-6 max-w-xl">
                     <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                        Agent Name
-                      </label>
-                      <input
-                        readOnly
-                        value="Claire"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">
-                        Patients hear this name when the AI answers calls.
-                      </p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">AI Personality</h3>
+                      <p className="text-sm text-gray-500">Define how your agent responds and answers FAQs.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="text-sm font-bold text-gray-700 block mb-1.5">
+                          Agent Name
+                        </label>
+                        <input
+                          readOnly
+                          value="Claire"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-bold text-gray-700 block mb-1.5">
+                          Custom Greeting
+                        </label>
+                        <input
+                          readOnly
+                          value="Hi! Thanks for calling Bright Smiles Dental..."
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                        Custom Greeting
-                      </label>
-                      <input
-                        readOnly
-                        value="Hi! Thanks for calling Bright Smiles Dental. How can I help you today?"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5">
                         System Prompt
                       </label>
                       <textarea
                         readOnly
-                        rows={4}
-                        value="You are a professional dental receptionist AI named Claire. You handle appointment scheduling, patient questions, and after-hours inquiries for Bright Smiles Dental. Always be warm, helpful, and guide patients toward scheduling."
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default resize-none"
+                        rows={3}
+                        value="You are a professional dental receptionist AI named Claire. You handle appointment scheduling, patient questions, and after-hours inquiries for Bright Smiles Dental."
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default resize-none"
                       />
                     </div>
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-600">
-                      ✦ Live preview — configure these in your dashboard after signing up.
+                    <div className="pt-6 border-t border-gray-100">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-semibold text-gray-900 text-sm">Patient FAQs</h4>
+                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-bold">3 added</span>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-3">Add your practice&apos;s most common questions and answers below.</p>
+                      <div className="space-y-2">
+                        {[
+                          { q: "How long is a new patient exam?", a: "About 90 minutes with X-rays and cleaning" },
+                          { q: "Do you accept insurance?", a: "Yes, we accept most major plans. Call for your specific coverage." },
+                          { q: "Can I get same-day emergency appointments?", a: "Yes. Call immediately for emergencies — we keep slots open." },
+                        ].map((faq, i) => (
+                          <div key={i} className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs">
+                            <p className="font-medium text-gray-900 mb-1">Q: {faq.q}</p>
+                            <p className="text-gray-600">A: {faq.a}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {activeTab === "voice" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">Voice Settings</h3>
+                  <div className="space-y-6 max-w-xl">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Voice Calling</h3>
+                        <p className="text-sm text-gray-500 mt-1">Configure your telephone and routing.</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-700">Accept Calls</span>
+                        <div className="w-12 h-6 rounded-full bg-green-500 flex items-center">
+                          <span className="w-4 h-4 bg-white rounded-full shadow ml-1" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                      <p className="text-xs text-blue-800 font-bold uppercase tracking-wider mb-1">Your Virtual Number</p>
+                      <p className="font-mono text-lg text-blue-900">+1 (602) 555-0182</p>
+                      <div className="text-xs text-blue-600 bg-white px-2 py-1 rounded inline-block mt-2 font-semibold">Active</div>
+                    </div>
+
                     <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-3">
-                        Acoustic Tone
-                      </label>
-                      <div className="space-y-2">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm">Acoustic Tone</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {TONES.map((t) => (
                           <button
                             key={t.id}
                             type="button"
                             onClick={() => setTone(t.id)}
-                            className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${
+                            className={`text-left p-3 rounded-2xl border-2 transition-all ${
                               tone === t.id
                                 ? "border-blue-600 bg-blue-50/50"
-                                : "border-gray-200 hover:border-gray-300"
+                                : "border-gray-100"
                             }`}
                           >
-                            <div className="font-semibold text-sm text-gray-900">{t.label}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{t.desc}</div>
+                            <p className={`font-bold text-sm ${tone === t.id ? "text-blue-800" : "text-gray-900"}`}>{t.label}</p>
+                            <p className="text-xs text-gray-500 mt-1">{t.desc}</p>
                           </button>
                         ))}
                       </div>
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-2">
-                        Virtual Number
-                      </label>
-                      <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold">
-                        <PhoneCall size={14} />
-                        +1 (602) 555-0182
+
+                    <div className="pt-4 border-t border-gray-100">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm">Smart Handoffs — transfer complex calls to your team</h4>
+                      <div className="space-y-2">
+                        {[
+                          { label: "Appointment requests", desc: "Transfers to desk instead of answering" },
+                          { label: "Insurance inquiries", desc: "Transfers to desk instead of answering" },
+                          { label: "Clinical/medical advice", desc: "Transfers to desk instead of answering" },
+                        ].map((item) => (
+                          <label key={item.label} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100">
+                            <input type="checkbox" defaultChecked className="w-4 h-4 text-blue-600 rounded" />
+                            <span className="text-sm font-medium text-gray-800">{item.label}</span>
+                          </label>
+                        ))}
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200">
-                      <div>
-                        <div className="font-semibold text-sm text-gray-900">Accept Calls</div>
-                        <div className="text-xs text-gray-500">AI answers all incoming calls</div>
-                      </div>
-                      <Toggle on={true} />
                     </div>
                   </div>
                 )}
 
                 {activeTab === "notifications" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
-                    {[
-                      {
-                        label: "Emergency Alerts",
-                        desc: "Get notified immediately for dental emergencies",
-                        icon: Siren,
-                        color: "text-red-600",
-                      },
-                      {
-                        label: "New Booking Requests",
-                        desc: "Alert when a patient requests an appointment",
-                        icon: CalendarCheck,
-                        color: "text-blue-600",
-                      },
-                      {
-                        label: "Callback Requests",
-                        desc: "Alert when a patient asks to be called back",
-                        icon: Phone,
-                        color: "text-blue-600",
-                      },
-                    ].map((row) => (
+                  <div className="space-y-4 max-w-xl">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Notifications</h3>
+                      <p className="text-sm text-gray-500">Get alerted when important situations occur. All items appear in your dashboard inbox.</p>
+                    </div>
+
+                    {/* Emergency Alerts - Expandable */}
+                    <div className={`rounded-2xl border-2 overflow-hidden transition-all ${emergencyEnabled ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"}`}>
                       <div
-                        key={row.label}
-                        className="flex items-center justify-between p-4 rounded-2xl border border-gray-200"
+                        onClick={() => setEmergencyEnabled(!emergencyEnabled)}
+                        className="flex items-center gap-4 p-4 cursor-pointer"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
-                            <row.icon size={16} className={row.color} />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${emergencyEnabled ? "bg-red-500 text-white" : "bg-gray-100 text-gray-400"}`}>
+                          <Siren size={18} />
+                        </div>
+                        <div className="flex-1">
+                          <p className={`font-semibold text-sm ${emergencyEnabled ? "text-gray-900" : "text-gray-500"}`}>Emergency Alerts</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Get notified immediately for dental emergencies.</p>
+                        </div>
+                        <div className={`w-11 h-6 rounded-full transition-colors shrink-0 ${emergencyEnabled ? "bg-red-500" : "bg-gray-200"}`}>
+                          <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${emergencyEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                        </div>
+                      </div>
+                      {emergencyEnabled && (
+                        <div className="px-4 pb-4 space-y-3 border-t border-red-100 pt-4 text-xs">
+                          <p className="text-gray-500 font-medium">Add at least one contact below.</p>
+                          <div>
+                            <label className="block text-gray-700 font-medium mb-1">SMS / Phone number</label>
+                            <input readOnly value="+1 (602) 555-0182" className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs" />
                           </div>
                           <div>
-                            <div className="font-semibold text-sm text-gray-900">{row.label}</div>
-                            <div className="text-xs text-gray-500">{row.desc}</div>
+                            <label className="block text-gray-700 font-medium mb-1">Email address</label>
+                            <input readOnly value="doctor@brightsmiles.com" className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-xs" />
                           </div>
                         </div>
-                        <Toggle on={true} />
+                      )}
+                    </div>
+
+                    {/* New Booking Requests */}
+                    <div
+                      onClick={() => setBookingEnabled(!bookingEnabled)}
+                      className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${bookingEnabled ? "border-blue-400 bg-blue-50" : "border-gray-200 bg-white"}`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${bookingEnabled ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"}`}>
+                        <CalendarCheck size={18} />
                       </div>
-                    ))}
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-gray-500">
-                      Alerts delivered via SMS, email, and WhatsApp — configure your contact details in your dashboard.
+                      <div className="flex-1">
+                        <p className={`font-semibold text-sm ${bookingEnabled ? "text-gray-900" : "text-gray-500"}`}>New Booking Requests</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Get notified when a patient submits a booking request.</p>
+                      </div>
+                      <div className={`w-11 h-6 rounded-full transition-colors shrink-0 ${bookingEnabled ? "bg-blue-600" : "bg-gray-200"}`}>
+                        <span className={`w-4 h-4 bg-white rounded-full shadow transition-all ${bookingEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                      </div>
+                    </div>
+
+                    {/* Callback Requests */}
+                    <div className="flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-200 bg-white">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-gray-100 text-gray-400">
+                        <Phone size={18} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm text-gray-500">Callback Requests</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Get notified when a patient asks to be called back.</p>
+                      </div>
+                      <Toggle on={false} />
                     </div>
                   </div>
                 )}
 
                 {activeTab === "profile" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">Practice Profile</h3>
+                  <div className="space-y-6 max-w-xl">
                     <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                        Practice Name
-                      </label>
-                      <input
-                        readOnly
-                        value="Bright Smiles Dental"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
-                      />
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Practice Profile</h3>
+                      <p className="text-sm text-gray-500">General information about your office.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="text-sm font-bold text-gray-700 block mb-1.5">
+                          Practice Name
+                        </label>
+                        <input
+                          readOnly
+                          value="Bright Smiles Dental"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-bold text-gray-700 block mb-1.5">
+                          Specialty
+                        </label>
+                        <div className="relative">
+                          <select disabled value="dental" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default appearance-none pr-10 disabled:opacity-100">
+                            <option value="dental">General Dental</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-3 text-gray-400 pointer-events-none" size={16} />
+                        </div>
+                      </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                        Practice Email
+                      <label className="text-sm font-bold text-gray-700 block mb-2">
+                        Business Hours
                       </label>
-                      <input
-                        readOnly
-                        value="info@brightsmilesdental.com"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                        Time Zone
-                      </label>
-                      <input
-                        readOnly
-                        value="Eastern (EST)"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default"
-                      />
+                      <div className="space-y-1.5 bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs text-gray-600">
+                        <div className="flex justify-between"><span>Monday</span><span>9:00 AM — 5:00 PM</span></div>
+                        <div className="flex justify-between"><span>Tuesday</span><span>9:00 AM — 5:00 PM</span></div>
+                        <div className="flex justify-between"><span>Wednesday</span><span>9:00 AM — 5:00 PM</span></div>
+                        <div className="flex justify-between"><span>Thursday</span><span>9:00 AM — 7:00 PM</span></div>
+                        <div className="flex justify-between"><span>Friday</span><span>9:00 AM — 5:00 PM</span></div>
+                        <div className="flex justify-between"><span>Saturday</span><span>10:00 AM — 2:00 PM</span></div>
+                        <div className="flex justify-between"><span>Sunday</span><span>Closed</span></div>
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {activeTab === "features" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">AI Features</h3>
-                    <div className="space-y-3">
-                      {[
-                        { name: "Instant Booking", status: "Enabled" },
-                        { name: "After-Hours Handling", status: "Enabled" },
-                        { name: "Emergency Detection", status: "Enabled" },
-                        { name: "Insurance Questions", status: "Disabled" },
-                      ].map((f) => (
-                        <div
-                          key={f.name}
-                          className="flex items-center justify-between p-4 rounded-2xl border border-gray-200"
-                        >
-                          <div>
-                            <div className="font-semibold text-sm text-gray-900">{f.name}</div>
-                          </div>
-                          <span
-                            className={`text-xs font-bold px-2 py-1 rounded-full ${
-                              f.status === "Enabled"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
-                            }`}
-                          >
-                            {f.status}
-                          </span>
-                        </div>
-                      ))}
+                  <div className="space-y-6 max-w-xl">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">AI Features</h3>
+                      <p className="text-sm text-gray-500">Toggle capabilities on or off. Active features are applied to both chat and voice.</p>
                     </div>
+                    {["booking", "clinical", "financial"].map((group) => {
+                      const groupFeatures = FEATURE_DEFINITIONS.filter((f) => f.group === group);
+                      return (
+                        <div key={group}>
+                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{GROUP_LABELS[group]}</h4>
+                          <div className="space-y-2">
+                            {groupFeatures.slice(0, 2).map((feature) => {
+                              const isOn = Math.random() > 0.3;
+                              const Icon = ICON_MAP[feature.icon];
+                              return (
+                                <div
+                                  key={feature.key}
+                                  className={`flex items-center gap-4 p-4 rounded-2xl border-2 ${
+                                    isOn ? "border-blue-400 bg-blue-50" : "border-gray-200 bg-white"
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                      isOn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"
+                                    }`}
+                                  >
+                                    {Icon && <Icon size={18} />}
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className={`font-semibold text-sm ${isOn ? "text-gray-900" : "text-gray-500"}`}>
+                                      {feature.label}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-0.5">{feature.description}</p>
+                                  </div>
+                                  <div
+                                    className={`w-11 h-6 rounded-full flex items-center transition-colors shrink-0 ${
+                                      isOn ? "bg-blue-600" : "bg-gray-200"
+                                    }`}
+                                  >
+                                    <span
+                                      className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                                        isOn ? "translate-x-6" : "translate-x-1"
+                                      }`}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
                 {activeTab === "services" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">Practice Services</h3>
+                  <div className="space-y-5 max-w-xl">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Services</h3>
+                      <p className="text-sm text-gray-500">Define the treatments you offer and how long each one takes.</p>
+                    </div>
                     <div className="space-y-2">
                       {[
-                        "General Cleaning & Exams",
-                        "Root Canal Therapy",
-                        "Crowns & Bridges",
-                        "Orthodontics",
-                        "Teeth Whitening",
-                        "Extractions",
+                        { name: "New Patient Exam", duration: 90, desc: "Includes X-rays and full periodontal evaluation" },
+                        { name: "Adult Cleaning (Prophy)", duration: 60, desc: "" },
+                        { name: "Crown Prep", duration: 90, desc: "" },
+                        { name: "Root Canal", duration: 90, desc: "" },
+                        { name: "Extraction", duration: 60, desc: "" },
+                        { name: "Emergency Visit", duration: 30, desc: "Same-day pain triage" },
                       ].map((service) => (
-                        <div
-                          key={service}
-                          className="flex items-center gap-3 p-3 rounded-xl border border-gray-200"
-                        >
-                          <input type="checkbox" checked readOnly className="rounded" />
-                          <span className="text-sm text-gray-700">{service}</span>
+                        <div key={service.name} className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                          <div className="flex gap-3 items-end mb-2">
+                            <div className="flex-1">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Service Name</p>
+                              <p className="text-sm font-semibold text-gray-700">{service.name}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1"><Clock size={10} />Duration</p>
+                              <div className="text-sm font-semibold text-gray-700">{service.duration}<span className="text-xs text-gray-400 font-medium ml-1">min</span></div>
+                            </div>
+                          </div>
+                          {service.desc && <p className="text-xs text-gray-500">{service.desc}</p>}
                         </div>
                       ))}
                     </div>
@@ -765,57 +871,92 @@ function SettingsMockupSection() {
                 )}
 
                 {activeTab === "dos" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">Do's & Don'ts</h3>
+                  <div className="space-y-6 max-w-xl">
                     <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-2">Do's</label>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Do's & Don'ts</h3>
+                      <p className="text-sm text-gray-500">Control exactly what your AI will and won't say. These rules are applied on every conversation.</p>
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-5 h-5 rounded-full bg-green-100 border border-green-300 flex items-center justify-center shrink-0">
+                          <Check size={11} className="text-green-600" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 text-sm">Do's</h4>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-3">Things you want your AI to always do or say.</p>
                       <textarea
                         readOnly
-                        rows={4}
+                        rows={6}
                         value={DOS_ITEMS.join("\n")}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default resize-none"
+                        className="w-full border-2 border-green-200 rounded-2xl px-4 py-3 text-sm resize-none outline-none bg-green-50/30 placeholder-gray-300 leading-relaxed text-gray-700"
                       />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-2">Don'ts</label>
+
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-5 h-5 rounded-full bg-red-100 border border-red-300 flex items-center justify-center shrink-0">
+                          <X size={11} className="text-red-500" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 text-sm">Don'ts</h4>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-3">Things you never want your AI to do or say.</p>
                       <textarea
                         readOnly
-                        rows={4}
+                        rows={6}
                         value={DONTS_ITEMS.join("\n")}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default resize-none"
+                        className="w-full border-2 border-red-200 rounded-2xl px-4 py-3 text-sm resize-none outline-none bg-red-50/30 placeholder-gray-300 leading-relaxed text-gray-700"
                       />
                     </div>
                   </div>
                 )}
 
                 {activeTab === "integrations" && (
-                  <div className="space-y-5 max-w-lg">
-                    <h3 className="text-lg font-bold text-gray-900">Connected Integrations</h3>
-                    <div className="space-y-3">
-                      {[
-                        { name: "Open Dental", status: "Connected", color: "green" },
-                        { name: "Twilio", status: "Connected", color: "green" },
-                        { name: "Resend (Email)", status: "Not Connected", color: "gray" },
-                      ].map((i) => (
-                        <div
-                          key={i.name}
-                          className="flex items-center justify-between p-4 rounded-2xl border border-gray-200"
-                        >
-                          <div className="font-semibold text-sm text-gray-900">{i.name}</div>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-2 h-2 rounded-full animate-pulse ${
-                                i.color === "green" ? "bg-green-500" : "bg-gray-300"
-                              }`}
-                            />
-                            <span
-                              className={`text-xs font-bold ${
-                                i.color === "green" ? "text-green-700" : "text-gray-500"
-                              }`}
-                            >
-                              {i.status}
-                            </span>
+                  <div className="space-y-5 max-w-xl">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">App Integrations</h3>
+                      <p className="text-sm text-gray-500">Connect your existing tools to Salva AI.</p>
+                    </div>
+
+                    <div className="p-6 rounded-2xl border-2 border-green-500 bg-green-50/30">
+                      <div className="flex justify-between items-center mb-6">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg font-bold text-gray-900">Open Dental</span>
+                            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase">Connected</span>
                           </div>
+                          <p className="text-sm text-gray-500">Live scheduling and patient record sync</p>
+                        </div>
+                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 font-bold text-xs uppercase">PMS</div>
+                      </div>
+
+                      <div className="bg-white p-5 rounded-xl border border-gray-100 space-y-4">
+                        <div>
+                          <label className="text-sm font-bold text-gray-700 block mb-1.5">Server Endpoint URL</label>
+                          <input readOnly value="https://api.opendental.com" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-bold text-gray-700 block mb-1.5">Developer API Key</label>
+                          <div className="flex gap-2">
+                            <input readOnly type="password" value="sk_live_abc123def456..." className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 cursor-default" />
+                            <button type="button" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800">Test Sync</button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-green-600 font-bold bg-green-50 p-2 rounded flex items-center gap-2">
+                          <Check size={14} /> Valid connection established
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-gray-900">Waitlist Integrations — Coming Soon</h4>
+                      {[
+                        { name: "Eaglesoft", status: "Waitlist open" },
+                        { name: "Dentrix", status: "Waitlist open" },
+                        { name: "Curve Dental", status: "Coming soon" },
+                      ].map((item) => (
+                        <div key={item.name} className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 bg-white">
+                          <span className="font-semibold text-sm text-gray-900">{item.name}</span>
+                          <span className="text-xs text-gray-500 font-medium">{item.status}</span>
                         </div>
                       ))}
                     </div>
@@ -1322,7 +1463,7 @@ function Footer() {
     <footer className="bg-white border-t border-gray-100 py-10">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <span className="font-bold text-gray-900 tracking-tight">Salva AI</span>
-        <div className="flex items-center gap-6 text-sm text-gray-500">
+        <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-gray-500">
           <Link href="/how-it-works" className="hover:text-gray-800 transition-colors">
             How it works
           </Link>
@@ -1331,6 +1472,15 @@ function Footer() {
           </Link>
           <Link href="/sign-in" className="hover:text-gray-800 transition-colors">
             Sign in
+          </Link>
+          <Link href="/privacy" className="hover:text-gray-800 transition-colors">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:text-gray-800 transition-colors">
+            Terms
+          </Link>
+          <Link href="/baa" className="hover:text-gray-800 transition-colors">
+            BAA
           </Link>
         </div>
         <p className="text-sm text-gray-400">© {new Date().getFullYear()} Salva AI</p>
