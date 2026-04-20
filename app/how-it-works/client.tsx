@@ -80,7 +80,7 @@ const FEATURE_QA: Record<string, { question: string; on: string; off: string }> 
   },
   pricing_transparency: {
     question: "How much does a crown typically cost?",
-    on: "Crowns typically range from $800–$1,800 depending on material and location. Insurance often covers 50% after deductible. The dentist will give you an exact quote at your consultation — want to schedule one?",
+    on: "Crowns typically range from $800–$1,800 depending on material and location. Insurance may cover a portion after your deductible — your benefits will vary by plan. The dentist will give you an exact quote at your consultation — want to schedule one?",
     off: "For pricing, please call our front desk and they can walk you through costs and what your insurance may cover.",
   },
   payment_plans: {
@@ -189,7 +189,7 @@ const DONTS_ITEMS = [
   "Never share other patients' information",
 ];
 
-const COMING_SOON = ["EagleSoft", "Dentrix", "Curve Dental", "Carestream", "Dolphin Mgmt", "Fuse"];
+const COMING_SOON = ["Eaglesoft", "Dentrix", "Curve Dental", "Carestream", "Dolphin Mgmt", "Fuse"];
 
 // ─── Shared components ────────────────────────────────────────────────────────
 
@@ -239,7 +239,7 @@ function Nav() {
             href="/sign-up"
             className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
           >
-            Start free trial
+            Get started free
           </Link>
         </div>
       </nav>
@@ -274,7 +274,7 @@ function HeroSection() {
             href="/sign-up"
             className="bg-white text-gray-900 px-12 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors animate-glow-pulse"
           >
-            Start free trial
+            Get started free
           </Link>
         </div>
       </div>
@@ -1250,7 +1250,7 @@ function IntegrationsSection() {
             {[
               { icon: CalendarCheck, text: "Live appointment scheduling sync" },
               { icon: User, text: "Real-time patient record lookup" },
-              { icon: Bell, text: "Automatic booking confirmations" },
+              { icon: Bell, text: "Booking request routing to front desk" },
               { icon: CheckCircle2, text: "Two-way data validation" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3">
@@ -1301,7 +1301,7 @@ function CTASection() {
             href="/sign-up"
             className="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors text-lg"
           >
-            Start free trial
+            Get started free
           </Link>
           <a
             href="mailto:hello@salvaai.com"

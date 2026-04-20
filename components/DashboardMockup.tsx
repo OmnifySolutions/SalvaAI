@@ -82,7 +82,7 @@ export default function DashboardMockup() {
             <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mb-4">
               <Phone size={20} className="text-orange-600" />
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">29</div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">0</div>
             <p className="text-gray-600 text-sm font-medium mb-3">Phone Calls</p>
             <p className="text-gray-400 text-xs">All time</p>
           </div>
@@ -92,7 +92,7 @@ export default function DashboardMockup() {
             <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center mb-4">
               <MessageSquare size={20} className="text-yellow-600" />
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">2</div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">0</div>
             <p className="text-gray-600 text-sm font-medium mb-3">Chats</p>
             <p className="text-gray-400 text-xs">All time</p>
           </div>

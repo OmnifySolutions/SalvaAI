@@ -86,7 +86,7 @@ export default async function HomePage() {
               href="/sign-up"
               className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
             >
-              Start free trial
+              Get started free
             </Link>
           </div>
         </nav>
@@ -119,7 +119,7 @@ export default async function HomePage() {
               href="/sign-up"
               className="bg-white text-gray-900 px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
             >
-              Start 14-day free trial
+              Start free — no card needed
             </Link>
             <Link
               href="/how-it-works"
@@ -128,21 +128,21 @@ export default async function HomePage() {
               How it works
             </Link>
           </div>
-          <p className="text-xs text-gray-600 mb-14">14-day free trial. Cancel anytime.</p>
+          <p className="text-xs text-gray-600 mb-14">Free plan available. Paid plans include a 14-day trial.</p>
 
           {/* Pain stats strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden max-w-2xl mx-auto">
             <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">1 in 3</p>
-              <p className="text-xs text-gray-500 mt-1">new-patient calls go unanswered</p>
+              <p className="text-2xl font-bold text-white tracking-tight">Most calls</p>
+              <p className="text-xs text-gray-500 mt-1">to dental offices go unanswered during peak hours</p>
             </div>
             <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">4 in 5</p>
-              <p className="text-xs text-gray-500 mt-1">callers hang up instead of leaving voicemail</p>
+              <p className="text-2xl font-bold text-white tracking-tight">Few callers</p>
+              <p className="text-xs text-gray-500 mt-1">actually leave voicemail — the rest go silent</p>
             </div>
             <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">$850</p>
-              <p className="text-xs text-gray-500 mt-1">estimated value per missed new-patient call</p>
+              <p className="text-2xl font-bold text-white tracking-tight">Every missed call</p>
+              <p className="text-xs text-gray-500 mt-1">is a new patient your competitor can capture</p>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@ export default async function HomePage() {
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Pre-trained</span>
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Medicaid routing</span>
+                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Eligibility screening</span>
               </div>
             </div>
 
@@ -275,11 +275,11 @@ export default async function HomePage() {
               </li>
               <li className="flex items-center gap-3 text-gray-300">
                 <CheckCircle2 className="text-blue-400" size={20} />
-                <span><strong className="text-white">Dentrix & Eaglesoft:</strong> Waitlist integrations active</span>
+                <span><strong className="text-white">Dentrix & Eaglesoft:</strong> Waitlist open — join to get early access</span>
               </li>
               <li className="flex items-center gap-3 text-gray-300">
                 <CheckCircle2 className="text-blue-400" size={20} />
-                <span><strong className="text-white">Real Time</strong> patient record lookups</span>
+                <span><strong className="text-white">Real-time</strong> patient record lookups</span>
               </li>
             </ul>
           </div>
@@ -331,7 +331,7 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-              Up and running in minutes
+              Up and running in under 5 minutes
             </h2>
             <p className="text-gray-500 max-w-lg mx-auto text-lg">
               No IT team. No months of onboarding. The moment you sign up, you're ready to go.
@@ -369,7 +369,7 @@ export default async function HomePage() {
 
       {/* Competitive nudge */}
       <div className="text-center pb-10">
-        <p className="text-sm text-gray-400">Often costs less than hiring a part-time receptionist.</p>
+        <p className="text-sm text-gray-400">Typically a fraction of the cost of a part-time receptionist.</p>
       </div>
 
       {/* CTA banner */}
@@ -379,13 +379,13 @@ export default async function HomePage() {
             Every missed call is a missed patient.
           </h2>
           <p className="text-gray-400 mb-8">
-            Salva AI answers 24/7 so you never lose another one. First 14 days free.
+            Salva AI answers 24/7 so you never lose another one. Start free, upgrade anytime.
           </p>
           <Link
             href="/sign-up"
             className="inline-block bg-white text-gray-900 px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
           >
-            Start free trial →
+            Get started free
           </Link>
         </div>
       </section>
@@ -398,6 +398,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
           <span className="font-semibold text-gray-700">Salva AI</span>
           <div className="flex gap-6">
+            <Link href="/how-it-works" className="hover:text-gray-600 transition-colors">How it works</Link>
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>
             <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign in</Link>
           </div>
@@ -412,7 +413,7 @@ const features = [
   {
     icon: Phone,
     title: "AI voice answering",
-    description: "Forward your practice number to Salva AI. Every call gets answered in your voice — appointments, insurance questions, after-hours, anything.",
+    description: "Forward your practice number to Salva AI. Every call gets answered in your practice's tone — appointments, insurance questions, after-hours, anything.",
   },
   {
     icon: Clock,
@@ -436,13 +437,13 @@ const features = [
   },
   {
     icon: ShieldCheck,
-    title: "HIPAA-compliant",
+    title: "Designed for HIPAA compliance",
     description: "We never collect or store personal health information. Patients are directed to call for anything clinical.",
   },
   {
     icon: Zap,
-    title: "2-minute setup",
-    description: "No developer needed. Sign up, answer a few questions about your practice, copy one line of code. Done.",
+    title: "Quick setup",
+    description: "No developer needed. Sign up, answer a few questions about your practice, copy one line of code — live in under 5 minutes.",
   },
   {
     icon: Bell,

@@ -20,8 +20,8 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   },
   {
     key: 'after_hours_handling',
-    label: 'Disable After Hours Handling',
-    description: 'Turn off custom responses for after-hours contacts. By default, the AI acknowledges closed hours.',
+    label: 'After-Hours Handling',
+    description: 'Automatically handle after-hours contacts. When enabled, the AI acknowledges closed hours and offers callback collection.',
     icon: 'Moon',
     group: 'booking',
     promptInstruction:

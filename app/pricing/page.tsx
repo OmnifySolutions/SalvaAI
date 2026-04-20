@@ -6,9 +6,9 @@ import UpgradeButton from "@/components/UpgradeButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  title: "Dental AI Receptionist Pricing — Plans & Comparison",
   description:
-    "Simple, transparent pricing for dental AI receptionists. Start free — no credit card required. Upgrade to Pro for 24/7 voice AI.",
+    "Simple, transparent pricing for dental AI receptionists. Start with 50 free interactions — no credit card required. Paid plans include a 14-day free trial.",
   alternates: { canonical: "/pricing" },
 };
 
@@ -44,7 +44,7 @@ const plans = [
       "Conversation history",
       "Email support",
     ],
-    cta: "Start free trial",
+    cta: "Start 14-day free trial",
     ctaLoggedIn: "Upgrade to this plan",
     href: "/sign-up?plan=basic",
     hrefLoggedIn: "/dashboard?upgrade=basic",
@@ -63,7 +63,7 @@ const plans = [
       "Custom AI instructions",
       "Priority support",
     ],
-    cta: "Start free trial",
+    cta: "Start 14-day free trial",
     ctaLoggedIn: "Upgrade to this plan",
     href: "/sign-up?plan=pro",
     hrefLoggedIn: "/dashboard?upgrade=pro",
@@ -82,7 +82,7 @@ const plans = [
       "Centralized dashboard",
       "Dedicated onboarding support",
     ],
-    cta: "Start free trial",
+    cta: "Start 14-day free trial",
     ctaLoggedIn: "Upgrade to this plan",
     href: "/sign-up?plan=multi",
     hrefLoggedIn: "/dashboard?upgrade=multi",
@@ -136,7 +136,7 @@ const comparison = [
   },
   {
     feature: "Setup time",
-    hustle: "2 minutes",
+    hustle: "Under 5 min",
     arini: "Several hours",
     truelark: "Several hours",
   },
@@ -187,6 +187,20 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.q,
+              acceptedAnswer: { "@type": "Answer", text: faq.a },
+            })),
+          }),
+        }}
+      />
 
       {/* Nav */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -216,7 +230,7 @@ export default async function PricingPage() {
                   href="/sign-up"
                   className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
                 >
-                  Start free trial
+                  Get started free
                 </Link>
               </>
             )}
@@ -389,7 +403,7 @@ export default async function PricingPage() {
 
         {/* Fine print */}
         <p className="text-center text-sm font-medium text-gray-500 mt-10 mb-20">
-          14-day free trial on all paid plans. Cancel anytime — no fees.
+          14-day free trial included with all paid plans. Cancel anytime — no fees.
         </p>
 
         {/* Competitor comparison Overhaul */}

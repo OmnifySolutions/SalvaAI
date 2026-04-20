@@ -168,6 +168,36 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
   - Zero additional cost, reliable, used by most startups initially
 - ⏳ **Pending**: Domain activation (usually 24-48 hours), then configure email forwarding on registrar control panel
 
+**Item 37: Full content & SEO audit (2026-04-21)** — COMPLETE
+- ✅ **Trial language contradiction fixed**: Hero CTA now clarifies free plan vs 14-day paid trial
+  - "Start free — no card needed" (free forever), "Start 14-day free trial" only on paid plan CTAs
+  - Trust line updated to separate free and paid offerings
+- ✅ **Unverified stats softened**: Replaced specific numbers with qualitative language (FTC compliance)
+  - "1 in 3" → "Most calls", "4 in 5" → "Few callers", "$850" → "Every missed call", "$1,000+" → "High value"
+  - Removed uncited statistics from hero strip and StatsCarousel
+- ✅ **Inaccurate claims corrected**:
+  - "in your voice" → "in your practice's tone" (AI voice description)
+  - "Automatic booking confirmations" → "Booking request routing to front desk" (unvalidated claim)
+  - "Insurance often covers 50%" → softened to "may cover a portion" (unverifiable percentage)
+  - $149 demo price removed from ChatCardSpread
+  - "Medicaid routing" tag → "Eligibility screening"
+  - Dashboard mockup test data (29, 2) reset to 0
+- ✅ **Integration status aligned**: Eaglesoft/Dentrix "waitlist integrations active" → "Waitlist open" for consistency
+- ✅ **Setup time standardized**: All references now "under 5 minutes" (was "2-minute" in features)
+- ✅ **SEO optimized**:
+  - Pricing page title: "Pricing" → "Dental AI Receptionist Pricing — Plans & Comparison"
+  - How-it-works meta description: benefit-oriented (outcomes-focused)
+  - Added FAQPage JSON-LD schema to pricing page
+  - Added SoftwareApplication JSON-LD schema to how-it-works page
+  - Footer: added "How it works" navigation link
+- ✅ **Grammar & brand polish**:
+  - "Real Time" → "Real-time" (hyphenation)
+  - "Disable After Hours Handling" → "After-Hours Handling" (label inversion fix)
+  - "HIPAA-compliant" → "Designed for HIPAA compliance" (defensible language)
+  - Eaglesoft capitalization standardized
+  - CTA copy consistency: "Get started free" across all primary CTAs
+- ✅ **Files modified** (8 total): app/page.tsx, app/pricing/page.tsx, app/how-it-works/page.tsx, app/how-it-works/client.tsx, components/StatsCarousel.tsx, components/ChatCardSpread.tsx, components/DashboardMockup.tsx, lib/ai-features.ts
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

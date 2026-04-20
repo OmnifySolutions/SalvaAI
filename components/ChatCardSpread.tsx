@@ -23,7 +23,7 @@ const scenarios = [
     label: "New patient",
     messages: [
       { role: "user", text: "How much is a teeth cleaning for a new patient?" },
-      { role: "ai",   text: "New patient exams with X-rays and cleaning start at $149, often covered by insurance. Shall I check availability?" },
+      { role: "ai",   text: "New patient exams are typically covered by insurance — I can help get you scheduled. Shall I find an opening?" },
       { role: "user", text: "That sounds great, let's do it!" },
     ],
   },
