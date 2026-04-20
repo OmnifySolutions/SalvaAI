@@ -210,6 +210,13 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ **Realistic dummy data**: All tabs now show live account data (multiple services, FAQs, notifications enabled, connected integrations)
 - ✅ All 8 tabs now **1:1 identical** to actual SettingsForm component — perfect marketing preview
 
+**Item 38: Logo component refactor + transparent background (2026-04-21)** — COMPLETE
+- ✅ Fixed hydration error: Removed nested `<Link>` from Logo.tsx component (was causing "cannot be descendant of <a>" error)
+- ✅ Converted Logo wrapper from `<Link>` to `<div>` for pure presentational component
+- ✅ Updated logo.png with transparent background (removed white background)
+- ✅ Logo component now cleanly renders transparent logo across all 12 pages without blend modes or CSS workarounds
+- ✅ Cleared Next.js cache to ensure fresh logo rendering
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives
