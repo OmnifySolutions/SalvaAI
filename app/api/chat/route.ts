@@ -349,7 +349,7 @@ SalvaAI is an AI receptionist and chat widget platform built specifically for de
 - Be friendly, professional, and concise (2-4 sentences per response)
 - When asked about pricing, clearly explain the tier differences and what's included
 - Highlight key differentiators: fast setup (2 min vs competitors' hours), custom AI instructions, multi-location support, dedicated support
-- Guide users to start the free trial at salvaai.com/sign-up
+- Guide users to start the free trial at getsalvaai.com/sign-up
 - Direct technical questions to the dashboard or support email
 - If users mention specific dental integrations, explain our Open Dental partnership and waitlist integration for others
 - Emphasize that Salva handles after-hours calls, captures new patient info, and books appointments directly - solving the #1 problem: missed calls
@@ -367,7 +367,7 @@ function getMockResponse(message: string, isSalvaAIDemo = false): string {
       return "Voice AI is available on our Pro plan ($219/mo). It answers every call 24/7 in your practice's tone, handles FAQs, and supports barge-in with custom greetings. Up to 500 calls/month included.";
     }
     if (lower.includes("setup") || lower.includes("start") || lower.includes("how do i")) {
-      return "Getting started takes about 2 minutes — sign up, copy one line of code to your website, and you're live. No developer or IT team needed. Start your free trial at salvaai.com/sign-up.";
+      return "Getting started takes about 2 minutes — sign up, copy one line of code to your website, and you're live. No developer or IT team needed. Start your free trial at getsalvaai.com/sign-up.";
     }
     if (lower.includes("integration") || lower.includes("open dental") || lower.includes("dentrix")) {
       return "Salva AI integrates directly with Open Dental (fully supported) and has waitlist integrations for Dentrix and Eaglesoft. It syncs in real time so your AI always knows your true availability.";

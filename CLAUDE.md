@@ -245,7 +245,7 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 
 **Item 41: Email consolidation (2026-04-21)** — COMPLETE
 - ✅ **Consolidated all contact email addresses** to single `support@getsalvaai.com` address
-- ✅ **Removed deprecated email addresses**: privacy@salvaai.com, compliance@salvaai.com, hello@salvaai.com, billing@salvaai.com, legal@salvaai.com, support@salvaai.com, alerts@salvaai.com, billing@getsalvaai.com, compliance@getsalvaai.com, privacy@getsalvaai.com
+- ✅ **Removed deprecated email addresses**: privacy@getsalvaai.com, compliance@getsalvaai.com, hello@getsalvaai.com, billing@getsalvaai.com, legal@getsalvaai.com, support@getsalvaai.com, alerts@getsalvaai.com, billing@getsalvaai.com, compliance@getsalvaai.com, privacy@getsalvaai.com
 - ✅ **Updated 8 files**: app/privacy/page.tsx, app/baa/page.tsx, app/faq/page.tsx, app/how-it-works/client.tsx, app/setup/page.tsx, app/terms/page.tsx, lib/notifications.ts, railway/notifications.js
 - ✅ **Total instances updated**: 35 email addresses across the codebase
 - ✅ **Email forwarding active**: support@getsalvaai.com forwards to daryllvasconcellos@gmail.com via Gmail forwarding + "Send As" feature (zero cost, reliable)
@@ -253,7 +253,7 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 **Item 42: Homepage SEO & Content Audit (2026-04-22)** — COMPLETE
 - ✅ **H1 optimization**: Changed from "Trained your way. Configured in minutes." → "Never Miss Another Patient Call." (keyword-rich, conversion-focused)
 - ✅ **Meta tags**: Updated title "Dental Offices" → "Dental Practices" (industry standard), improved description with benefit focus + "no card needed"
-- ✅ **Schema URL fix**: `salvaai.com` → `getsalvaai.com` in JSON-LD Organization schema
+- ✅ **Schema URL fix**: `getsalvaai.com` → `getsalvaai.com` in JSON-LD Organization schema
 - ✅ **Hero subheading**: Removed defensive "Unlike generic AI receptionists" opener
 - ✅ **CTA labels**: "Start Trial" → "Get Started Free" (3 places) for clarity on free tier
 - ✅ **Trust bar**: "Live in 5 min" → "Live in minutes" (softer promise, less risky)
@@ -273,6 +273,15 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ **Badge styling uniformity**: "Hear it in action" label now matches "Fully Configurable" badge (same bg-blue-50, border-blue-100, text-blue-600 styling)
 - ✅ **Files modified** (7 total): app/page.tsx, app/globals.css, components/AudioDemo.tsx, components/ChatCardSpread.tsx, components/CustomizabilityDemo.tsx, components/DashboardMockup.tsx, components/StatsCarousel.tsx
 - ✅ **Key outcomes**: 24 content/SEO/legal fixes across homepage, all critical FTC risks closed (absolute claims, trademark misuse, deceptive implied stats), build passing, ready for launch review
+
+**Item 43: Homepage UI Polish + Dashboard Mockup Redesign (2026-04-22)** — COMPLETE
+- ✅ **Dashboard mockup modernization**: Rebuilt as unified macOS browser frame with traffic lights, address bar, gradient background, and shadow effects
+- ✅ **Dashboard mockup compaction**: Reduced padding, font sizes, and grid columns (2-col → 3-col stats) for tight, elegant layout
+- ✅ **Gradient refinement**: Hero H1 "Patient Call" updated to lighter blue gradient (`from-blue-300 to-blue-400`)
+- ✅ **Accent color highlights**: Made "Your rules" blue in CustomizabilityDemo, made "5 minutes" blue in setup timeline heading
+- ✅ **Domain consolidation**: Replaced all instances of `salvaai.com` → `getsalvaai.com` across 15+ source files (layout, pages, API routes, notifications, robots/sitemap)
+- ✅ **Files modified** (17 total): components/DashboardMockup.tsx, components/CustomizabilityDemo.tsx, app/page.tsx, app/layout.tsx, lib/notifications.ts, railway/notifications.js, app/robots.ts, app/sitemap.ts, plus 9 page files
+- ✅ **Build status**: All syntax errors resolved, component structure validated, clean git diff ready
 
 ### 🟡 Pending (Blocked/In Progress)
 

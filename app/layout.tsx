@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://salvaai.com"),
+  metadataBase: new URL("https://getsalvaai.com"),
   title: {
     default: "Salva AI — AI Receptionist for Dental Offices",
     template: "%s | Salva AI",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: "Salva AI — AI Receptionist for Dental Offices",
     description:
       "24/7 AI answers calls and chats for your dental practice. Never miss a new patient.",
-    url: "https://salvaai.com",
+    url: "https://getsalvaai.com",
     siteName: "Salva AI",
     type: "website",
   },

@@ -512,7 +512,7 @@ function SettingsMockupSection() {
               <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
             <div className="flex-1 bg-white rounded-lg px-3 py-1 text-xs text-gray-400 text-center">
-              app.salvaai.com/settings
+              app.getsalvaai.com/settings
             </div>
           </div>
 
@@ -1449,7 +1449,7 @@ function CTASection() {
             Get started free
           </Link>
           <a
-            href="mailto:support@getsalvaai.com"
+            href="mailto:support@getgetsalvaai.com"
             className="border border-white/20 text-gray-300 px-8 py-4 rounded-xl font-semibold hover:border-white/40 transition-colors text-lg"
           >
             Talk to us

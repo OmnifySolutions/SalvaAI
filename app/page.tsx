@@ -110,7 +110,7 @@ export default async function HomePage() {
 
           <h1 className="text-5xl md:text-7xl font-black text-white leading-[1] tracking-tighter mb-6 max-w-4xl mx-auto">
             Never Miss Another <br />
-            <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">Patient Call.</span>
+            <span className="bg-gradient-to-r from-blue-300 to-blue-400 bg-clip-text text-transparent">Patient Call.</span>
           </h1>
 
           <p className="text-xl text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
@@ -356,7 +356,7 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
-              Up and running in under 5 minutes
+              Up and running in under <span className="text-blue-600">5 minutes</span>
             </h2>
             <p className="text-gray-500 max-w-lg mx-auto text-lg">
               No IT team. No months of onboarding. The moment you sign up, you're ready to go.

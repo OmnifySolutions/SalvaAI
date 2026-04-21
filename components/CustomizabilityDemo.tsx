@@ -64,7 +64,7 @@ export default function CustomizabilityDemo() {
             Fully Configurable
           </div>
           <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
-            Your AI. Your rules. Your voice.
+            Your AI. <span className="text-blue-600">Your rules</span>. Your voice.
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">
             Toggle any behavior on or off. Your AI does exactly what you want — and nothing you don&apos;t.

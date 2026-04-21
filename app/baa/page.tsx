@@ -311,10 +311,10 @@ export default function BAAPage() {
                   <span>
                     Email{" "}
                     <a
-                      href="mailto:support@getsalvaai.com"
+                      href="mailto:support@getgetsalvaai.com"
                       className="text-blue-400 underline hover:text-blue-300"
                     >
-                      support@getsalvaai.com
+                      support@getgetsalvaai.com
                     </a>{" "}
                     with your practice name and plan type.
                   </span>
@@ -333,7 +333,7 @@ export default function BAAPage() {
                 </li>
               </ol>
               <a
-                href="mailto:support@getsalvaai.com?subject=BAA Request — [Your Practice Name]"
+                href="mailto:support@getgetsalvaai.com?subject=BAA Request — [Your Practice Name]"
                 className="inline-block bg-white text-gray-900 px-6 py-3 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
               >
                 Request a BAA

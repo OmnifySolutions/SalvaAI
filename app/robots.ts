@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/dashboard", "/settings", "/onboarding", "/sign-in", "/sign-up", "/api/"],
       },
     ],
-    sitemap: "https://salvaai.com/sitemap.xml",
+    sitemap: "https://getsalvaai.com/sitemap.xml",
   };
 }

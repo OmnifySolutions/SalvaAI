@@ -66,7 +66,7 @@ export async function sendEmergencyNotification(business: Business, conv: Conver
   const channel = conv.channel === "voice" ? "📞 Phone call" : "💬 Chat";
   const msg = `🚨 DENTAL EMERGENCY — ${business.name}\n${channel} from ${caller}\n${conv.summary ?? conv.appointment_notes ?? "Patient reported a dental emergency."}\nReview in your SalvaAI dashboard.`;
   const subject = `🚨 Emergency Alert — ${business.name}`;
-  const html = `<p><strong>Dental Emergency Reported</strong></p><p><strong>Practice:</strong> ${business.name}</p><p><strong>Channel:</strong> ${channel}</p><p><strong>Caller:</strong> ${caller}</p><p>${conv.summary ?? conv.appointment_notes ?? "Patient reported a dental emergency."}</p><p>Review and resolve in your <a href="https://salvaai.com/dashboard">SalvaAI dashboard</a>.</p>`;
+  const html = `<p><strong>Dental Emergency Reported</strong></p><p><strong>Practice:</strong> ${business.name}</p><p><strong>Channel:</strong> ${channel}</p><p><strong>Caller:</strong> ${caller}</p><p>${conv.summary ?? conv.appointment_notes ?? "Patient reported a dental emergency."}</p><p>Review and resolve in your <a href="https://getsalvaai.com/dashboard">SalvaAI dashboard</a>.</p>`;
 
   await Promise.allSettled([
     business.notify_emergency_phone ? sendSmsAlert(business.notify_emergency_phone, msg) : Promise.resolve(),
@@ -80,7 +80,7 @@ export async function sendBookingNotification(business: Business, conv: Conversa
   const caller = formatCaller(conv);
   const msg = `📅 New booking request — ${business.name}\nFrom: ${caller}\n${conv.appointment_notes ?? "Patient requested an appointment."}\nReview in your SalvaAI dashboard.`;
   const subject = `New Booking Request — ${business.name}`;
-  const html = `<p><strong>New Booking Request</strong></p><p><strong>Practice:</strong> ${business.name}</p><p><strong>From:</strong> ${caller}</p><p>${conv.appointment_notes ?? "Patient requested an appointment."}</p><p>Review in your <a href="https://salvaai.com/dashboard">SalvaAI dashboard</a>.</p>`;
+  const html = `<p><strong>New Booking Request</strong></p><p><strong>Practice:</strong> ${business.name}</p><p><strong>From:</strong> ${caller}</p><p>${conv.appointment_notes ?? "Patient requested an appointment."}</p><p>Review in your <a href="https://getsalvaai.com/dashboard">SalvaAI dashboard</a>.</p>`;
 
   await Promise.allSettled([
     business.notify_emergency_phone ? sendSmsAlert(business.notify_emergency_phone, msg) : Promise.resolve(),
@@ -93,7 +93,7 @@ export async function sendCallbackNotification(business: Business, conv: Convers
   const caller = formatCaller(conv);
   const msg = `📞 Callback requested — ${business.name}\nFrom: ${caller}\nReview in your SalvaAI dashboard.`;
   const subject = `Callback Request — ${business.name}`;
-  const html = `<p><strong>Callback Requested</strong></p><p><strong>Practice:</strong> ${business.name}</p><p><strong>From:</strong> ${caller}</p><p>Review in your <a href="https://salvaai.com/dashboard">SalvaAI dashboard</a>.</p>`;
+  const html = `<p><strong>Callback Requested</strong></p><p><strong>Practice:</strong> ${business.name}</p><p><strong>From:</strong> ${caller}</p><p>Review in your <a href="https://getsalvaai.com/dashboard">SalvaAI dashboard</a>.</p>`;
 
   await Promise.allSettled([
     business.notify_emergency_phone ? sendSmsAlert(business.notify_emergency_phone, msg) : Promise.resolve(),

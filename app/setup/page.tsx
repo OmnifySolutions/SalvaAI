@@ -21,7 +21,7 @@ const CARRIER_TABS: { id: Carrier; label: string; sub: string }[] = [
   { id: "us",   label: "US Mobile Carriers",      sub: "AT&T, Verizon, T-Mobile" },
 ];
 
-const PLACEHOLDER_CODE = `<script src="https://app.salvaai.com/api/widget/embed?id=YOUR_ID"></script>`;
+const PLACEHOLDER_CODE = `<script src="https://app.getsalvaai.com/api/widget/embed?id=YOUR_ID"></script>`;
 
 export default function SetupPage() {
   const [platform, setPlatform] = useState<Platform>("squarespace");
@@ -262,7 +262,7 @@ export default function SetupPage() {
             </p>
           </div>
           <a
-            href="mailto:support@getsalvaai.com"
+            href="mailto:support@getgetsalvaai.com"
             className="shrink-0 text-sm bg-gray-900 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-700 transition-colors"
           >
             Get setup help

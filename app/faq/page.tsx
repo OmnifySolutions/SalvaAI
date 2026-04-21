@@ -295,7 +295,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "Do you offer refunds?",
-        a: "We do not offer refunds for partial months or unused months. If you believe you were charged in error, contact support@getsalvaai.com and we will investigate promptly.",
+        a: "We do not offer refunds for partial months or unused months. If you believe you were charged in error, contact support@getgetsalvaai.com and we will investigate promptly.",
       },
       {
         q: "What happens if I go over my interaction limit?",
@@ -330,7 +330,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "How do I request a BAA?",
-        a: "Email support@getsalvaai.com with your practice name and plan type. We will send you our standard BAA (based on the HHS model template) for review within 1 business day. Multi-Practice plans can also request custom BAA review.",
+        a: "Email support@getgetsalvaai.com with your practice name and plan type. We will send you our standard BAA (based on the HHS model template) for review within 1 business day. Multi-Practice plans can also request custom BAA review.",
       },
       {
         q: "Is Salva AI TCPA compliant?",
@@ -357,7 +357,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "Can I export my data?",
-        a: "Yes. You may request an export of your practice data and conversation history at any time by contacting support@getsalvaai.com. We will provide the export before any account deletion.",
+        a: "Yes. You may request an export of your practice data and conversation history at any time by contacting support@getgetsalvaai.com. We will provide the export before any account deletion.",
       },
       {
         q: "How long is my data retained?",
@@ -365,7 +365,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "What happens to my data if I cancel?",
-        a: "Your account remains accessible until the end of your billing period. After that, your data enters a 30-day deletion window. You can request an export before deletion. Contact support@getsalvaai.com to initiate data deletion or export.",
+        a: "Your account remains accessible until the end of your billing period. After that, your data enters a 30-day deletion window. You can request an export before deletion. Contact support@getgetsalvaai.com to initiate data deletion or export.",
       },
       {
         q: "Does Salva AI sell my data?",
@@ -411,7 +411,7 @@ const CATEGORIES: Category[] = [
     questions: [
       {
         q: "How do I get help?",
-        a: "Email support@getsalvaai.com for any questions or issues. We aim to respond within 1 business day. For urgent matters, include 'URGENT' in the subject line.",
+        a: "Email support@getgetsalvaai.com for any questions or issues. We aim to respond within 1 business day. For urgent matters, include 'URGENT' in the subject line.",
       },
       {
         q: "Is there an onboarding call available?",
@@ -419,7 +419,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "What if I find a bug or the AI behaves unexpectedly?",
-        a: "Email support@getsalvaai.com with a description of the issue and, if possible, the conversation transcript. We treat accuracy and reliability as critical — you will receive a timely response.",
+        a: "Email support@getgetsalvaai.com with a description of the issue and, if possible, the conversation transcript. We treat accuracy and reliability as critical — you will receive a timely response.",
       },
       {
         q: "Where can I find release notes and product updates?",
@@ -528,10 +528,10 @@ export default function FAQPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="mailto:support@getsalvaai.com"
+              href="mailto:support@getgetsalvaai.com"
               className="bg-white text-gray-900 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors text-sm"
             >
-              Email support@getsalvaai.com
+              Email support@getgetsalvaai.com
             </a>
             <Link
               href="/sign-up"
