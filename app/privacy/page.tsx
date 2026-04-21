@@ -316,10 +316,10 @@ export default function PrivacyPolicyPage() {
             <p className="text-gray-600 mt-2">
               To exercise any of these rights, contact us at{" "}
               <a
-                href="mailto:privacy@salvaai.com"
+                href="mailto:support@getsalvaai.com"
                 className="text-blue-600 underline hover:text-blue-800"
               >
-                privacy@salvaai.com
+                support@getsalvaai.com
               </a>
               .
             </p>
@@ -340,10 +340,10 @@ export default function PrivacyPolicyPage() {
               that require a Business Associate Agreement (BAA), we are happy to execute one.
               Please contact{" "}
               <a
-                href="mailto:compliance@salvaai.com"
+                href="mailto:support@getsalvaai.com"
                 className="text-blue-600 underline hover:text-blue-800"
               >
-                compliance@salvaai.com
+                support@getsalvaai.com
               </a>{" "}
               to request a BAA. See our{" "}
               <Link href="/baa" className="text-blue-600 underline hover:text-blue-800">
@@ -390,8 +390,8 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="text-gray-600 mt-2">
               To exercise these rights, email{" "}
-              <a href="mailto:privacy@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                privacy@salvaai.com
+              <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                support@getsalvaai.com
               </a>{" "}
               with the subject line &ldquo;CCPA Request.&rdquo; We will verify your identity before
               responding and will fulfill verified requests within 45 days.
@@ -443,14 +443,14 @@ export default function PrivacyPolicyPage() {
             <ul className="list-none pl-0 text-gray-600 space-y-1 mt-2">
               <li>
                 <strong>Email:</strong>{" "}
-                <a href="mailto:privacy@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                  privacy@salvaai.com
+                <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                  support@getsalvaai.com
                 </a>
               </li>
               <li>
                 <strong>General inquiries:</strong>{" "}
-                <a href="mailto:hello@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                  hello@salvaai.com
+                <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                  support@getsalvaai.com
                 </a>
               </li>
             </ul>

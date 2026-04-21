@@ -295,7 +295,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "Do you offer refunds?",
-        a: "We do not offer refunds for partial months or unused months. If you believe you were charged in error, contact billing@getsalvaai.com and we will investigate promptly.",
+        a: "We do not offer refunds for partial months or unused months. If you believe you were charged in error, contact support@getsalvaai.com and we will investigate promptly.",
       },
       {
         q: "What happens if I go over my interaction limit?",
@@ -330,7 +330,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "How do I request a BAA?",
-        a: "Email compliance@getsalvaai.com with your practice name and plan type. We will send you our standard BAA (based on the HHS model template) for review within 1 business day. Multi-Practice plans can also request custom BAA review.",
+        a: "Email support@getsalvaai.com with your practice name and plan type. We will send you our standard BAA (based on the HHS model template) for review within 1 business day. Multi-Practice plans can also request custom BAA review.",
       },
       {
         q: "Is Salva AI TCPA compliant?",
@@ -357,7 +357,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "Can I export my data?",
-        a: "Yes. You may request an export of your practice data and conversation history at any time by contacting privacy@getsalvaai.com. We will provide the export before any account deletion.",
+        a: "Yes. You may request an export of your practice data and conversation history at any time by contacting support@getsalvaai.com. We will provide the export before any account deletion.",
       },
       {
         q: "How long is my data retained?",
@@ -365,7 +365,7 @@ const CATEGORIES: Category[] = [
       },
       {
         q: "What happens to my data if I cancel?",
-        a: "Your account remains accessible until the end of your billing period. After that, your data enters a 30-day deletion window. You can request an export before deletion. Contact privacy@getsalvaai.com to initiate data deletion or export.",
+        a: "Your account remains accessible until the end of your billing period. After that, your data enters a 30-day deletion window. You can request an export before deletion. Contact support@getsalvaai.com to initiate data deletion or export.",
       },
       {
         q: "Does Salva AI sell my data?",

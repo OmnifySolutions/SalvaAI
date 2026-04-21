@@ -243,6 +243,13 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ Sign-off table with Status/Tester/Date columns for tracking progress
 - ✅ Identified critical vs. high vs. medium vs. low priority tests based on codebase analysis
 
+**Item 41: Email consolidation (2026-04-21)** — COMPLETE
+- ✅ **Consolidated all contact email addresses** to single `support@getsalvaai.com` address
+- ✅ **Removed deprecated email addresses**: privacy@salvaai.com, compliance@salvaai.com, hello@salvaai.com, billing@salvaai.com, legal@salvaai.com, support@salvaai.com, alerts@salvaai.com, billing@getsalvaai.com, compliance@getsalvaai.com, privacy@getsalvaai.com
+- ✅ **Updated 8 files**: app/privacy/page.tsx, app/baa/page.tsx, app/faq/page.tsx, app/how-it-works/client.tsx, app/setup/page.tsx, app/terms/page.tsx, lib/notifications.ts, railway/notifications.js
+- ✅ **Total instances updated**: 35 email addresses across the codebase
+- ✅ **Email forwarding active**: support@getsalvaai.com forwards to daryllvasconcellos@gmail.com via Gmail forwarding + "Send As" feature (zero cost, reliable)
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

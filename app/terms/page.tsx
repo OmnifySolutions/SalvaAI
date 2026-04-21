@@ -177,8 +177,8 @@ export default function TermsOfServicePage() {
             <p className="text-gray-600">
               We do not offer refunds for partial months or for months in which the Service was
               available but unused. If you believe you were charged in error, contact us at{" "}
-              <a href="mailto:billing@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                billing@salvaai.com
+              <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                support@getsalvaai.com
               </a>{" "}
               and we will investigate promptly.
             </p>
@@ -397,8 +397,8 @@ export default function TermsOfServicePage() {
             <p className="text-gray-600">
               <strong>Opt-Out:</strong> You may opt out of this arbitration provision by sending
               written notice to{" "}
-              <a href="mailto:legal@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                legal@salvaai.com
+              <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                support@getsalvaai.com
               </a>{" "}
               within 30 days of first accepting these Terms. If you opt out, disputes will be
               resolved in the state or federal courts located in Delaware.
@@ -471,8 +471,8 @@ export default function TermsOfServicePage() {
               We may provide notices to you via email to the address associated with your account,
               through the Service dashboard, or by posting on our website. You are responsible for
               keeping your contact information up to date. Notices to Salva AI must be sent to{" "}
-              <a href="mailto:legal@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                legal@salvaai.com
+              <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                support@getsalvaai.com
               </a>
               .
             </p>
@@ -484,14 +484,14 @@ export default function TermsOfServicePage() {
             <ul className="list-none pl-0 text-gray-600 space-y-1 mt-2">
               <li>
                 <strong>Email:</strong>{" "}
-                <a href="mailto:legal@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                  legal@salvaai.com
+                <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                  support@getsalvaai.com
                 </a>
               </li>
               <li>
                 <strong>General inquiries:</strong>{" "}
-                <a href="mailto:hello@salvaai.com" className="text-blue-600 underline hover:text-blue-800">
-                  hello@salvaai.com
+                <a href="mailto:support@getsalvaai.com" className="text-blue-600 underline hover:text-blue-800">
+                  support@getsalvaai.com
                 </a>
               </li>
             </ul>

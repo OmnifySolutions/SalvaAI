@@ -1449,7 +1449,7 @@ function CTASection() {
             Get started free
           </Link>
           <a
-            href="mailto:hello@salvaai.com"
+            href="mailto:support@getsalvaai.com"
             className="border border-white/20 text-gray-300 px-8 py-4 rounded-xl font-semibold hover:border-white/40 transition-colors text-lg"
           >
             Talk to us
