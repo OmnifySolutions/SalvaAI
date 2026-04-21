@@ -265,7 +265,7 @@ function HeroSection() {
         <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
           Full Product Tour
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[1] mb-6">
           See everything{" "}
           <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             Salva AI
@@ -292,26 +292,30 @@ function HeroSection() {
 
 function DashboardSection() {
   const bullets = [
+    { label: "Inbox notifications", desc: "Emergencies, bookings, and callbacks in one place" },
+    { label: "Emergency detection", desc: "Flags urgent cases for immediate team attention" },
+    { label: "After-hours handling", desc: "Captures inquiries when your office is closed" },
     { label: "Total interactions", desc: "Every chat and call, tracked automatically" },
     { label: "Appointments booked", desc: "See how many patients converted to bookings" },
     { label: "Phone calls handled", desc: "Total voice calls answered by your AI" },
-    { label: "Inbox notifications", desc: "Emergencies, bookings, and callbacks in one place" },
   ];
 
   return (
     <section className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
+            Analytics
+          </div>
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            Real-time <span className="text-blue-600">intelligence.</span><br />No guesswork.
+          </h2>
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+            Your dashboard shows exactly how your AI is performing — at a glance, the moment you log in.
+          </p>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <div>
-            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
-              Analytics
-            </div>
-            <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-              Real-time intelligence.<br />No guesswork.
-            </h2>
-            <p className="text-gray-500 text-lg mb-8 leading-relaxed">
-              Your dashboard shows exactly how your AI is performing — at a glance, the moment you log in.
-            </p>
             <ul>
               {bullets.map((b) => (
                 <li key={b.label} className="flex gap-4 mb-5 last:mb-0" style={{ alignItems: "flex-start", minHeight: "40px" }}>
@@ -324,8 +328,8 @@ function DashboardSection() {
               ))}
             </ul>
           </div>
-          <div className="overflow-hidden rounded-3xl shadow-xl" style={{ height: "520px", width: "100%" }}>
-            <div style={{ transform: "scale(0.625)", transformOrigin: "top left", width: "100%", height: "100%" }}>
+          <div className="overflow-hidden rounded-3xl shadow-xl flex items-center justify-center" style={{ height: "640px", width: "100%" }}>
+            <div style={{ transform: "scale(0.8)", width: "1600px", height: "832px", transformOrigin: "center" }}>
               <DashboardMockup />
             </div>
           </div>
@@ -357,7 +361,7 @@ function AIFeaturesSection() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             AI Behaviors
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
             8 AI behaviors. All toggleable.
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
@@ -495,8 +499,8 @@ function SettingsMockupSection() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Settings
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-            Configure everything.<br />No developer needed.
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            <span className="text-blue-600">Configure everything.</span><br />No developer needed.
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Every detail of your AI — from its name and personality to its voice tone — is configurable from your dashboard.
@@ -885,7 +889,7 @@ function SettingsMockupSection() {
                         <div className="w-5 h-5 rounded-full bg-green-100 border border-green-300 flex items-center justify-center shrink-0">
                           <Check size={11} className="text-green-600" />
                         </div>
-                        <h4 className="font-semibold text-gray-900 text-sm">Do's</h4>
+                        <h4 className="font-semibold text-gray-900 text-sm">Always do</h4>
                       </div>
                       <p className="text-xs text-gray-400 mb-3">Things you want your AI to always do or say.</p>
                       <textarea
@@ -901,7 +905,7 @@ function SettingsMockupSection() {
                         <div className="w-5 h-5 rounded-full bg-red-100 border border-red-300 flex items-center justify-center shrink-0">
                           <X size={11} className="text-red-500" />
                         </div>
-                        <h4 className="font-semibold text-gray-900 text-sm">Don'ts</h4>
+                        <h4 className="font-semibold text-gray-900 text-sm">Never do</h4>
                       </div>
                       <p className="text-xs text-gray-400 mb-3">Things you never want your AI to do or say.</p>
                       <textarea
@@ -999,8 +1003,8 @@ function InboxDemoSection() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Inbox
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-            Never miss an emergency<br />or booking request.
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            Never miss an <span className="text-blue-600">emergency</span><br />or booking request.
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Your inbox surfaces the conversations that need human attention — emergencies, pending bookings, and callback requests — all in one place.
@@ -1010,18 +1014,24 @@ function InboxDemoSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Inbox mockup */}
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="font-bold text-gray-900 text-sm">Action Required</h3>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {items.length} item{items.length !== 1 ? "s" : ""} need attention
-                </p>
+                <div className="flex items-center gap-3">
+                  <h3 className="font-black text-gray-900 text-lg">Action Required</h3>
+                  {items.length > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">
+                      {items.length} NEW
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-400 font-medium mt-1">Review and resolve incoming requests</p>
               </div>
-              <div className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
-                {items.length}
+              <div className="text-[10px] bg-gray-900 text-white font-black px-2 py-1 rounded-md uppercase tracking-[0.2em] shadow-lg flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+                LIVE
               </div>
             </div>
-            <div className="flex border-b border-gray-100 px-4 pt-3 gap-1">
+            <div className="border-b border-gray-100 px-6 pt-4 flex gap-2">
               {INBOX_TAB_LIST.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
@@ -1030,16 +1040,16 @@ function InboxDemoSection() {
                     setActiveTab(id);
                     setUserClicked(true);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
                     activeTab === id
                       ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-400 hover:text-gray-600"
+                      : "text-gray-400 hover:text-gray-600 border-b-2 border-transparent"
                   }`}
                 >
-                  <Icon size={12} />
+                  <Icon size={14} />
                   {label}
                   <span
-                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                       activeTab === id
                         ? "bg-blue-100 text-blue-600"
                         : "bg-gray-100 text-gray-400"
@@ -1050,39 +1060,41 @@ function InboxDemoSection() {
                 </button>
               ))}
             </div>
-            <div className="p-4" key={activeTab}>
-              <div className="animate-fade-slide space-y-3">
+            <div className="p-6" key={activeTab}>
+              <div className="animate-fade-slide space-y-4">
                 {items.map((item, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-3 p-4 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
+                    className="flex items-start gap-3 cursor-pointer group"
                   >
                     <div
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${
                         activeTab === "emergencies"
                           ? "bg-red-50 text-red-500"
-                          : "bg-blue-50 text-blue-500"
+                          : activeTab === "bookings"
+                          ? "bg-blue-50 text-blue-500"
+                          : "bg-orange-50 text-orange-500"
                       }`}
                     >
                       {activeTab === "emergencies" ? (
-                        <AlertTriangle size={14} />
+                        <AlertTriangle size={16} />
                       ) : activeTab === "bookings" ? (
-                        <CalendarCheck size={14} />
+                        <CalendarCheck size={16} />
                       ) : (
-                        <Phone size={14} />
+                        <Phone size={16} />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-semibold text-sm text-gray-900">{item.name}</span>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="font-bold text-sm text-gray-900">{item.name}</span>
                         {item.badge && (
-                          <span className="text-[10px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             {item.badge}
                           </span>
                         )}
                         <span className="text-xs text-gray-400 ml-auto">{item.time}</span>
                       </div>
-                      <p className="text-xs text-gray-500 leading-snug line-clamp-2">
+                      <p className="text-sm text-gray-600 leading-snug">
                         {item.summary}
                       </p>
                     </div>
@@ -1093,11 +1105,14 @@ function InboxDemoSection() {
           </div>
 
           {/* Notification channels */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-gray-900 text-lg">Alerts delivered instantly</h3>
-            <p className="text-gray-500 text-sm">
-              Configure which channels receive alerts for each event type.
-            </p>
+          <div className="space-y-5">
+            <div>
+              <h3 className="font-bold text-gray-900 text-lg mb-1">Alert Channels</h3>
+              <p className="text-gray-500 text-sm">
+                Configure how you receive notifications for emergencies, bookings, and callbacks.
+              </p>
+            </div>
+
             {[
               {
                 label: "SMS",
@@ -1120,8 +1135,8 @@ function InboxDemoSection() {
             ].map((ch) => (
               <div
                 key={ch.label}
-                className={`flex items-center justify-between p-5 rounded-2xl border ${
-                  ch.on ? "border-gray-200 bg-white" : "border-gray-100 bg-gray-50"
+                className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${
+                  ch.on ? "border-gray-200 bg-white hover:border-gray-300" : "border-gray-100 bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -1135,7 +1150,7 @@ function InboxDemoSection() {
                     <div className="text-xs text-gray-500">{ch.desc}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {!ch.on && (
                     <span className="text-xs text-gray-400 font-medium">Setup required</span>
                   )}
@@ -1143,13 +1158,14 @@ function InboxDemoSection() {
                 </div>
               </div>
             ))}
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mt-6">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-sm font-semibold text-gray-900">Realtime sync</span>
+                <span className="text-sm font-semibold text-gray-900">Realtime updates</span>
               </div>
-              <p className="text-xs text-gray-500">
-                Your inbox updates in real time as new conversations come in — no refresh needed.
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Your inbox updates instantly as conversations arrive. Never miss an emergency, booking request, or callback.
               </p>
             </div>
           </div>
@@ -1183,8 +1199,8 @@ function DosDontsSection() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Custom Rules
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-            AI that follows<br />YOUR rules.
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            AI that follows<br /><span className="text-blue-600">YOUR rules.</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Write plain English rules — one per line. Your AI follows them on every call and chat, no matter what.
@@ -1256,8 +1272,8 @@ function VoiceSection() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Voice AI
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-            Answers every call.<br />Even at 2 a.m.
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            Answers <span className="text-blue-600">every call.</span><br />Even at 2 a.m.
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Choose how your AI sounds. Select a tone below to hear the difference in the sample transcript.
@@ -1365,8 +1381,8 @@ function IntegrationsSection() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Integrations
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-            Works with your<br />existing software.
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            Works with your<br /><span className="text-blue-600">existing software.</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Plugs directly into your practice management system — no double entry, no manual syncing.

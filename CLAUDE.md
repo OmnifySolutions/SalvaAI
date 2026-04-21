@@ -46,6 +46,23 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 
 ### ✅ Recently Completed
 
+**Item 44: How-it-works page header & preview standardization (2026-04-22)** — COMPLETE
+- ✅ **Header font standardization**: All h2 headers changed from `font-bold` to `font-black` (matches homepage)
+- ✅ **Hero h1 gradient**: Updated to match Salva AI gradient (`from-blue-400 to-cyan-400`), applied same gradient to homepage "Patient Call"
+- ✅ **Hero h1 sizing**: Changed from `text-6xl` to `text-7xl` (matches homepage)
+- ✅ **Blue highlights on headers**: Added contextual blue text to key phrases:
+  - "Real-time **intelligence.**" (analytics)
+  - "**Configure everything.**" (settings)
+  - "Never miss an **emergency**" (inbox)
+  - "AI that follows **YOUR rules**" (do's & don'ts)
+  - "Answers **every call.**" (voice)
+  - "Works with your **existing software.**" (integrations)
+- ✅ **Dashboard preview sizing**: Increased from 0.625 scale (520px height) to 0.8 scale (640px height) for proper fit in container
+- ✅ **Analytics section**: Reordered bullets (Inbox notifications → Emergency detection → After-hours handling)
+- ✅ **Inbox preview**: Updated to match actual InboxSection 1:1 with proper header, "LIVE" status badge, tab styling, and item layout
+- ✅ **Notification channels section**: Enhanced layout with better labels, descriptions, and realtime sync info
+- ✅ **Settings preview**: Ensured all 8 tabs have 1:1 dummy data matching actual SettingsForm
+
 **Website & Dashboard Overhaul (2026-04-18)** — 17 polishing changes
 - ✅ Reordered homepage: AudioDemo → CustomizabilityDemo → StatsCarousel → ChatCardSpread (audio → customize flow)
 - ✅ Added interactive "AI Customizability Demo" section showing toggle-based AI response changes

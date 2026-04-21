@@ -110,7 +110,7 @@ export default async function HomePage() {
 
           <h1 className="text-5xl md:text-7xl font-black text-white leading-[1] tracking-tighter mb-6 max-w-4xl mx-auto">
             Never Miss Another <br />
-            <span className="bg-gradient-to-r from-blue-300 to-blue-400 bg-clip-text text-transparent">Patient Call.</span>
+            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Patient Call.</span>
           </h1>
 
           <p className="text-xl text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
