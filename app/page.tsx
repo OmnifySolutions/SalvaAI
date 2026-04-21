@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Salva AI — AI Receptionist for Dental Offices",
+  title: "Salva AI — AI Receptionist for Dental Practices",
   description:
-    "24/7 AI receptionist and chat widget for dental practices. Answer every new-patient call, book appointments, and sync with OpenDental.",
+    "Salva AI answers every patient call and chat 24/7 — books appointments, handles after-hours, and syncs with Open Dental. Start free in minutes.",
   alternates: { canonical: "/" },
 };
 import {
@@ -47,7 +47,7 @@ export default async function HomePage() {
               {
                 "@type": "Organization",
                 name: "Salva AI",
-                url: "https://salvaai.com",
+                url: "https://getsalvaai.com",
                 description: "AI receptionist and chat widget for dental offices.",
               },
               {
@@ -90,7 +90,7 @@ export default async function HomePage() {
               href="/sign-up"
               className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
             >
-              Start Trial
+              Get Started Free
             </Link>
           </div>
         </nav>
@@ -100,7 +100,7 @@ export default async function HomePage() {
       <section className="relative bg-gray-950 overflow-hidden">
         {/* Subtle radial glow behind headline */}
         <div className="pointer-events-none absolute inset-0 flex items-start justify-center">
-          <div className="w-[900px] h-[500px] bg-blue-600/10 rounded-full blur-3xl -translate-y-1/4 animate-glow-float" />
+          <div className="w-[900px] h-[500px] bg-blue-600/20 rounded-full blur-3xl -translate-y-1/4 animate-glow-float" />
         </div>
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-blue-300 text-xs font-semibold px-3 py-1.5 rounded-full mb-8 tracking-wide uppercase">
@@ -109,12 +109,12 @@ export default async function HomePage() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black text-white leading-[1] tracking-tighter mb-6 max-w-4xl mx-auto">
-            Trained your way. <br />
-            Configured in <span className="text-blue-500">minutes.</span>
+            Never Miss Another <br />
+            <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">Patient Call.</span>
           </h1>
 
           <p className="text-xl text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
-            Unlike generic AI receptionists, Salva AI is trained on <em>your</em> practice — your services, tone, and FAQs — and live in minutes. No missed calls, no lost patients.
+            Salva AI is trained on <em>your</em> practice — your services, tone, and FAQs — and live in minutes. No missed calls, no lost patients.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
@@ -122,7 +122,7 @@ export default async function HomePage() {
               href="/sign-up"
               className="bg-white text-gray-900 px-20 py-3.5 rounded-xl font-semibold shadow-sm active:scale-95 animate-soft-pulse"
             >
-              Start Trial
+              Start Free
             </Link>
             <Link
               href="/how-it-works"
@@ -156,7 +156,7 @@ export default async function HomePage() {
               <div className="flex items-center gap-4">
                 <span>Free to start</span>
                 <span className="w-1.5 h-1.5 bg-blue-500/40 rounded-full" />
-                <span>Live in 5 min</span>
+                <span>Live in minutes</span>
                 <span className="w-1.5 h-1.5 bg-blue-500/40 rounded-full" />
                 <span>No contracts</span>
               </div>
@@ -192,10 +192,10 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-wide uppercase">
-              The AI Playbook
+              Core Workflows
             </div>
             <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
-              Works exactly like your top staff
+              Handles the calls your team doesn't have time for.
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto text-lg">
               Three core workflows, highly tailored to your practice. Launch in 5 minutes — with total control over every response.
@@ -212,7 +212,7 @@ export default async function HomePage() {
                 Answers every call in your practice&apos;s exact tone. Handles endless FAQ loops, office hours, and parking directions without bothering your team.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Barge-in supported</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Natural conversation</span>
                 <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Custom greetings</span>
               </div>
             </div>
@@ -223,11 +223,11 @@ export default async function HomePage() {
               </div>
               <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Insurance Checker</h3>
               <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
-                Patients ask &quot;Do you take my insurance?&quot; and Salva checks your accepted list immediately. Stops bad leads and books the good ones.
+                Patients ask &quot;Do you take my insurance?&quot; and Salva answers instantly from your accepted carriers list — so only the right patients get booked.
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="text-[11px] bg-blue-50 border border-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Easily customized</span>
-                <span className="text-[11px] bg-blue-50 border border-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Eligibility screening</span>
+                <span className="text-[11px] bg-blue-50 border border-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Carrier matching</span>
               </div>
             </div>
 
@@ -240,8 +240,8 @@ export default async function HomePage() {
                 Walks new patients through intake questions, pitches your new patient specials, and secures the booking directly into your calendar.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">High conversion</span>
-                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">PMS Integrated</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">New patient optimized</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Open Dental sync</span>
               </div>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
             {[
               { text: "Answer calls in 1 second", icon: CheckCircle2 },
-              { text: "HIPAA-grade security", icon: CheckCircle2 },
+              { text: "Designed for HIPAA compliance", icon: CheckCircle2 },
               { text: "Intelligent call routing", icon: CheckCircle2 },
               { text: "After-hours triage", icon: CheckCircle2 },
               { text: "Direct Open Dental sync", icon: CheckCircle2 },
@@ -287,7 +287,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-16">
           <div className="flex-1 space-y-6">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-full tracking-wide uppercase">
-              Deep Integrations
+              Practice Management Sync
             </div>
             <h2 className="text-4xl font-black tracking-tight text-white mb-6">Syncs directly with your Practice Management Software.</h2>
             <p className="text-gray-400 text-lg leading-relaxed">
@@ -324,7 +324,7 @@ export default async function HomePage() {
                   {`> Checking availability for next Tuesday...`}
                 </div>
                 <div className="bg-gray-900/50 p-4 rounded-xl text-sm font-mono text-green-400 opacity-80">
-                  {`> Found slot: 2:00 PM with Dr. Smith`}
+                  {`> Found slot: 2:00 PM — Tuesday morning`}
                 </div>
                 <div className="bg-gray-900/50 p-4 rounded-xl text-sm font-mono flex items-center gap-2">
                   <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
@@ -341,7 +341,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
-              Everything in one place
+              Your practice, in real time.
             </h2>
             <p className="text-gray-500 max-w-md mx-auto">
               Your dashboard shows every call and chat in real time — so you always know what patients are asking.
@@ -394,7 +394,7 @@ export default async function HomePage() {
 
       {/* Competitive nudge */}
       <div className="text-center pb-10">
-        <p className="text-sm text-gray-400">Typically a fraction of the cost of a part-time receptionist.</p>
+        <p className="text-sm text-gray-400">No hiring. No training. No overtime. Just results.</p>
       </div>
 
       {/* CTA banner */}
@@ -404,13 +404,13 @@ export default async function HomePage() {
             Every missed call is a missed patient.
           </h2>
           <p className="text-gray-400 mb-8">
-            Salva AI answers 24/7 so you never lose another one. Start free, upgrade anytime.
+            Salva AI answers 24/7 so you never lose another one.
           </p>
           <Link
             href="/sign-up"
             className="inline-block bg-white text-gray-900 px-20 py-3.5 rounded-xl font-semibold shadow-sm active:scale-95 animate-soft-pulse"
           >
-            Start Trial
+            Get Started Free
           </Link>
         </div>
       </section>
@@ -420,8 +420,11 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-8">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <Logo width={110} height={28} />
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 text-sm text-gray-400">
+          <div className="flex flex-col gap-2">
+            <Logo width={110} height={28} />
+            <p className="text-xs text-gray-500">AI receptionist built for dental practices.</p>
+          </div>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link href="/how-it-works" className="hover:text-gray-600 transition-colors">How it works</Link>
             <Link href="/pricing" className="hover:text-gray-600 transition-colors">Pricing</Link>

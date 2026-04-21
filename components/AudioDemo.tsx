@@ -33,10 +33,10 @@ export default function AudioDemo() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-24 border-t border-gray-100">
       <div className="text-center mb-16">
-        <span className="text-blue-600 font-bold tracking-wider uppercase text-sm mb-4 inline-block">
+        <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-wide uppercase">
           Hear it in action
-        </span>
-        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">
+        </div>
+        <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
           Sounds like your best team member.
         </h2>
         <p className="text-gray-500 text-lg max-w-2xl mx-auto">

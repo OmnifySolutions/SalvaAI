@@ -250,6 +250,30 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 - ✅ **Total instances updated**: 35 email addresses across the codebase
 - ✅ **Email forwarding active**: support@getsalvaai.com forwards to daryllvasconcellos@gmail.com via Gmail forwarding + "Send As" feature (zero cost, reliable)
 
+**Item 42: Homepage SEO & Content Audit (2026-04-22)** — COMPLETE
+- ✅ **H1 optimization**: Changed from "Trained your way. Configured in minutes." → "Never Miss Another Patient Call." (keyword-rich, conversion-focused)
+- ✅ **Meta tags**: Updated title "Dental Offices" → "Dental Practices" (industry standard), improved description with benefit focus + "no card needed"
+- ✅ **Schema URL fix**: `salvaai.com` → `getsalvaai.com` in JSON-LD Organization schema
+- ✅ **Hero subheading**: Removed defensive "Unlike generic AI receptionists" opener
+- ✅ **CTA labels**: "Start Trial" → "Get Started Free" (3 places) for clarity on free tier
+- ✅ **Trust bar**: "Live in 5 min" → "Live in minutes" (softer promise, less risky)
+- ✅ **Insurance section**: "Stops bad leads" → "only the right patients get booked" (rehumanize copy), badge "Eligibility screening" → "Carrier matching" (accurate scope)
+- ✅ **Insurance demo chat**: Removed trademark names (Delta Dental, Cigna, Aetna) → "most major PPO plans" (legal safety)
+- ✅ **StatsCarousel**: "100% customizable" → "Fully customizable", "0 missed patient inquiries" → "24/7 after-hours handled" (remove absolute claims)
+- ✅ **Badge updates**: "Barge-in supported" → "Natural conversation", "High conversion" → "New patient optimized", "PMS Integrated" → "Open Dental sync", "Deep Integrations" → "Practice Management Sync", "Eligibility screening" → "Carrier matching"
+- ✅ **Security language**: "HIPAA-grade security" → "Designed for HIPAA compliance" (defensible per Item 37 policy)
+- ✅ **Header standardization**: AudioDemo + CustomizabilityDemo H2s changed from `font-bold` → `font-black` (uniform with other H2s like Playbook)
+- ✅ **Hero H1 gradient**: "Patient Call." now spans with `bg-gradient-to-r from-blue-400 to-blue-500` + `bg-clip-text` (matches lighter blue aesthetic)
+- ✅ **Dashboard mockup**: Added "Sample data" label under Overview header (FTC compliance—prevents misleading implied claims)
+- ✅ **Generic headings**: "Everything in one place" → "Your practice, in real time.", "Works exactly like your top staff" → "Handles the calls your team doesn't have time for." (specific, benefit-focused)
+- ✅ **Competitive nudge**: "Typically a fraction of the cost..." → "No hiring. No training. No overtime. Just results." (stronger positioning)
+- ✅ **CTA banner**: Removed "Start free, upgrade anytime" subtext (button already says it)
+- ✅ **Footer**: Added tagline "AI receptionist built for dental practices." (keyword footprint + brand identity)
+- ✅ **Glow animation restoration**: Increased glow-float keyframe opacity (0.5→0.6, 0.15-0.18→0.35-0.4) and background from `bg-blue-600/10` → `bg-blue-600/20` (more visible, breathing effect preserved)
+- ✅ **Badge styling uniformity**: "Hear it in action" label now matches "Fully Configurable" badge (same bg-blue-50, border-blue-100, text-blue-600 styling)
+- ✅ **Files modified** (7 total): app/page.tsx, app/globals.css, components/AudioDemo.tsx, components/ChatCardSpread.tsx, components/CustomizabilityDemo.tsx, components/DashboardMockup.tsx, components/StatsCarousel.tsx
+- ✅ **Key outcomes**: 24 content/SEO/legal fixes across homepage, all critical FTC risks closed (absolute claims, trademark misuse, deceptive implied stats), build passing, ready for launch review
+
 ### 🟡 Pending (Blocked/In Progress)
 
 **Item 24: Real-time dashboard notifications** — Supabase Realtime WebSocket push when new conversation arrives

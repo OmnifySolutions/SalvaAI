@@ -122,7 +122,8 @@ export default function DashboardMockup() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Overview</h3>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded font-medium">Sample data</span>
             <button className="text-xs text-gray-600 hover:text-gray-900">Today</button>
             <button className="text-xs text-gray-600 hover:text-gray-900">This week</button>
             <button className="text-xs text-gray-600 hover:text-gray-900">This month</button>

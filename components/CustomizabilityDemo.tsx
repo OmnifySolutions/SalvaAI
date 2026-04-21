@@ -63,8 +63,8 @@ export default function CustomizabilityDemo() {
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-wide uppercase">
             Fully Configurable
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
-            Trained your way. Configured in minutes.
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            Your AI. Your rules. Your voice.
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">
             Toggle any behavior on or off. Your AI does exactly what you want — and nothing you don&apos;t.

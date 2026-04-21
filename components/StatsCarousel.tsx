@@ -3,9 +3,9 @@
 import React from "react";
 
 const stats = [
-  { number: "100%",       label: "customizable name, voice & FAQs" },
+  { number: "Fully",       label: "customizable name, voice & FAQs" },
   { number: "5 Min",      label: "setup time to go live with your own AI" },
-  { number: "0",          label: "missed patient inquiries, even after hours" },
+  { number: "24/7",       label: "after-hours inquiries handled automatically" },
   { number: "24/7",       label: "booking & insurance sync with Open Dental" },
   { number: "Free",        label: "start with 50 interactions, no card needed" },
 ];

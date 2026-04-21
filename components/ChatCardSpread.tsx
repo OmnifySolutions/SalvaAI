@@ -6,8 +6,8 @@ const scenarios = [
   {
     label: "Insurance",
     messages: [
-      { role: "user", text: "Do you accept Delta Dental insurance?" },
-      { role: "ai",   text: "Yes! We're in-network with Delta Dental, Cigna, and Aetna. Want to schedule a new patient exam?" },
+      { role: "user", text: "Do you accept my insurance?" },
+      { role: "ai",   text: "Yes! We're in-network with most major PPO plans, including the ones you listed. Want to schedule a new patient exam?" },
       { role: "user", text: "Yes please, what times are available?" },
     ],
   },
