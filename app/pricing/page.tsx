@@ -412,7 +412,7 @@ export default async function PricingPage() {
         {/* Competitor comparison Overhaul */}
         <div className="mt-24">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-3">How we compare</h2>
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-3">How we compare</h2>
             <p className="text-gray-500 font-medium">Same powerful features as enterprise tools — at a fraction of the price.</p>
           </div>
 
@@ -457,7 +457,7 @@ export default async function PricingPage() {
 
         {/* RE-INSERTED FAQ SECTION */}
         <div className="mt-28 border-t border-gray-200 pt-20">
-          <h2 className="text-3xl font-black text-gray-900 tracking-tight text-center mb-12">
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight text-center mb-12">
             Common questions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 max-w-4xl mx-auto">

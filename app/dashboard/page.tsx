@@ -97,7 +97,7 @@ export default async function DashboardPage() {
         {/* Realtime Agent Status Banner */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Intelligence Center</h1>
+            <h1 className="text-3xl font-black text-gray-900 mb-1 tracking-tight">Intelligence Center</h1>
             <p className="text-sm text-gray-500">Welcome back. Your AI agent is answering calls and chats right now.</p>
           </div>
           <div className="flex items-center gap-3">
@@ -160,7 +160,7 @@ export default async function DashboardPage() {
             {/* Live Call/Chat Feed */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900">Recent Activity Stream</h2>
+                <h2 className="text-lg font-black text-gray-900 tracking-tight">Recent Activity Stream</h2>
               </div>
               <ul className="divide-y divide-gray-50">
                 {!feedConversations || feedConversations.length === 0 ? (

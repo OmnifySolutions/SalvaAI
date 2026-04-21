@@ -53,8 +53,8 @@ const CATEGORIES: Category[] = [
         a: "Salva AI is a web-based platform. Your dashboard, inbox, settings, and analytics are accessible from any device — phone, tablet, or desktop — through your browser. There is no separate mobile app at this time.",
       },
       {
-        q: "What languages does the AI support?",
-        a: "The AI can understand and respond in multiple languages, including English and Spanish. The primary language of the platform and its configuration interface is English. If multi-language support is important to your practice, contact us and we can discuss your specific needs.",
+        q: "Can I use Salva AI for multiple practice locations?",
+        a: "Yes. The Multi-Practice plan is designed specifically for organizations with multiple locations. It allows you to manage all sites from a single centralized dashboard, with custom routing rules and unified reporting for your entire group.",
       },
       {
         q: "Can I try Salva AI before committing?",
@@ -467,7 +467,7 @@ export default function FAQPage() {
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Help Center
           </div>
-          <h1 className="text-5xl font-bold text-white tracking-tight mb-4">
+          <h1 className="text-5xl font-black text-white tracking-tight mb-4">
             Frequently Asked Questions
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
@@ -522,7 +522,7 @@ export default function FAQPage() {
 
         {/* Still have questions */}
         <section className="bg-gray-950 rounded-3xl p-10 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">Still have questions?</h2>
+          <h2 className="text-3xl font-black text-white mb-3">Still have questions?</h2>
           <p className="text-gray-400 mb-6 max-w-md mx-auto">
             Our team responds to all inquiries within 1 business day.
           </p>

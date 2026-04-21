@@ -21,6 +21,7 @@ import {
   PhoneCall,
   Headphones,
   CheckCircle2,
+  Bot,
 } from "lucide-react";
 import ChatCardSpread from "@/components/ChatCardSpread";
 import StatsCarousel from "@/components/StatsCarousel";
@@ -89,7 +90,7 @@ export default async function HomePage() {
               href="/sign-up"
               className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
             >
-              Get started free
+              Start Trial
             </Link>
           </div>
         </nav>
@@ -107,22 +108,21 @@ export default async function HomePage() {
             AI Voice + Chat Receptionist for Dental Practices
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6 max-w-3xl mx-auto">
-            Every missed call<br />
-            is a <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">missed patient.</span><br />
-            Salva AI answers them all.
+          <h1 className="text-5xl md:text-7xl font-black text-white leading-[1] tracking-tighter mb-6 max-w-4xl mx-auto">
+            Trained your way. <br />
+            Configured in <span className="text-blue-500">minutes.</span>
           </h1>
 
           <p className="text-xl text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
-            Salva AI answers every call and chat 24/7, trained on your FAQs, services, and hours — so no new-patient inquiry ever hits voicemail again.
+            Unlike generic AI receptionists, Salva AI is trained on <em>your</em> practice — your services, tone, and FAQs — and live in minutes. No missed calls, no lost patients.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
             <Link
               href="/sign-up"
-              className="bg-white text-gray-900 px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
+              className="bg-white text-gray-900 px-20 py-3.5 rounded-xl font-semibold shadow-sm active:scale-95 animate-soft-pulse"
             >
-              Start free — no card needed
+              Start Trial
             </Link>
             <Link
               href="/how-it-works"
@@ -131,21 +131,36 @@ export default async function HomePage() {
               How it works
             </Link>
           </div>
-          <p className="text-xs text-gray-600 mb-14">Free plan available. Paid plans include a 14-day trial.</p>
 
-          {/* Pain stats strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden max-w-2xl mx-auto">
-            <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">Most calls</p>
-              <p className="text-xs text-gray-500 mt-1">to dental offices go unanswered during peak hours</p>
+
+          {/* Enhanced Customisation Chips & Trust Bar */}
+          <div className="mt-12 flex flex-col items-center gap-6">
+            <div className="flex flex-wrap justify-center gap-3">
+              {[
+                { icon: Bot, label: "Your AI's name & voice" },
+                { icon: MessageSquare, label: "Custom FAQs & greetings" },
+                { icon: Sliders, label: "Services, hours & tone" }
+              ].map((chip) => (
+                <div 
+                  key={chip.label}
+                  className="flex items-center gap-2.5 bg-white/[0.03] backdrop-blur-md border border-white/10 text-gray-300 text-[13px] font-medium px-5 py-2.5 rounded-full hover:bg-white/[0.08] transition-all hover:border-white/20 shadow-2xl"
+                >
+                  <chip.icon size={15} className="text-blue-400" />
+                  {chip.label}
+                </div>
+              ))}
             </div>
-            <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">Few callers</p>
-              <p className="text-xs text-gray-500 mt-1">actually leave voicemail — the rest go silent</p>
-            </div>
-            <div className="bg-gray-900 px-6 py-5">
-              <p className="text-2xl font-bold text-white tracking-tight">Every missed call</p>
-              <p className="text-xs text-gray-500 mt-1">is a new patient your competitor can capture</p>
+            
+            <div className="flex items-center gap-6 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">
+              <span className="hidden sm:block h-px w-8 bg-gradient-to-r from-transparent to-gray-800" />
+              <div className="flex items-center gap-4">
+                <span>Free to start</span>
+                <span className="w-1.5 h-1.5 bg-blue-500/40 rounded-full" />
+                <span>Live in 5 min</span>
+                <span className="w-1.5 h-1.5 bg-blue-500/40 rounded-full" />
+                <span>No contracts</span>
+              </div>
+              <span className="hidden sm:block h-px w-8 bg-gradient-to-l from-transparent to-gray-800" />
             </div>
           </div>
         </div>
@@ -179,84 +194,91 @@ export default async function HomePage() {
             <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 tracking-wide uppercase">
               The AI Playbook
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
               Works exactly like your top staff
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto text-lg">
-              Three core workflows, pre-trained and ready. Activate instantly — no setup required.
+              Three core workflows, highly tailored to your practice. Launch in 5 minutes — with total control over every response.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-all hover:-translate-y-1">
-              <div className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                <Headphones size={24} strokeWidth={1.5} />
+            <div className="bg-white border border-gray-100 rounded-[32px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1.5 group">
+              <div className="w-14 h-14 bg-gray-900 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl group-hover:scale-110 transition-transform">
+                <Headphones size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">The 24/7 Receptionist</h3>
-              <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                Answers every call in your practice's exact tone. Handles endless FAQ loops, office hours, and parking directions without bothering your team.
+              <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">The 24/7 Receptionist</h3>
+              <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
+                Answers every call in your practice&apos;s exact tone. Handles endless FAQ loops, office hours, and parking directions without bothering your team.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Barge-in supported</span>
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Custom greetings</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Barge-in supported</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Custom greetings</span>
               </div>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-all hover:-translate-y-1">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                <ShieldCheck size={24} strokeWidth={1.5} />
+            <div className="bg-white border border-gray-100 rounded-[32px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1.5 group ring-2 ring-blue-600/5">
+              <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                <ShieldCheck size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Insurance Checker</h3>
-              <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                Patients ask "Do you take my insurance?" and Salva checks your accepted list immediately. Stops bad leads and books the good ones.
+              <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Insurance Checker</h3>
+              <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
+                Patients ask &quot;Do you take my insurance?&quot; and Salva checks your accepted list immediately. Stops bad leads and books the good ones.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Pre-trained</span>
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Eligibility screening</span>
+                <span className="text-[11px] bg-blue-50 border border-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Easily customized</span>
+                <span className="text-[11px] bg-blue-50 border border-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">Eligibility screening</span>
               </div>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-all hover:-translate-y-1">
-              <div className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                <Zap size={24} strokeWidth={1.5} />
+            <div className="bg-white border border-gray-100 rounded-[32px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1.5 group">
+              <div className="w-14 h-14 bg-gray-900 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl group-hover:scale-110 transition-transform">
+                <Zap size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">New Patient Booking</h3>
-              <p className="text-sm text-gray-500 leading-relaxed mb-6">
+              <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">New Patient Booking</h3>
+              <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
                 Walks new patients through intake questions, pitches your new patient specials, and secures the booking directly into your calendar.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">High conversion</span>
-                <span className="text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-md font-medium">Guided onboarding</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">High conversion</span>
+                <span className="text-[11px] bg-gray-50 border border-gray-100 text-gray-500 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider">PMS Integrated</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="bg-gray-50 py-24 border-t border-gray-100">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
-            Voice AI + chat, fully automated
+      {/* Voice AI + chat, fully automated checklist */}
+      <section className="bg-gray-50 py-24 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+            The hardest working receptionist <br />
+            <span className="text-blue-600">you&apos;ll ever meet.</span>
           </h2>
-          <p className="text-gray-500 max-w-lg mx-auto">
+          <p className="text-gray-500 max-w-lg mx-auto mb-16">
             Answers calls, handles after-hours questions, and books more patients — without adding a single staff member.
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {features.map((f) => (
-            <div key={f.title} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
-              <div className="w-10 h-10 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600">
-                <f.icon size={20} strokeWidth={1.5} />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+            {[
+              { text: "Answer calls in 1 second", icon: CheckCircle2 },
+              { text: "HIPAA-grade security", icon: CheckCircle2 },
+              { text: "Intelligent call routing", icon: CheckCircle2 },
+              { text: "After-hours triage", icon: CheckCircle2 },
+              { text: "Direct Open Dental sync", icon: CheckCircle2 },
+              { text: "Insurance verification", icon: CheckCircle2 },
+              { text: "Instant SMS alerts", icon: CheckCircle2 },
+              { text: "Live dashboard reporting", icon: CheckCircle2 }
+            ].map((f, i) => (
+              <div key={i} className="flex items-center gap-4 bg-white p-5 rounded-3xl border border-gray-100 shadow-sm transition-all hover:border-blue-200 group">
+                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                  <f.icon size={16} strokeWidth={2.5} />
+                </div>
+                <span className="text-sm font-bold text-gray-700 tracking-tight">{f.text}</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.description}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
       </section>
 
       {/* PMS Integration */}
@@ -267,7 +289,7 @@ export default async function HomePage() {
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-full tracking-wide uppercase">
               Deep Integrations
             </div>
-            <h2 className="text-4xl font-bold tracking-tight">Syncs directly with your Practice Management Software.</h2>
+            <h2 className="text-4xl font-black tracking-tight text-white mb-6">Syncs directly with your Practice Management Software.</h2>
             <p className="text-gray-400 text-lg leading-relaxed">
               Real-time, bi-directional sync means your AI agent always knows your true availability, and appointments book directly into your actual calendar.
             </p>
@@ -318,7 +340,7 @@ export default async function HomePage() {
       <section className="bg-white py-24 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
               Everything in one place
             </h2>
             <p className="text-gray-500 max-w-md mx-auto">
@@ -333,7 +355,7 @@ export default async function HomePage() {
       <section className="bg-gray-50 py-32 border-t border-gray-100">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
               Up and running in under 5 minutes
             </h2>
             <p className="text-gray-500 max-w-lg mx-auto text-lg">
@@ -359,9 +381,9 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="mt-16 flex justify-center">
-            <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-600 text-sm px-4 py-2 rounded-xl shadow-sm">
-              <CheckCircle2 size={16} className="text-blue-500" />
-              Works alongside your existing systems.
+            <div className="inline-flex items-center gap-2 bg-blue-50/50 border border-blue-100/50 text-blue-700 text-xs px-5 py-2.5 rounded-2xl shadow-sm backdrop-blur-sm font-bold uppercase tracking-widest">
+              <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              Works with your existing systems
             </div>
           </div>
         </div>
@@ -378,7 +400,7 @@ export default async function HomePage() {
       {/* CTA banner */}
       <section className="bg-gray-900 mx-6 mb-16 rounded-3xl">
         <div className="max-w-2xl mx-auto px-8 py-14 text-center">
-          <h2 className="text-3xl font-bold text-white tracking-tight mb-3">
+          <h2 className="text-4xl font-black text-white tracking-tight mb-4">
             Every missed call is a missed patient.
           </h2>
           <p className="text-gray-400 mb-8">
@@ -386,9 +408,9 @@ export default async function HomePage() {
           </p>
           <Link
             href="/sign-up"
-            className="inline-block bg-white text-gray-900 px-7 py-3.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors"
+            className="inline-block bg-white text-gray-900 px-20 py-3.5 rounded-xl font-semibold shadow-sm active:scale-95 animate-soft-pulse"
           >
-            Get started free
+            Start Trial
           </Link>
         </div>
       </section>
@@ -415,86 +437,20 @@ export default async function HomePage() {
   );
 }
 
-const features = [
-  {
-    icon: Phone,
-    title: "AI voice answering",
-    description: "Forward your practice number to Salva AI. Every call gets answered in your practice's tone — appointments, insurance questions, after-hours, anything.",
-  },
-  {
-    icon: Clock,
-    title: "After-hours coverage",
-    description: "Your AI receptionist never sleeps. Capture new patient inquiries at 11pm on a Sunday that would otherwise go unanswered.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Instant chat widget",
-    description: "One line of code on your website. Patients get answers to their questions immediately — insurance, hours, services, anything.",
-  },
-  {
-    icon: Sliders,
-    title: "Fully customizable",
-    description: "Set your AI's name, greeting, office hours, services, and FAQs. It sounds like your practice, not a generic chatbot.",
-  },
-  {
-    icon: ClipboardList,
-    title: "Conversation history",
-    description: "Every call and chat is logged in your dashboard. See what patients are asking, spot trends, and never lose a lead.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Designed for HIPAA compliance",
-    description: "We never collect or store personal health information. Patients are directed to call for anything clinical.",
-  },
-  {
-    icon: Zap,
-    title: "Quick setup",
-    description: "No developer needed. Sign up, answer a few questions about your practice, copy one line of code — live in under 5 minutes.",
-  },
-  {
-    icon: Bell,
-    title: "Smart handoffs",
-    description: "If the AI can't answer, it takes a message and notifies your team immediately. No patient left without a response.",
-  },
-];
-
-const howItWorks = [
-  {
-    icon: PhoneCall,
-    title: "Patient calls",
-    description: "A patient calls your practice — during hours, after hours, on a holiday. Doesn't matter.",
-  },
-  {
-    icon: Headphones,
-    title: "Salva AI answers",
-    description: "The AI picks up immediately and introduces itself in your practice's voice. No hold time.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Question answered",
-    description: "Hours, insurance, services, appointment requests — resolved instantly without staff involvement.",
-  },
-  {
-    icon: Bell,
-    title: "Team notified",
-    description: "Can't handle it? The AI takes a message and alerts your team. No lead slips through.",
-  },
-];
-
 const setupTimeline = [
   {
-    milestone: "Day 1",
-    title: "Chat widget live",
-    description: "Copy one line of code to your website. Your AI receptionist starts answering patient questions within minutes.",
+    milestone: "Step 1",
+    title: "Customize & Train",
+    description: "Launch your custom dashboard, define your services, and set your AI's unique tone and FAQs in minutes.",
   },
   {
-    milestone: "Day 2",
-    title: "Voice AI activated",
-    description: "Forward your practice number and every call gets answered 24/7 — no missed patients, no voicemail.",
+    milestone: "Step 2",
+    title: "Test & Review",
+    description: "Interact with your AI over live call or chat to ensure it answers exactly how you want your staff to respond.",
   },
   {
-    milestone: "Day 3",
-    title: "ROI tracking live",
-    description: "See every conversation in your dashboard. Track leads captured, calls answered, and patient inquiries handled.",
+    milestone: "Step 3",
+    title: "Go Live",
+    description: "Redirect your practice number or embed the chat widget. Start capturing every missed patient inquiry immediately.",
   },
 ];
