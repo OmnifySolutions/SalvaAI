@@ -46,6 +46,16 @@ Never assume the user knows where things are or how to navigate a UI. Be 95%+ co
 
 ### ✅ Recently Completed
 
+**Item 45: Comprehensive Jest test suite (2026-04-22)** — COMPLETE
+- ✅ **Jest setup**: Configured jest.config.js, jest.setup.js, added test scripts to package.json
+- ✅ **Classification tests** (lib/classify.test.ts): 25 tests covering urgency detection, appointment/callback intent, contact extraction, after-hours logic
+- ✅ **AI Features tests** (lib/ai-features.test.ts): 18 tests for feature toggle definitions, prompt injection, custom rule enforcement
+- ✅ **Chat API tests** (api/chat/route.ts): 25 tests for validation, business lookup, interaction limits, rate limiting, feature injection, error handling
+- ✅ **Inbox API tests** (api/inbox/route.ts): 8 tests for conversation retrieval, marking resolved
+- ✅ **Total: 93 tests passing** — all critical logic paths covered
+- ✅ **TEST_AUTOMATION.md created**: Comprehensive guide with phase-based testing strategy, E2E examples, troubleshooting
+- ✅ **Testing split**: Automated tests (logic) + manual tests (UX quality, feature behavior, voice quality)
+
 **Item 44: How-it-works page header & preview standardization (2026-04-22)** — COMPLETE
 - ✅ **Header font standardization**: All h2 headers changed from `font-bold` to `font-black` (matches homepage)
 - ✅ **Hero h1 gradient**: Updated to match Salva AI gradient (`from-blue-400 to-cyan-400`), applied same gradient to homepage "Patient Call"
