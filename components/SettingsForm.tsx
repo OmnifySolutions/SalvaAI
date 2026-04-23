@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 import { FEATURE_DEFINITIONS, GROUP_LABELS, type FeatureDefinition } from "@/lib/ai-features";
+import { getServiceDefaults, buildDefaultGreeting } from "@/lib/service-defaults";
 
 type FAQ = { question: string; answer: string };
 type VoiceTone = "professional" | "warm" | "clinical";
@@ -121,7 +122,8 @@ export default function SettingsForm({ business }: { business: Business }) {
     if (typeof raw === "string" && raw.trim()) {
       return raw.split(",").map((s) => ({ name: s.trim(), durationMinutes: 60, description: "" }));
     }
-    return DENTAL_DEFAULTS;
+    const defaults = getServiceDefaults(business.business_type);
+    return defaults.map((d) => ({ name: d.name, durationMinutes: d.durationMinutes, description: d.description }));
   };
 
   const { items: serviceItems, add: addService, update: updateService, remove: removeService } = useArrayState(initializeServices(), { name: "", durationMinutes: 60, description: "" });
@@ -374,7 +376,7 @@ export default function SettingsForm({ business }: { business: Business }) {
           <div className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                <Field fixedHintHeight label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
-               <Field label="Custom Greeting"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder="Hi, thanks for calling..." /></Field>
+               <Field label="Custom Greeting"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder={buildDefaultGreeting(aiName, name)} /></Field>
             </div>
             <Field label="System Prompt" hint="Direct operating instructions for the LLM">
               <textarea rows={4} value={customPrompt} onChange={e => setCustomPrompt(e.target.value)} className={inputCls} placeholder="Always offer the new patient special..." />

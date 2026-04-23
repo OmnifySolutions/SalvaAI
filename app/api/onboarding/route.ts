@@ -31,12 +31,24 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { businessName, businessType, hours, services } = await req.json();
+  const body = await req.json();
+  const {
+    businessName,
+    businessType,
+    hours,
+    services,
+    aiName,
+    aiGreeting,
+    notifyEmergencyPhone,
+    notifyEmergencyEmail,
+    opendentalServerUrl,
+    opendentalApiKey,
+  } = body;
+
   if (!businessName?.trim()) {
     return Response.json({ error: "Business name required" }, { status: 400 });
   }
 
-  // Check if already onboarded
   const { data: existing } = await supabaseAdmin
     .from("businesses")
     .select("id")
@@ -56,8 +68,15 @@ export async function POST(req: NextRequest) {
       name: businessName.trim(),
       slug,
       business_type: businessType ?? "dental",
-      hours: hours ?? "",
-      services: services ?? "",
+      hours: hours ?? null,
+      services: Array.isArray(services) ? services : [],
+      ai_name: aiName?.trim() || "Claire",
+      ai_greeting: aiGreeting?.trim() || null,
+      notify_on_emergency: true,
+      notify_emergency_phone: notifyEmergencyPhone || null,
+      notify_emergency_email: notifyEmergencyEmail || null,
+      opendental_server_url: opendentalServerUrl || null,
+      opendental_api_key: opendentalApiKey || null,
       plan: "free",
       plan_status: "active",
       faqs: [],

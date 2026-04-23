@@ -34,7 +34,7 @@ function callerLabel(item: InboxItem): string {
   return item.visitor_name ?? item.visitor_phone ?? item.visitor_email ?? "Unknown caller";
 }
 
-export default function InboxSection() {
+export default function InboxSection({ opendentalConnected = true }: { opendentalConnected?: boolean }) {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("emergencies");
@@ -187,6 +187,19 @@ export default function InboxSection() {
           );
         })}
       </div>
+
+      {activeTab === "bookings" && !opendentalConnected && bookings.length > 0 && (
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 flex items-start gap-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-amber-900">Connect Open Dental to auto-confirm bookings</p>
+            <p className="text-xs text-amber-700 mt-0.5">Your AI is collecting these — but can&apos;t write them into your calendar yet.</p>
+          </div>
+          <a href="/settings#integrations" className="text-xs font-bold bg-amber-600 text-white px-3 py-1.5 rounded-full hover:bg-amber-700 transition-colors shrink-0">
+            Connect →
+          </a>
+        </div>
+      )}
 
       {/* Items list */}
       <ul className="space-y-4">

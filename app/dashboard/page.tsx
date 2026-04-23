@@ -23,6 +23,9 @@ import {
 import DashboardStats from "@/components/DashboardStats";
 import InboxSection from "@/components/InboxSection";
 import Logo from "@/components/Logo";
+import SetupChecklist from "@/components/SetupChecklist";
+import DashboardOnboardingFlag from "@/components/DashboardOnboardingFlag";
+import { Suspense } from "react";
 import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -75,6 +78,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Suspense fallback={null}><DashboardOnboardingFlag /></Suspense>
       {/* Top Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-8">
@@ -93,7 +97,10 @@ export default async function DashboardPage() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        
+
+        {/* Setup checklist — compact full-width bar */}
+        <SetupChecklist business={business} />
+
         {/* Realtime Agent Status Banner */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
@@ -118,7 +125,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Action Required Inbox */}
-        <InboxSection />
+        <InboxSection opendentalConnected={!!business.opendental_api_key} />
 
         {/* Stats Row with date filter */}
         <DashboardStats
@@ -199,7 +206,7 @@ export default async function DashboardPage() {
 
           {/* Right Sidebar */}
           <div className="space-y-6">
-            
+
             {/* Quick Actions / Upgrades */}
             {business.plan === "free" && (
               <div className="bg-gray-900 rounded-3xl border border-gray-800 p-8 text-white shadow-2xl relative overflow-hidden group">

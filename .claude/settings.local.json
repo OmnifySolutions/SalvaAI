@@ -55,7 +55,11 @@
       "Bash(grep -n \"14-day free trial\\\\|Start free trial\\\\|1 in 3\\\\|4 in 5\\\\|\\\\$850\\\\|Medicaid routing\\\\|EagleSoft\\\\|Waitlist integrations active\\\\|2-minute setup\\\\|in your voice\\\\|Automatic booking\\\\|HIPAA-compliant\\\\b\" app/page.tsx app/pricing/page.tsx app/how-it-works/client.tsx components/StatsCarousel.tsx components/ChatCardSpread.tsx)",
       "Bash(git *)",
       "Bash(find . -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.md\" \\\\\\) ! -path \"./node_modules/*\" ! -path \"./.next/*\" ! -path \"./plugins/*\" -exec grep -l \"@\" {} \\\\;)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "Bash(npm test *)",
+      "Bash(xargs ls *)",
+      "Bash(node *)",
+      "WebFetch(domain:elevenlabs.io)"
     ]
   }
 }
