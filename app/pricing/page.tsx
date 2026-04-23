@@ -69,7 +69,6 @@ const plans: Plan[] = [
       "Real-time dashboard notifications",
       "Multi-channel alerts — SMS, email, WhatsApp",
       "Open Dental integration",
-      "Business Associate Agreement (BAA) available",
       "Priority support",
     ],
     cta: "Start 14-day free trial",
@@ -325,9 +324,9 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Plans Grid — Basic / Pro / Growth / Multi */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-stretch">
-          {plans.map((plan) => {
+        {/* Plans — Basic / Pro / Growth row (3 columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+          {plans.slice(0, 3).map((plan) => {
             const isCurrent = isLoaded && isLoggedIn && currentPlan === plan.planKey;
             const useUpgrade = isLoaded && isLoggedIn && !isCurrent;
             const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
@@ -339,7 +338,7 @@ export default function PricingPage() {
                 key={plan.planKey}
                 className={`relative rounded-3xl p-8 flex flex-col h-full transition-all ${
                   plan.highlight
-                    ? "bg-gray-900 text-white shadow-2xl scale-[1.02] z-10 border border-gray-800"
+                    ? "bg-gray-900 text-white shadow-2xl scale-[1.02] z-10 border-gray-800"
                     : "bg-white border border-gray-200 shadow-sm"
                 }`}
               >
@@ -353,7 +352,7 @@ export default function PricingPage() {
                   <h2 className={`text-sm font-bold uppercase tracking-widest mb-3 ${plan.highlight ? "text-blue-400" : "text-gray-400"}`}>
                     {plan.name}
                   </h2>
-                  <div className="flex items-end gap-2 mb-3">
+                  <div className="flex items-end gap-1 mb-3">
                     <span className={`text-5xl font-black tracking-tight ${plan.highlight ? "text-white" : "text-gray-900"}`}>
                       {displayPrice}
                     </span>
@@ -364,10 +363,11 @@ export default function PricingPage() {
                   </p>
                 </div>
 
-                <ul className="space-y-3 mb-8 flex-1">
+                {/* flex-1 to push the CTA button to the absolute bottom evenly! */}
+                <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm">
-                      <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center border flex-none ${
+                      <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center border ${
                         plan.highlight ? "bg-blue-900/50 border-blue-500/30 text-blue-400" : "bg-blue-50 border-blue-100 text-blue-600"
                       }`}>
                         <Check size={12} className="stroke-[3]" />
@@ -408,7 +408,7 @@ export default function PricingPage() {
 
                   <div className="h-6 mt-3">
                     <p className={`text-[11px] font-medium text-center ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
-                      Cancel anytime
+                      Cancel or upgrade anytime
                     </p>
                   </div>
                 </div>
@@ -416,6 +416,74 @@ export default function PricingPage() {
             );
           })}
         </div>
+
+        {/* Multi-Practice — full-width horizontal card */}
+        {(() => {
+          const multiPlan = plans[3]; // Multi plan
+          const multiIsCurrent = isLoaded && isLoggedIn && currentPlan === multiPlan.planKey;
+          const multiUseUpgrade = isLoaded && isLoggedIn && !multiIsCurrent;
+          const multiCta = multiIsCurrent ? "Current plan" : isLoggedIn ? multiPlan.ctaLoggedIn : multiPlan.cta;
+          const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
+          const displayPrice = billingCycle === "annual" ? multiPlan.annualPrice : multiPlan.monthlyPrice;
+
+          return (
+            <div className="relative mt-12 rounded-[2rem] border border-gray-800 bg-gray-900 p-8 flex flex-col sm:flex-row sm:items-center gap-8 shadow-2xl overflow-visible">
+              <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-[100px] pointer-events-none z-0" />
+
+              {multiPlan.badge && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg z-20">
+                  {multiPlan.badge}
+                </div>
+              )}
+
+              <div className="sm:w-64 shrink-0 relative z-10 break-words">
+                <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-blue-400">{multiPlan.name}</h2>
+                <div className="flex items-end gap-1 mb-3">
+                  <span className="text-3xl lg:text-4xl font-black tracking-tight text-white">{displayPrice}</span>
+                  <span className="text-sm pb-1 text-gray-400 font-medium">{multiPlan.period}</span>
+                </div>
+                <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-[200px]">{multiPlan.description}</p>
+              </div>
+
+              <ul className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
+                {multiPlan.features.map((f) => (
+                  <li key={f} className="flex items-center gap-3 text-sm">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-blue-900/50 flex items-center justify-center border border-blue-500/30">
+                      <Check size={12} className="text-blue-400 stroke-[3]" />
+                    </span>
+                    <span className="text-gray-300 font-medium">{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-3 relative z-10 ml-auto pt-4 sm:pt-0">
+                {multiUseUpgrade ? (
+                  <UpgradeButton
+                    plan="multi"
+                    billingCycle={billingCycle}
+                    className="px-8 py-4 rounded-xl text-sm font-bold bg-white text-gray-900 hover:bg-gray-100 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-60"
+                  >
+                    {multiCta}
+                  </UpgradeButton>
+                ) : (
+                  <Link
+                    href={multiHref}
+                    aria-current={multiIsCurrent ? "page" : undefined}
+                    className={`px-8 py-4 rounded-xl text-sm font-bold text-center transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] ${
+                      multiIsCurrent
+                        ? "bg-gray-800 text-gray-400 cursor-default pointer-events-none shadow-none"
+                        : "bg-white text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    {multiCta}
+                  </Link>
+                )}
+                <p className="text-[11px] font-medium text-center text-gray-500 mt-1">Cancel or upgrade anytime</p>
+              </div>
+            </div>
+          );
+        })()}
+
 
         {/* Fine print */}
         <p className="text-center text-sm font-medium text-gray-500 mt-10 mb-20">

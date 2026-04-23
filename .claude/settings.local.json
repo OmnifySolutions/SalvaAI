@@ -59,7 +59,15 @@
       "Bash(npm test *)",
       "Bash(xargs ls *)",
       "Bash(node *)",
-      "WebFetch(domain:elevenlabs.io)"
+      "WebFetch(domain:elevenlabs.io)",
+      "WebFetch(domain:www.dentina.ai)",
+      "WebFetch(domain:www.dentalaiassist.com)",
+      "WebFetch(domain:www.getnextphone.com)",
+      "WebFetch(domain:savvyagents.ai)",
+      "WebFetch(domain:www.dentalbase.ai)",
+      "Bash(scoop install *)",
+      "Bash(choco install *)",
+      "Bash(npx supabase *)"
     ]
   }
 }
