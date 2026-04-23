@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/chat",
   "/api/widget/(.*)",
   "/api/webhooks/(.*)",
+  "/api/stripe/webhook",
   "/api/voice/(.*)",
 ]);
 

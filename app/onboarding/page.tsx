@@ -30,6 +30,7 @@ function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan") ?? "free";
+  const billing = (searchParams.get("billing") ?? "annual") as "annual" | "monthly";
   const isVoicePlan = plan === "pro" || plan === "multi";
 
   const [phase, setPhase] = useState<Phase>("intro");
@@ -139,6 +140,20 @@ function OnboardingContent() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed");
+
+      if (plan && plan !== "free") {
+        const checkoutRes = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan, billingCycle: billing }),
+        });
+        const checkoutData = await checkoutRes.json();
+        if (checkoutData.url) {
+          window.location.href = checkoutData.url;
+          return;
+        }
+      }
+
       router.push("/dashboard?onboarded=1");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

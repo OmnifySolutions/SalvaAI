@@ -345,7 +345,9 @@ export default function PricingPage() {
             else if (isLoggedIn && currentPlan !== "free") {
               cta = isDowngrade ? "Downgrade to this plan" : plan.ctaLoggedIn;
             }
-            const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
+            const href = isLoggedIn
+              ? plan.hrefLoggedIn
+              : `/sign-up?plan=${plan.planKey}&billing=${billingCycle}`;
             const displayPrice = billingCycle === "annual" ? plan.annualPrice : plan.monthlyPrice;
 
             return (
@@ -445,7 +447,9 @@ export default function PricingPage() {
           else if (isLoggedIn && currentPlan !== "free") {
             multiCta = multiIsDowngrade ? "Downgrade to this plan" : multiPlan.ctaLoggedIn;
           }
-          const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
+          const multiHref = isLoggedIn
+            ? multiPlan.hrefLoggedIn
+            : `/sign-up?plan=multi&billing=${billingCycle}`;
           const displayPrice = billingCycle === "annual" ? multiPlan.annualPrice : multiPlan.monthlyPrice;
 
           return (
