@@ -16,7 +16,7 @@ export async function GET() {
       .eq("clerk_user_id", userId)
       .maybeSingle();
 
-    const plan = data?.plan ?? "basic";
+    const plan = data?.plan ?? "free";
 
     return NextResponse.json({ userId, plan });
   } catch (error) {

@@ -200,9 +200,17 @@ const faqs = [
   },
 ];
 
+const planTiers: Record<PlanType | "free", number> = {
+  free: 0,
+  basic: 1,
+  pro: 2,
+  growth: 3,
+  multi: 4,
+};
+
 export default function PricingPage() {
   const { userId } = useAuth();
-  const [currentPlan, setCurrentPlan] = useState<"basic" | "pro" | "growth" | "multi">("basic");
+  const [currentPlan, setCurrentPlan] = useState<PlanType | "free">("free");
   const [billingCycle, setBillingCycle] = useState<"annual" | "monthly">("annual");
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -328,8 +336,15 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
           {plans.slice(0, 3).map((plan) => {
             const isCurrent = isLoaded && isLoggedIn && currentPlan === plan.planKey;
+            const currentTier = planTiers[currentPlan];
+            const planTier = planTiers[plan.planKey];
+            const isDowngrade = isLoaded && isLoggedIn && planTier < currentTier;
             const useUpgrade = isLoaded && isLoggedIn && !isCurrent;
-            const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
+            let cta = plan.cta;
+            if (isCurrent) cta = "Current plan";
+            else if (isLoggedIn) {
+              cta = isDowngrade ? "Downgrade to this plan" : plan.ctaLoggedIn;
+            }
             const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
             const displayPrice = billingCycle === "annual" ? plan.annualPrice : plan.monthlyPrice;
 
@@ -421,8 +436,15 @@ export default function PricingPage() {
         {(() => {
           const multiPlan = plans[3]; // Multi plan
           const multiIsCurrent = isLoaded && isLoggedIn && currentPlan === multiPlan.planKey;
+          const currentTier = planTiers[currentPlan];
+          const multiTier = planTiers[multiPlan.planKey];
+          const multiIsDowngrade = isLoaded && isLoggedIn && multiTier < currentTier;
           const multiUseUpgrade = isLoaded && isLoggedIn && !multiIsCurrent;
-          const multiCta = multiIsCurrent ? "Current plan" : isLoggedIn ? multiPlan.ctaLoggedIn : multiPlan.cta;
+          let multiCta = multiPlan.cta;
+          if (multiIsCurrent) multiCta = "Current plan";
+          else if (isLoggedIn) {
+            multiCta = multiIsDowngrade ? "Downgrade to this plan" : multiPlan.ctaLoggedIn;
+          }
           const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
           const displayPrice = billingCycle === "annual" ? multiPlan.annualPrice : multiPlan.monthlyPrice;
 
