@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const businessId = session.metadata?.businessId;
+        const billingCycle = (session.metadata?.billingCycle || "monthly") as "annual" | "monthly";
         if (!businessId || !session.subscription) break;
 
         const subscription = await stripe.subscriptions.retrieve(
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
             stripe_customer_id:      session.customer as string,
             stripe_subscription_id:  session.subscription as string,
             plan,
+            billing_cycle: billingCycle,
             plan_status: planStatusFromStripe(subscription.status),
           })
           .eq("id", businessId);

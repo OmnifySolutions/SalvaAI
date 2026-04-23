@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Salva AI — AI Receptionist for Dental Practices",
+  title: "Salva AI — AI Receptionist for Dental Practices | $65/mo",
   description:
-    "Salva AI answers every patient call and chat 24/7 — books appointments, handles after-hours, and syncs with Open Dental. Start free in minutes.",
+    "AI receptionist for dental practices. 24/7 voice answering + chat. Books appointments, handles after-hours. 14-day free trial. No contracts.",
   alternates: { canonical: "/" },
 };
 import {
@@ -59,8 +59,8 @@ export default async function HomePage() {
                   "24/7 AI receptionist and chat widget for dental practices. Answers calls, books appointments, and syncs with practice management software.",
                 offers: {
                   "@type": "AggregateOffer",
-                  lowPrice: "0",
-                  highPrice: "749",
+                  lowPrice: "65",
+                  highPrice: "1049",
                   priceCurrency: "USD",
                 },
               },
@@ -87,10 +87,10 @@ export default async function HomePage() {
               Sign in
             </Link>
             <Link
-              href="/sign-up"
+              href="/sign-up?plan=pro"
               className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
             >
-              Get Started Free
+              Start free trial
             </Link>
           </div>
         </nav>

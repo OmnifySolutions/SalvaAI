@@ -29,26 +29,34 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 ## Current State
 
 **Latest completed work** (as of 2026-04-23): 
-- Onboarding intro audio: Improved browser speech synthesis with voice loading fallback (plays on every refresh)
-- Onboarding colors: Migrated from orange/rose gradient to blue theme throughout (buttons, focus states, accents)
-- Onboarding Step 3 logic: Voice demo & phone preview now conditional on `?plan=pro` or `?plan=multi`
-- SetupChecklist: Redesigned as compact full-width horizontal bar with blue progress indicator (moved from sidebar to dashboard top)
-- Cost/Profit analysis: Added Claude Haiku chat costs, ElevenLabs scaling analysis, pricing strategy recommendation (hard cap + Growth tier)
-- Created `COST_PROFIT_BREAKDOWN.md` with comprehensive unit economics for all plans
+- **PRICING OVERHAUL (7 of 8 tasks)**: Complete redesign from Free/$69/$219/$749 to Basic/$65-79 | Pro/$249-309 | Growth/$449-559 | Multi/$849-1049 with annual/monthly toggle
+  - Pricing page refactor with 4 tiers, expanded feature lists (8+ per tier), new hero "Transparent pricing. No contracts."
+  - Database migration: added `billing_cycle`, `minutes_used_this_period`, `minutes_limit_monthly` columns
+  - Stripe integration: PRICE_IDS now supports 4 plans × 2 billing cycles (8 total); checkout accepts billingCycle param
+  - Voice minute enforcement: quota checks at call init, MinuteUsageCard dashboard component
+  - Homepage copy updated: metadata, CTA, schema pricing ($65–$1,049 range)
+  - Comparison table vs Dentina.ai + DentalAI Assist; "Save 2 months free" framing on annual
+  - Created `PRICING_ROLLOUT.md` (implementation guide) + `ACTION_LIST.md` (next steps)
 
-**Active blockers**:
+**Blocking go-live**:
+- Stripe price IDs: need to create 8 IDs in Stripe dashboard + add to `.env`
+- Supabase migration: run `supabase migration up`
+- Multi-Practice dashboard: not built (2–3 day task, blocks Multi tier sales)
+
+**Active blockers** (pre-pricing):
 - Anthropic credits exhausted; using Groq LLM (`llama-3.3-70b-versatile`)
 - Twilio trial watermark (needs paid upgrade)
 - Voice booking validation needs ngrok tunnel for local testing
 - SocialProof component gated until real customer reviews collected
 - ElevenLabs Creator plan ($22/mo): Sufficient for 1-2 Pro customers; upgrade strategy needed as customer base grows
 
-**Next priorities**:
-- Implement voice selector dropdown in Settings (use multiple pre-built ElevenLabs voices)
+**Next priorities** (post-pricing):
+- ✋ **PAUSE**: Complete ACTION_LIST.md steps before building new features (Stripe setup, migration, testing)
+- Voice selector dropdown in Settings (use multiple pre-built ElevenLabs voices) — tie to Pro plan
 - Item 23 (voice UX): Microphone permission UI + end-to-end Open Dental booking validation
 - Item 24: Real-time dashboard notifications (Supabase WebSocket)
 - Item 26: Enable social proof (pending customer reviews)
-- Pricing: Consider adding Growth tier ($399/mo for 2,500 min) when first Pro customers reach volume; move Pro cap from 500 → 1,000 min
+- Multi-Practice dashboard: location switcher UI + aggregated stats (2–3 days, blocks Multi tier)
 
 **Quick references**:
 - Test guide: `TEST_AUTOMATION.md` (phase-based testing strategy)

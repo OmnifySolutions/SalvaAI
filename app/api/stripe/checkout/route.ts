@@ -1,14 +1,17 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
-import { stripe, PRICE_IDS } from "@/lib/stripe";
+import { stripe, PRICE_IDS, type PlanType, type BillingCycle } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { plan } = await req.json() as { plan: "basic" | "pro" | "multi" };
-  if (!PRICE_IDS[plan]) return Response.json({ error: "Invalid plan" }, { status: 400 });
+  const { plan, billingCycle = "annual" } = await req.json() as { plan: PlanType; billingCycle?: BillingCycle };
+
+  if (!plan || !PRICE_IDS[plan] || !PRICE_IDS[plan][billingCycle]) {
+    return Response.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
+  }
 
   const { data: business } = await supabaseAdmin
     .from("businesses")
@@ -19,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!business) return Response.json({ error: "Business not found" }, { status: 404 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const priceId = PRICE_IDS[plan];
+  const priceId = PRICE_IDS[plan][billingCycle];
 
   // ── Upgrade existing subscription directly (no new Checkout needed) ──────
   if (business.stripe_subscription_id) {
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
     });
     await supabaseAdmin
       .from("businesses")
-      .update({ plan })
+      .update({ plan, billing_cycle: billingCycle })
       .eq("id", business.id);
     return Response.json({ url: `${appUrl}/dashboard?upgraded=true` });
   }
@@ -60,12 +63,12 @@ export async function POST(req: NextRequest) {
     line_items: [{ price: priceId, quantity: 1 }],
     subscription_data: {
       trial_period_days: 14,
-      metadata: { businessId: business.id },
+      metadata: { businessId: business.id, plan, billingCycle },
     },
     payment_method_collection: "always",
     success_url: `${appUrl}/dashboard?upgraded=true`,
     cancel_url: `${appUrl}/pricing`,
-    metadata: { businessId: business.id, plan },
+    metadata: { businessId: business.id, plan, billingCycle },
   });
 
   return Response.json({ url: session.url });

@@ -1,48 +1,49 @@
+"use client";
+
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { useState, useEffect } from "react";
 import { Check, X } from "lucide-react";
-import { supabaseAdmin } from "@/lib/supabase";
+import { useAuth } from "@clerk/nextjs";
 import UpgradeButton from "@/components/UpgradeButton";
 import Logo from "@/components/Logo";
-import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Dental AI Receptionist Pricing — Plans & Comparison",
-  description:
-    "Simple, transparent pricing for dental AI receptionists. Start with 50 free interactions — no credit card required. Paid plans include a 14-day free trial.",
-  alternates: { canonical: "/pricing" },
-};
+// Metadata is now in layout.tsx since this is a client component
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Try it risk-free with your first 50 patient interactions.",
-    features: [
-      "50 AI interactions total",
-      "Chat widget",
-      "Basic FAQ support",
-      "Salva AI branding",
-    ],
-    cta: "Get started free",
-    ctaLoggedIn: "Go to dashboard",
-    href: "/sign-up",
-    hrefLoggedIn: "/dashboard",
-    highlight: false,
-    badge: null,
-  },
+type PlanType = "basic" | "pro" | "growth" | "multi";
+
+interface Plan {
+  name: string;
+  planKey: PlanType;
+  annualPrice: string;
+  monthlyPrice: string;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  ctaLoggedIn: string;
+  href: string;
+  hrefLoggedIn: string;
+  highlight: boolean;
+  badge: string | null;
+}
+
+const plans: Plan[] = [
   {
     name: "Basic",
-    price: "$69",
+    planKey: "basic",
+    annualPrice: "$65",
+    monthlyPrice: "$79",
     period: "/ month",
-    description: "For growing practices that want to capture every opportunity.",
+    description: "Website AI chat for growing practices.",
     features: [
-      "Unlimited AI interactions",
-      "Chat widget — no branding",
+      "Unlimited AI chat on your website",
+      "Trained on your FAQs, hours & services",
+      "24/7 coverage — never sleeps",
       "Custom AI name & greeting",
-      "FAQ management",
-      "Conversation history",
+      "Zero SalvaAI branding on your widget",
+      "Do's & Don'ts behavior controls",
+      "Conversation history & transcripts",
+      "HIPAA-safe — no PHI stored",
       "Email support",
     ],
     cta: "Start 14-day free trial",
@@ -54,14 +55,21 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$219",
+    planKey: "pro",
+    annualPrice: "$249",
+    monthlyPrice: "$309",
     period: "/ month",
-    description: "For busy practices that can't afford to miss a single call.",
+    description: "Never miss a patient call with 24/7 AI voice answering.",
     features: [
-      "Everything in Basic",
-      "AI voice phone answering",
-      "Up to 500 calls / month",
-      "Custom AI instructions",
+      "24/7 AI voice phone answering",
+      "750 voice minutes / month (≈250 calls at 3 min average)",
+      "Custom AI voice selection",
+      "8 AI behavior toggles (instant booking, after-hours, insurance, emergency, pricing, payment plans)",
+      "Missed-call inbox — emergencies, bookings, callbacks",
+      "Real-time dashboard notifications",
+      "Multi-channel alerts — SMS, email, WhatsApp",
+      "Open Dental integration",
+      "Business Associate Agreement (BAA) available",
       "Priority support",
     ],
     cta: "Start 14-day free trial",
@@ -72,16 +80,39 @@ const plans = [
     badge: "Most popular",
   },
   {
-    name: "Multi-Practice",
-    price: "$749",
+    name: "Growth",
+    planKey: "growth",
+    annualPrice: "$449",
+    monthlyPrice: "$559",
     period: "/ month",
-    description: "One AI platform across all your locations — at a fraction of buying 5 Pro plans.",
+    description: "For high-volume single practices that scale fast.",
     features: [
-      "Up to 5 locations",
       "Everything in Pro",
-      "Up to 2,500 calls / month",
-      "Centralized dashboard",
-      "Dedicated onboarding support",
+      "2,000 voice minutes / month (≈650 calls at 3 min average)",
+      "Dedicated onboarding call",
+      "Priority email support",
+    ],
+    cta: "Start 14-day free trial",
+    ctaLoggedIn: "Upgrade to this plan",
+    href: "/sign-up?plan=growth",
+    hrefLoggedIn: "/dashboard?upgrade=growth",
+    highlight: false,
+    badge: null,
+  },
+  {
+    name: "Multi-Practice",
+    planKey: "multi",
+    annualPrice: "$849",
+    monthlyPrice: "$1,049",
+    period: "/ month",
+    description: "All locations, one platform — 57% cheaper per location than competitors.",
+    features: [
+      "Everything in Growth",
+      "Up to 5 practice locations",
+      "750 voice minutes per location (3,750 total)",
+      "Centralized multi-location dashboard",
+      "Per-location AI configuration",
+      "Consolidated billing",
     ],
     cta: "Start 14-day free trial",
     ctaLoggedIn: "Upgrade to this plan",
@@ -95,51 +126,51 @@ const plans = [
 const comparison = [
   {
     feature: "Starting price",
-    hustle: "$69 / mo",
-    arini: "$249 / mo",
-    truelark: "$345 / mo",
+    salvai: "$65 / mo",
+    dentina: "$399 / mo",
+    dentalaiassist: "$299 / mo",
   },
   {
-    feature: "Voice AI answering",
-    hustle: "Pro · $219/mo",
-    arini: "$249 / mo",
-    truelark: "$345 / mo",
+    feature: "Pro / Entry voice pricing",
+    salvai: "$249 / mo",
+    dentina: "$399 / mo",
+    dentalaiassist: "$299 / mo",
   },
   {
-    feature: "AI chat widget",
-    hustle: true,
-    arini: true,
-    truelark: true,
+    feature: "Voice minutes at entry",
+    salvai: "750 min / mo",
+    dentina: "Unlimited",
+    dentalaiassist: "600 min / mo",
   },
   {
-    feature: "After-hours coverage",
-    hustle: true,
-    arini: true,
-    truelark: true,
+    feature: "Chat widget included",
+    salvai: true,
+    dentina: true,
+    dentalaiassist: false,
   },
   {
-    feature: "Multi-location support",
-    hustle: "$749 / mo (5 locations)",
-    arini: false,
-    truelark: false,
+    feature: "Multi-location pricing",
+    salvai: "$849 / mo (5 locs)",
+    dentina: "$2,000+ / mo (5 locs)",
+    dentalaiassist: "Custom",
   },
   {
-    feature: "No vendor branding",
-    hustle: "Basic+",
-    arini: false,
-    truelark: true,
+    feature: "Per-location minute limit",
+    salvai: "750 min each",
+    dentina: false,
+    dentalaiassist: false,
   },
   {
     feature: "14-day free trial",
-    hustle: true,
-    arini: false,
-    truelark: false,
+    salvai: true,
+    dentina: false,
+    dentalaiassist: false,
   },
   {
     feature: "Setup time",
-    hustle: "Under 5 min",
-    arini: "Several hours",
-    truelark: "Several hours",
+    salvai: "Under 5 min",
+    dentina: "Several hours",
+    dentalaiassist: "Several hours",
   },
 ];
 
@@ -149,42 +180,57 @@ const faqs = [
     a: "No. You copy one line of code and paste it into your website before the closing </body> tag. Most practice managers can do it in under 5 minutes.",
   },
   {
-    q: "What happens when the Free plan's 50 interaction limit is reached?",
-    a: "Once your 50-interaction trial is used, the widget lets patients know to call the office directly. Upgrade to Basic or Pro for unlimited interactions.",
+    q: "What's included in the 14-day free trial?",
+    a: "You get full access to whichever plan you choose — Basic, Pro, Growth, or Multi-Practice. No credit card required upfront. After 14 days, your card will be charged the plan price you selected. Cancel anytime.",
+  },
+  {
+    q: "What happens if I exceed my monthly voice minutes?",
+    a: "You can purchase overage minutes at $0.35/min, or upgrade to a higher plan anytime. Unused minutes don't roll over to the next month.",
   },
   {
     q: "Is patient data safe?",
-    a: "Yes. We never collect or store personal health information. The widget only handles general questions — it directs patients to call for anything clinical.",
+    a: "Yes. We never collect or store personal health information (PHI). The AI handles general questions — it directs patients to call for anything clinical. HIPAA-compliant.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. No contracts, no cancellation fees. Upgrade or cancel from your dashboard whenever you want.",
+    a: "Yes. No contracts, no cancellation fees. Upgrade, downgrade, or cancel from your dashboard whenever you want.",
   },
   {
     q: "Is a Business Associate Agreement (BAA) available?",
-    a: "Yes. A BAA is available on Pro and Multi-Practice plans. Contact us after signing up and we'll send one over.",
+    a: "Yes. A BAA is available on Pro, Growth, and Multi-Practice plans. Contact us after signing up and we'll send one over.",
   },
 ];
 
-export default async function PricingPage() {
-  const { userId } = await auth();
+export default function PricingPage() {
+  const { userId } = useAuth();
+  const [currentPlan, setCurrentPlan] = useState<"basic" | "pro" | "growth" | "multi">("basic");
+  const [billingCycle, setBillingCycle] = useState<"annual" | "monthly">("annual");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      const fetchUserPlan = async () => {
+        try {
+          const response = await fetch("/api/user-plan");
+          if (response.ok) {
+            const data = await response.json();
+            if (data.plan) {
+              setCurrentPlan(data.plan);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch user plan:", error);
+        } finally {
+          setIsLoaded(true);
+        }
+      };
+      fetchUserPlan();
+    } else {
+      setIsLoaded(true);
+    }
+  }, [userId]);
+
   const isLoggedIn = !!userId;
-
-  let currentPlan: "free" | "basic" | "pro" | "multi" = "free";
-  if (isLoggedIn) {
-    const { data } = await supabaseAdmin
-      .from("businesses")
-      .select("plan")
-      .eq("clerk_user_id", userId)
-      .maybeSingle();
-    currentPlan = (data?.plan as typeof currentPlan) ?? "free";
-  }
-
-  const multiPlan = plans.find((p) => p.name === "Multi-Practice")!;
-  const multiIsCurrent = (currentPlan as string) === "multi";
-  const multiUseUpgrade = isLoggedIn && !multiIsCurrent;
-  const multiCta = multiIsCurrent ? "Current plan" : isLoggedIn ? multiPlan.ctaLoggedIn : multiPlan.cta;
-  const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-gray-900" style={{ fontFamily: "var(--font-geist-sans)" }}>
@@ -230,10 +276,10 @@ export default async function PricingPage() {
                   Sign in
                 </Link>
                 <Link
-                  href="/sign-up"
+                  href="/sign-up?plan=pro"
                   className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
                 >
-                  Get started free
+                  Start free trial
                 </Link>
               </>
             )}
@@ -246,30 +292,54 @@ export default async function PricingPage() {
         {/* Header */}
         <div className="text-center mb-14">
           <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4">
-            Simple, transparent pricing
+            Transparent pricing. No contracts.
           </h1>
-          <p className="text-lg text-gray-500 max-w-md mx-auto">
-            One missed new-patient call is worth more than a month of Salva AI.
+          <p className="text-lg text-gray-500 max-w-md mx-auto mb-8">
+            Setup in 5 minutes. 14-day free trial. Cancel anytime.
           </p>
+
+          {/* Billing Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex items-center gap-1 bg-gray-200 rounded-full p-1">
+              <button
+                onClick={() => setBillingCycle("annual")}
+                className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${
+                  billingCycle === "annual"
+                    ? "bg-white text-gray-900 shadow-md"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                Billed annually <span className="ml-1 inline-block bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">Save 2 months</span>
+              </button>
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${
+                  billingCycle === "monthly"
+                    ? "bg-white text-gray-900 shadow-md"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                Monthly
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Plans — Free / Basic / Pro row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
-          {plans.filter((p) => p.name !== "Multi-Practice").map((plan) => {
-            const isPaid = plan.name !== "Free";
-            const planKey = plan.name.toLowerCase() as "free" | "basic" | "pro";
-            const isCurrent = isLoggedIn && currentPlan === planKey;
-            const useUpgrade = isLoggedIn && isPaid && !isCurrent;
+        {/* Plans Grid — Basic / Pro / Growth / Multi */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-stretch">
+          {plans.map((plan) => {
+            const isCurrent = isLoaded && isLoggedIn && currentPlan === plan.planKey;
+            const useUpgrade = isLoaded && isLoggedIn && !isCurrent;
             const cta = isCurrent ? "Current plan" : isLoggedIn ? plan.ctaLoggedIn : plan.cta;
             const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
+            const displayPrice = billingCycle === "annual" ? plan.annualPrice : plan.monthlyPrice;
 
-            // Notice the h-full flex flex-col to force equal heights!
             return (
               <div
-                key={plan.name}
+                key={plan.planKey}
                 className={`relative rounded-3xl p-8 flex flex-col h-full transition-all ${
                   plan.highlight
-                    ? "bg-gray-900 text-white shadow-2xl scale-[1.02] z-10 border-gray-800"
+                    ? "bg-gray-900 text-white shadow-2xl scale-[1.02] z-10 border border-gray-800"
                     : "bg-white border border-gray-200 shadow-sm"
                 }`}
               >
@@ -283,9 +353,9 @@ export default async function PricingPage() {
                   <h2 className={`text-sm font-bold uppercase tracking-widest mb-3 ${plan.highlight ? "text-blue-400" : "text-gray-400"}`}>
                     {plan.name}
                   </h2>
-                  <div className="flex items-end gap-1 mb-3">
+                  <div className="flex items-end gap-2 mb-3">
                     <span className={`text-5xl font-black tracking-tight ${plan.highlight ? "text-white" : "text-gray-900"}`}>
-                      {plan.price}
+                      {displayPrice}
                     </span>
                     <span className="text-sm pb-1.5 text-gray-400 font-medium">{plan.period}</span>
                   </div>
@@ -294,11 +364,10 @@ export default async function PricingPage() {
                   </p>
                 </div>
 
-                {/* flex-1 to push the CTA button to the absolute bottom evenly! */}
-                <ul className="space-y-4 mb-8 flex-1">
+                <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm">
-                      <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center border ${
+                      <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center border flex-none ${
                         plan.highlight ? "bg-blue-900/50 border-blue-500/30 text-blue-400" : "bg-blue-50 border-blue-100 text-blue-600"
                       }`}>
                         <Check size={12} className="stroke-[3]" />
@@ -311,7 +380,8 @@ export default async function PricingPage() {
                 <div className="mt-auto">
                   {useUpgrade ? (
                     <UpgradeButton
-                      plan={planKey as "basic" | "pro"}
+                      plan={plan.planKey}
+                      billingCycle={billingCycle}
                       className={`w-full py-4 rounded-xl text-sm font-bold transition-colors disabled:opacity-60 ${
                         plan.highlight
                           ? "bg-white text-gray-900 hover:bg-gray-100 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
@@ -337,11 +407,9 @@ export default async function PricingPage() {
                   )}
 
                   <div className="h-6 mt-3">
-                    {isPaid ? (
-                      <p className={`text-[11px] font-medium text-center ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
-                        Upgrade or cancel anytime
-                      </p>
-                    ) : null}
+                    <p className={`text-[11px] font-medium text-center ${plan.highlight ? "text-gray-400" : "text-gray-500"}`}>
+                      Cancel anytime
+                    </p>
                   </div>
                 </div>
               </div>
@@ -349,64 +417,9 @@ export default async function PricingPage() {
           })}
         </div>
 
-        {/* Multi-Practice — full-width horizontal card overhauled */}
-        <div className="relative mt-12 rounded-[2rem] border border-gray-800 bg-gray-900 p-8 flex flex-col sm:flex-row sm:items-center gap-8 shadow-2xl overflow-visible">
-          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-[100px] pointer-events-none z-0" />
-          
-          {multiPlan.badge && (
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full shadow-lg z-20">
-              {multiPlan.badge}
-            </div>
-          )}
-          
-          <div className="sm:w-64 shrink-0 relative z-10 break-words">
-            <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-blue-400">Multi-Practice</h2>
-            <div className="flex items-end gap-1 mb-3">
-              <span className="text-3xl lg:text-4xl font-black tracking-tight text-white">{multiPlan.price}</span>
-              <span className="text-sm pb-1 text-gray-400 font-medium">{multiPlan.period}</span>
-            </div>
-            <p className="text-[13px] text-gray-400 leading-relaxed max-w-full sm:max-w-[200px]">{multiPlan.description}</p>
-          </div>
-          
-          <ul className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10 py-4 border-y sm:border-y-0 sm:border-l border-gray-800 sm:pl-8">
-            {multiPlan.features.map((f) => (
-              <li key={f} className="flex items-center gap-3 text-sm">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-blue-900/50 flex items-center justify-center border border-blue-500/30">
-                  <Check size={12} className="text-blue-400 stroke-[3]" />
-                </span>
-                <span className="text-gray-300 font-medium">{f}</span>
-              </li>
-            ))}
-          </ul>
-          
-          <div className="shrink-0 flex flex-col items-stretch sm:items-end gap-3 relative z-10 ml-auto pt-4 sm:pt-0">
-            {multiUseUpgrade ? (
-              <UpgradeButton
-                plan="multi"
-                className="px-8 py-4 rounded-xl text-sm font-bold bg-white text-gray-900 hover:bg-gray-100 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-60"
-              >
-                {multiCta}
-              </UpgradeButton>
-            ) : (
-              <Link
-                href={multiHref}
-                aria-current={multiIsCurrent ? "page" : undefined}
-                className={`px-8 py-4 rounded-xl text-sm font-bold text-center transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] ${
-                  multiIsCurrent
-                    ? "bg-gray-800 text-gray-400 cursor-default pointer-events-none shadow-none"
-                    : "bg-white text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                {multiCta}
-              </Link>
-            )}
-            <p className="text-[11px] font-medium text-center text-gray-500 mt-1">Upgrade or cancel anytime</p>
-          </div>
-        </div>
-
         {/* Fine print */}
         <p className="text-center text-sm font-medium text-gray-500 mt-10 mb-20">
-          14-day free trial included with all paid plans. Cancel anytime — no fees.
+          14-day free trial on all plans. Cancel anytime — no fees, no contracts.
         </p>
 
         {/* Competitor comparison Overhaul */}
@@ -427,8 +440,8 @@ export default async function PricingPage() {
                         Salva AI
                       </span>
                     </th>
-                    <th className="py-5 px-6 text-center text-gray-500 font-bold w-[20%] border-l border-gray-200">Arini</th>
-                    <th className="py-5 px-6 text-center text-gray-500 font-bold w-[20%] border-l border-gray-200">TrueLark</th>
+                    <th className="py-5 px-6 text-center text-gray-500 font-bold w-[20%] border-l border-gray-200">Dentina.ai</th>
+                    <th className="py-5 px-6 text-center text-gray-500 font-bold w-[20%] border-l border-gray-200">DentalAI Assist</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -436,13 +449,13 @@ export default async function PricingPage() {
                     <tr key={row.feature} className={`hover:bg-gray-50/50 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-gray-50/30"}`}>
                       <td className="py-4 px-6 text-gray-700 font-semibold">{row.feature}</td>
                       <td className="py-4 px-6 text-center border-l border-gray-200 bg-blue-50/20">
-                        <ComparisonCell value={row.hustle} highlight />
+                        <ComparisonCell value={row.salvai} highlight />
                       </td>
                       <td className="py-4 px-6 text-center border-l border-gray-200">
-                        <ComparisonCell value={row.arini} />
+                        <ComparisonCell value={row.dentina} />
                       </td>
                       <td className="py-4 px-6 text-center border-l border-gray-200">
-                        <ComparisonCell value={row.truelark} />
+                        <ComparisonCell value={row.dentalaiassist} />
                       </td>
                     </tr>
                   ))}

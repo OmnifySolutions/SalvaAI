@@ -2,16 +2,37 @@ import Stripe from "stripe";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-export const PRICE_IDS: Record<"basic" | "pro" | "multi", string> = {
-  basic: process.env.STRIPE_BASIC_PRICE_ID!,
-  pro:   process.env.STRIPE_PRO_PRICE_ID!,
-  multi: process.env.STRIPE_MULTI_PRICE_ID!,
+export type PlanType = "basic" | "pro" | "growth" | "multi";
+export type BillingCycle = "annual" | "monthly";
+
+export const PRICE_IDS: Record<PlanType, Record<BillingCycle, string>> = {
+  basic: {
+    annual:  process.env.STRIPE_BASIC_ANNUAL_PRICE_ID!,
+    monthly: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID!,
+  },
+  pro: {
+    annual:  process.env.STRIPE_PRO_ANNUAL_PRICE_ID!,
+    monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID!,
+  },
+  growth: {
+    annual:  process.env.STRIPE_GROWTH_ANNUAL_PRICE_ID!,
+    monthly: process.env.STRIPE_GROWTH_MONTHLY_PRICE_ID!,
+  },
+  multi: {
+    annual:  process.env.STRIPE_MULTI_ANNUAL_PRICE_ID!,
+    monthly: process.env.STRIPE_MULTI_MONTHLY_PRICE_ID!,
+  },
 };
 
-export function planFromPriceId(priceId: string): "basic" | "pro" | "multi" | "free" {
-  if (priceId === process.env.STRIPE_BASIC_PRICE_ID) return "basic";
-  if (priceId === process.env.STRIPE_PRO_PRICE_ID)   return "pro";
-  if (priceId === process.env.STRIPE_MULTI_PRICE_ID) return "multi";
+export function planFromPriceId(priceId: string): PlanType | "free" {
+  // Check all price IDs to find matching plan
+  for (const [plan, cycles] of Object.entries(PRICE_IDS)) {
+    for (const [, priceIdValue] of Object.entries(cycles)) {
+      if (priceIdValue === priceId) {
+        return plan as PlanType;
+      }
+    }
+  }
   return "free";
 }
 

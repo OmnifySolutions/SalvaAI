@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isAfterHours } from '@/lib/classify';
+import { hasMinutesAvailable } from '@/lib/minute-enforcement';
 import twilio from 'twilio';
 
 export async function POST(request: NextRequest) {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Find the business by their Twilio number
     const { data: businesses } = await supabaseAdmin
       .from('businesses')
-      .select('id, hours')
+      .select('id, hours, plan')
       .eq('twilio_sid', to)
       .single();
 
@@ -27,6 +28,19 @@ export async function POST(request: NextRequest) {
       return new NextResponse(twiml.toString(), {
         headers: { 'Content-Type': 'application/xml' },
       });
+    }
+
+    // Check if business has voice minutes available (not for chat-only Basic plan)
+    if (businesses.plan !== 'basic') {
+      const { available } = await hasMinutesAvailable(businesses.id);
+      if (!available) {
+        const twiml = new twilio.twiml.VoiceResponse();
+        twiml.say("Your account has reached its monthly voice minute limit. Please upgrade your plan or contact support.");
+        twiml.hangup();
+        return new NextResponse(twiml.toString(), {
+          headers: { 'Content-Type': 'application/xml' },
+        });
+      }
     }
 
     // Create conversation record

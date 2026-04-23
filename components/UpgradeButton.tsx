@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 interface Props {
-  plan?: "basic" | "pro" | "multi";
+  plan?: "basic" | "pro" | "growth" | "multi";
+  billingCycle?: "annual" | "monthly";
   mode?: "checkout" | "portal";
   className?: string;
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface Props {
 
 export default function UpgradeButton({
   plan,
+  billingCycle = "annual",
   mode = "checkout",
   className,
   children,
@@ -25,7 +27,7 @@ export default function UpgradeButton({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(mode === "checkout" ? { plan } : {}),
+          body: JSON.stringify(mode === "checkout" ? { plan, billingCycle } : {}),
         }
       );
       const data = await res.json();
