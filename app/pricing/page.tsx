@@ -342,7 +342,7 @@ export default function PricingPage() {
             const useUpgrade = isLoaded && isLoggedIn && !isCurrent;
             let cta = plan.cta;
             if (isCurrent) cta = "Current plan";
-            else if (isLoggedIn) {
+            else if (isLoggedIn && currentPlan !== "free") {
               cta = isDowngrade ? "Downgrade to this plan" : plan.ctaLoggedIn;
             }
             const href = isLoggedIn ? plan.hrefLoggedIn : plan.href;
@@ -442,7 +442,7 @@ export default function PricingPage() {
           const multiUseUpgrade = isLoaded && isLoggedIn && !multiIsCurrent;
           let multiCta = multiPlan.cta;
           if (multiIsCurrent) multiCta = "Current plan";
-          else if (isLoggedIn) {
+          else if (isLoggedIn && currentPlan !== "free") {
             multiCta = multiIsDowngrade ? "Downgrade to this plan" : multiPlan.ctaLoggedIn;
           }
           const multiHref = isLoggedIn ? multiPlan.hrefLoggedIn : multiPlan.href;
