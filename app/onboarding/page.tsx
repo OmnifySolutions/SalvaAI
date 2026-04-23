@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import HoursPicker, { type WeeklyHours, DEFAULT_HOURS } from "@/components/HoursPicker";
 import OnboardingIntro from "@/components/onboarding/OnboardingIntro";
@@ -19,6 +19,14 @@ const STEPS = [
 ];
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-slate-50 to-white" />}>
+      <OnboardingContent />
+    </Suspense>
+  );
+}
+
+function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan") ?? "free";
