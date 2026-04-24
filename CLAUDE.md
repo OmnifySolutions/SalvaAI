@@ -28,7 +28,8 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-23): 
+**Latest completed work** (as of 2026-04-24): 
+- **Checkout bug fix**: Added error handling to `/api/stripe/checkout` endpoint — was returning generic 500 without logging actual errors
 - **PRICING OVERHAUL (7 of 8 tasks)**: Complete redesign from Free/$69/$219/$749 to Basic/$65-79 | Pro/$249-309 | Growth/$449-559 | Multi/$849-1049 with annual/monthly toggle
   - Pricing page refactor with 4 tiers, expanded feature lists (8+ per tier), new hero "Transparent pricing. No contracts."
   - Database migration: added `billing_cycle`, `minutes_used_this_period`, `minutes_limit_monthly` columns
