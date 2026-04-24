@@ -27,22 +27,45 @@ export async function POST(req: NextRequest) {
 
     // ── Upgrade existing subscription directly (no new Checkout needed) ──────
     if (business.stripe_subscription_id) {
-      const subscription = await stripe.subscriptions.retrieve(
-        business.stripe_subscription_id
-      );
-      await stripe.subscriptions.update(business.stripe_subscription_id, {
-        items: [{ id: subscription.items.data[0].id, price: priceId }],
-        proration_behavior: "create_prorations",
-      });
-      await supabaseAdmin
-        .from("businesses")
-        .update({ plan, billing_cycle: billingCycle })
-        .eq("id", business.id);
-      return Response.json({ url: `${appUrl}/payment-success` });
+      try {
+        const subscription = await stripe.subscriptions.retrieve(
+          business.stripe_subscription_id
+        );
+        await stripe.subscriptions.update(business.stripe_subscription_id, {
+          items: [{ id: subscription.items.data[0].id, price: priceId }],
+          proration_behavior: "create_prorations",
+        });
+        await supabaseAdmin
+          .from("businesses")
+          .update({ plan, billing_cycle: billingCycle })
+          .eq("id", business.id);
+        return Response.json({ url: `${appUrl}/payment-success` });
+      } catch {
+        // Subscription belongs to a different Stripe mode — fall through to new checkout
+        await supabaseAdmin
+          .from("businesses")
+          .update({ stripe_customer_id: null, stripe_subscription_id: null })
+          .eq("id", business.id);
+        business.stripe_customer_id = null;
+      }
     }
 
     // ── New subscription via Stripe Checkout ─────────────────────────────────
     let customerId = business.stripe_customer_id as string | null;
+
+    // Validate the stored customer still exists in the current Stripe mode
+    if (customerId) {
+      try {
+        await stripe.customers.retrieve(customerId);
+      } catch {
+        // Customer belongs to a different Stripe mode (live vs test) — reset it
+        customerId = null;
+        await supabaseAdmin
+          .from("businesses")
+          .update({ stripe_customer_id: null, stripe_subscription_id: null })
+          .eq("id", business.id);
+      }
+    }
 
     if (!customerId) {
       const user = await currentUser();
