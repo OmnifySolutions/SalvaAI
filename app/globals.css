@@ -124,3 +124,12 @@ body {
 .animate-soft-flicker {
   animation: soft-flicker 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+@keyframes waveform-bar {
+  0%, 100% { height: var(--wave-min, 3px); }
+  50% { height: var(--wave-max, 32px); }
+}
+
+.animate-waveform {
+  animation: waveform-bar ease-in-out infinite;
+}

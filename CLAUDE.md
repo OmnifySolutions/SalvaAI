@@ -28,15 +28,19 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-24, UI polish & settings redesign):
+**Latest completed work** (as of 2026-04-24, voice selector UI + settings overhaul):
+- **Voice Selector Feature** (2026-04-24):
+  - Replaced Acoustic Tone selector with 4 voice options: Sarah (warm & friendly), Emma (clinical & precise), James (professional & efficient), Marcus (warm & approachable)
+  - Voice card UI: horizontal layout with [Play button] [Name/Gender/Tone] [Active selection badge], no card enlargement on selection
+  - Preview functionality: waveform animation component (28 bars with gradient blue background, varying heights, staggered animation durations 0.5s-1.0s), audio playback with Auto-stop at 15s, "Stop" button appears during preview
+  - Layout fixes: added `overflow-y-auto` to main SettingsForm content area, removed `overflow-hidden` from individual voice cards to prevent clipping when preview waveform appears
+  - Custom animations: added `.animate-waveform` (height oscillation via CSS variables `--wave-min`, `--wave-max`) to `app/globals.css`
+
 - **Dashboard & Settings UI overhaul** (2026-04-24): 
   - Dashboard cards: unified number styling (`font-black` + `tracking-tight`), added floating hover animations (`hover:-translate-y-1 hover:shadow-md transition-all duration-200`) to all cards (DashboardStats, StatWidget, MinuteUsageCard, LocationCard, CTA cards, InboxSection, AggregatedInboxSection, ChartPanel, Recent Activity, SetupChecklist)
   - Settings page header alignment: changed grid from `items-end` to `items-start` in AI Personality tab so Agent Name + Custom Greeting labels align vertically
   - Patient FAQ header: updated to match field label style (`text-sm font-bold text-gray-700`)
-  - Voice Calling tab overhaul:
-    - Accept Calls toggle: redesigned to premium brand-blue style (w-14 h-7, bg-blue-600, smooth 200ms transition, "LIVE/OFF" text label with soft-flicker animation when active)
-    - Acoustic Tone cards: changed from 3-column grid to full-width vertical stack (`space-y-3`), horizontal layout with icon left, title/subtitle center, active badge right, premium hover effects
-    - Smart Handoffs checkboxes: changed to blue (`accent-blue-600`)
+  - Voice Calling tab: Accept Calls toggle redesigned to premium brand-blue style (w-14 h-7, bg-blue-600, smooth 200ms transition, "LIVE/OFF" text label with soft-flicker animation when active), Smart Handoffs checkboxes changed to blue (`accent-blue-600`)
   - Integrations tab complete redesign: premium card layout with OpenDental branding block (black OD logo), capability badges, connected/disconnected state indicators, help links
   - Tab reordering: moved Notifications between Do's & Don'ts and Integrations
   - Custom animation: added `.animate-soft-flicker` (opacity: 1→0.6→1 over 1.5s) to `app/globals.css`

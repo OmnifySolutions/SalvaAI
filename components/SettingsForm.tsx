@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell, Play, Square } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 import { FEATURE_DEFINITIONS, GROUP_LABELS, type FeatureDefinition } from "@/lib/ai-features";
 import { getServiceDefaults, buildDefaultGreeting } from "@/lib/service-defaults";
 
 type FAQ = { question: string; answer: string };
-type VoiceTone = "professional" | "warm" | "clinical";
+type VoiceTone = "sarah" | "emma" | "james" | "marcus" | "professional" | "warm" | "clinical";
 type Service = { name: string; durationMinutes: number; description: string };
 
 // Generic hook for managing arrays of items (add, update, remove)
@@ -66,11 +66,11 @@ const DENTAL_DEFAULTS: Service[] = [
   { name: "Consultation", durationMinutes: 30, description: "" },
 ];
 
-// Presets remain same
-const TONES: { key: VoiceTone; label: string; subtitle: string }[] = [
-  { key: "professional", label: "Professional & Efficient", subtitle: "Busy front desk. Direct, no filler." },
-  { key: "warm",         label: "Warm & Friendly",          subtitle: "Approachable. Great for pediatrics." },
-  { key: "clinical",     label: "Clinical & Precise",        subtitle: "Minimal small talk. Ideal for surgeons." },
+const VOICES: { key: VoiceTone; name: string; gender: "Female" | "Male"; tone: string; desc: string }[] = [
+  { key: "sarah",  name: "Sarah",  gender: "Female", tone: "Warm & Friendly",          desc: "Approachable and caring. Perfect for pediatric and family dental." },
+  { key: "emma",   name: "Emma",   gender: "Female", tone: "Clinical & Precise",        desc: "Clear and efficient. Ideal for oral surgery and specialist practices." },
+  { key: "james",  name: "James",  gender: "Male",   tone: "Professional & Efficient",  desc: "Confident and direct. Great for busy front desk energy." },
+  { key: "marcus", name: "Marcus", gender: "Male",   tone: "Warm & Approachable",       desc: "Friendly and calm. Builds strong patient rapport." },
 ];
 
 const DEFLECT_PRESETS: { key: string; label: string }[] = [
@@ -153,7 +153,12 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
   const { items: faqs, add: addFaq, update: updateFaq, remove: removeFaq } = useArrayState(business.faqs ?? [], { question: "", answer: "" });
   
   const [voiceEnabled, setVoiceEnabled] = useState(business.voice_enabled ?? false);
-  const [voiceTone, setVoiceTone] = useState<VoiceTone>(business.voice_tone ?? "professional");
+  const [voiceTone, setVoiceTone] = useState<VoiceTone>(
+    VOICES.some(v => v.key === business.voice_tone) ? business.voice_tone as VoiceTone : "sarah"
+  );
+  const [playingVoice, setPlayingVoice] = useState<string | null>(null);
+  const previewTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [voiceEmergencyNumber, setVoiceEmergencyNumber] = useState(business.voice_emergency_number ?? "");
   const [voiceEmergencyMessage, setVoiceEmergencyMessage] = useState(business.voice_emergency_message ?? "");
   const [voiceDeflectTopics, setVoiceDeflectTopics] = useState<string[]>(business.voice_deflect_topics ?? []);
@@ -165,6 +170,33 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
   const isOdConnected = !!business.opendental_api_key;
 
   const hasVoice = business.plan === "pro" || business.plan === "multi";
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) audioRef.current.pause();
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+    };
+  }, []);
+
+  function stopPreview() {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+    setPlayingVoice(null);
+  }
+
+  function handlePreview(key: string) {
+    if (playingVoice === key) { stopPreview(); return; }
+    stopPreview();
+    setPlayingVoice(key);
+    const audio = new Audio(`/voices/${key}.mp3`);
+    audioRef.current = audio;
+    audio.addEventListener("ended", stopPreview);
+    audio.play().catch(() => {
+      // File not yet added — waveform animation still plays, audio fails silently
+    });
+    // 15s safety cap in case audio is long or stalls
+    previewTimerRef.current = setTimeout(stopPreview, 15000);
+  }
 
   function toggleDeflect(key: string) {
     setVoiceDeflectTopics((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]);
@@ -254,7 +286,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-6 md:p-10 bg-white">
+      <div className="flex-1 p-6 md:p-10 bg-white overflow-y-auto">
         
         {/* PROFILE TAB */}
         <div className={activeTab === "profile" ? "block" : "hidden"}>
@@ -440,33 +472,62 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-gray-700 mb-3">Acoustic Tone</h3>
+                <h3 className="text-sm font-bold text-gray-700 mb-3">Voice</h3>
                 <div className="space-y-3">
-                  {TONES.map(t => (
-                    <div
-                      key={t.key}
-                      onClick={() => setVoiceTone(t.key)}
-                      className={`cursor-pointer w-full flex items-center gap-5 px-5 py-4 rounded-2xl border-2 transition-all duration-200 select-none ${
-                        voiceTone === t.key
-                          ? 'border-blue-600 bg-blue-50 shadow-md shadow-blue-100'
-                          : 'border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${voiceTone === t.key ? 'bg-blue-600' : 'bg-gray-100'}`}>
-                        <PhoneCall size={17} className={voiceTone === t.key ? 'text-white' : 'text-gray-400'} />
+                  {VOICES.map(v => {
+                    const isSelected = voiceTone === v.key;
+                    const isPreviewing = playingVoice === v.key;
+                    return (
+                      <div
+                        key={v.key}
+                        onClick={() => setVoiceTone(v.key)}
+                        className={`cursor-pointer w-full rounded-2xl border-2 transition-colors duration-150 select-none shadow-sm ${
+                          isSelected
+                            ? 'border-blue-600 bg-blue-50'
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        {isPreviewing ? (
+                          <div className="px-5 py-4 flex items-center gap-4">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handlePreview(v.key); }}
+                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-600 hover:bg-blue-700 transition-colors"
+                            >
+                              <Square size={14} className="text-white" fill="white" />
+                            </button>
+                            <VoiceWaveform name={v.name} />
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-5 px-5 py-4">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handlePreview(v.key); }}
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                                isSelected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-100 hover:bg-gray-200'
+                              }`}
+                            >
+                              <Play size={15} className={isSelected ? 'text-white' : 'text-gray-500'} fill="currentColor" />
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                <p className={`font-black text-sm tracking-tight shrink-0 ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>{v.name}</p>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${v.gender === "Female" ? 'bg-pink-50 text-pink-500' : 'bg-sky-50 text-sky-500'}`}>{v.gender}</span>
+                                <span className="text-[10px] font-semibold text-gray-400 truncate">{v.tone}</span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-0.5 truncate">{v.desc}</p>
+                            </div>
+                            {isSelected && (
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Active</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-black text-sm tracking-tight ${voiceTone === t.key ? 'text-blue-900' : 'text-gray-900'}`}>{t.label}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{t.subtitle}</p>
-                      </div>
-                      {voiceTone === t.key && (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Active</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -769,6 +830,34 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
 }
 
 const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all bg-gray-50/50 hover:bg-white";
+
+const WAVEFORM_HEIGHTS = [6, 16, 28, 38, 40, 34, 22, 38, 40, 28, 14, 32, 40, 24, 38, 12, 30, 40, 22, 36, 16, 40, 28, 14, 36, 40, 20, 10];
+const WAVEFORM_DURATIONS = [0.7, 0.55, 0.9, 0.6, 0.75, 0.5, 1.0, 0.65, 0.8, 0.55, 0.7, 0.9, 0.5, 0.75, 0.6, 0.85, 0.5, 0.7, 0.95, 0.6, 0.8, 0.5, 0.7, 0.9, 0.55, 0.75, 0.6, 0.85];
+
+function VoiceWaveform({ name }: { name: string }) {
+  return (
+    <div className="flex-1 flex flex-col justify-center gap-2">
+      <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{name} · Previewing</span>
+      <div className="flex items-end gap-[2.5px] h-10">
+        {WAVEFORM_HEIGHTS.map((maxH, i) => (
+          <div
+            key={i}
+            className="flex-1 rounded-full animate-waveform"
+            style={{
+              background: `linear-gradient(to top, #2563eb, #60a5fa)`,
+              minWidth: '3px',
+              maxWidth: '8px',
+              ['--wave-min' as string]: '3px',
+              ['--wave-max' as string]: `${maxH}px`,
+              animationDuration: `${WAVEFORM_DURATIONS[i]}s`,
+              animationDelay: `${(i * 0.055) % 0.7}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Field({ label, required, hint, fixedHintHeight, children }: { label: string; required?: boolean; hint?: string; fixedHintHeight?: boolean; children: React.ReactNode }) {
   return (
