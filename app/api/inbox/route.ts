@@ -1,6 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getOrganization, getOrgLocations, verifyLocationOwnership } from "@/lib/organizations";
+import { sortByPriority } from "@/lib/inbox-utils";
 import { NextRequest } from "next/server";
+
+const INBOX_SELECT =
+  "id, channel, urgency, is_after_hours, appointment_requested, appointment_booked_status, callback_requested, visitor_name, visitor_phone, visitor_email, summary, appointment_notes, location_name, created_at";
 
 export async function GET() {
   const { userId } = await auth();
@@ -8,15 +13,38 @@ export async function GET() {
 
   const { data: business } = await supabaseAdmin
     .from("businesses")
-    .select("id")
+    .select("id, plan")
     .eq("clerk_user_id", userId)
     .single();
 
   if (!business) return Response.json({ error: "Business not found" }, { status: 404 });
 
+  // Multi-practice: query across all org locations
+  if (business.plan === "multi") {
+    const org = await getOrganization(userId);
+    if (org) {
+      const locations = await getOrgLocations(org.id);
+      const locationIds = locations.map((l) => l.id);
+
+      if (locationIds.length > 0) {
+        const { data, error } = await supabaseAdmin
+          .from("conversations")
+          .select(INBOX_SELECT)
+          .in("business_id", locationIds)
+          .is("resolved_at", null)
+          .or("urgency.eq.emergency,and(appointment_requested.eq.true,appointment_booked_status.neq.confirmed),callback_requested.eq.true")
+          .order("created_at", { ascending: false });
+
+        if (error) return Response.json({ error: "Failed to fetch inbox" }, { status: 500 });
+        return Response.json({ items: sortByPriority(data ?? []) });
+      }
+    }
+  }
+
+  // Single-practice (or multi with no org yet): existing behavior
   const { data, error } = await supabaseAdmin
     .from("conversations")
-    .select("id, channel, urgency, is_after_hours, appointment_requested, appointment_booked_status, callback_requested, visitor_name, visitor_phone, visitor_email, summary, appointment_notes, created_at")
+    .select(INBOX_SELECT)
     .eq("business_id", business.id)
     .is("resolved_at", null)
     .or("urgency.eq.emergency,and(appointment_requested.eq.true,appointment_booked_status.neq.confirmed),callback_requested.eq.true")
@@ -24,17 +52,7 @@ export async function GET() {
 
   if (error) return Response.json({ error: "Failed to fetch inbox" }, { status: 500 });
 
-  // Sort: emergencies first, then pending bookings, then callbacks
-  const sorted = (data ?? []).sort((a, b) => {
-    const priority = (c: typeof a) => {
-      if (c.urgency === "emergency") return 0;
-      if (c.appointment_requested && c.appointment_booked_status !== "confirmed") return 1;
-      return 2;
-    };
-    return priority(a) - priority(b);
-  });
-
-  return Response.json({ items: sorted });
+  return Response.json({ items: sortByPriority(data ?? []) });
 }
 
 export async function POST(req: NextRequest) {
@@ -46,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   const { data: business } = await supabaseAdmin
     .from("businesses")
-    .select("id")
+    .select("id, plan")
     .eq("clerk_user_id", userId)
     .single();
 
@@ -59,7 +77,13 @@ export async function POST(req: NextRequest) {
     .eq("id", conversationId)
     .single();
 
-  if (!conv || conv.business_id !== business.id) {
+  if (!conv) return Response.json({ error: "Not found" }, { status: 404 });
+
+  // For multi-plan, verify the conversation belongs to one of the org's locations
+  if (business.plan === "multi") {
+    const { owned } = await verifyLocationOwnership(userId, conv.business_id);
+    if (!owned) return Response.json({ error: "Not found" }, { status: 404 });
+  } else if (conv.business_id !== business.id) {
     return Response.json({ error: "Not found" }, { status: 404 });
   }
 

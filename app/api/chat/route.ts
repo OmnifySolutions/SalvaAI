@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
         visitor_phone: contact.phone ?? null,
         visitor_email: contact.email ?? null,
         appointment_notes: appointmentIntent ? message.slice(0, 500) : null,
+        location_name: business.name,
       })
       .select("id")
       .single();

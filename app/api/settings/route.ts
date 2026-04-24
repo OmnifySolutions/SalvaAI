@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { VALID_FEATURE_KEYS } from "@/lib/ai-features";
+import { verifyLocationOwnership } from "@/lib/organizations";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -16,6 +17,7 @@ export async function POST(req: NextRequest) {
     openDentalServerUrl, openDentalApiKey, openDentalBookingWindow,
     notifyOnEmergency, notifyEmergencyPhone, notifyEmergencyEmail, notifyEmergencyWhatsapp,
     notifyOnNewBooking, notifyOnCallback,
+    businessId: targetBusinessId,
   } = body;
 
   const validWindows = [3, 7, 14];
@@ -29,6 +31,13 @@ export async function POST(req: NextRequest) {
   const bookingMode = safeFeatures.includes('instant_booking') ? 'autonomous' : 'pending';
 
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
+
+  let updateById: string | null = null;
+  if (targetBusinessId) {
+    const { owned } = await verifyLocationOwnership(userId, targetBusinessId);
+    if (!owned) return Response.json({ error: "Location not found in your organization" }, { status: 403 });
+    updateById = targetBusinessId;
+  }
 
   const { error } = await supabaseAdmin
     .from("businesses")
@@ -61,7 +70,7 @@ export async function POST(req: NextRequest) {
       notify_on_new_booking: notifyOnNewBooking ?? false,
       notify_on_callback: notifyOnCallback ?? false,
     })
-    .eq("clerk_user_id", userId);
+    .eq(updateById !== null ? "id" : "clerk_user_id", updateById ?? userId);
 
   if (error) {
     console.error("Settings update error:", error);

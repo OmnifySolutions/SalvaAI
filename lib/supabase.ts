@@ -12,6 +12,20 @@ export const supabaseAdmin = supabaseServiceRoleKey
   ? createClient(supabaseUrl, supabaseServiceRoleKey)
   : createClient(supabaseUrl, supabaseAnonKey);
 
+export type Organization = {
+  id: string;
+  owner_clerk_user_id: string;
+  name: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan: string;
+  plan_status: string;
+  billing_cycle: "monthly" | "annual";
+  total_minutes_limit: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Business = {
   id: string;
   clerk_user_id: string;
@@ -19,7 +33,7 @@ export type Business = {
   slug: string;
   business_type: string;
   phone_number: string | null;
-  plan: "free" | "basic" | "pro" | "multi";
+  plan: "free" | "basic" | "pro" | "growth" | "multi";
   plan_status: string;
   faqs: { question: string; answer: string }[];
   hours: Record<string, { open: string | null; close: string | null; enabled: boolean }> | string;
@@ -34,6 +48,10 @@ export type Business = {
   ai_features: string[] | null;
   voice_enabled: boolean;
   twilio_sid: string | null;
+  // Multi-practice fields
+  organization_id: string | null;
+  is_primary_location: boolean;
+  location_display_name: string | null;
   created_at: string;
   updated_at: string;
 };

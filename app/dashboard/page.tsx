@@ -11,6 +11,7 @@ import {
   Settings,
   Moon,
   AlertTriangle,
+  MapPin,
 } from "lucide-react";
 import {
   getAppointmentStats,
@@ -19,20 +20,34 @@ import {
   getUrgencyBreakdown,
   getPeakContactHours,
   getEmergencyFlagCount,
+  getOrgAppointmentStats,
+  getOrgCallVolumeSeries,
+  getOrgAfterHoursCount,
+  getOrgEmergencyFlagCount,
+  getOrgUrgencyBreakdown,
 } from "@/lib/dashboard";
 import DashboardStats from "@/components/DashboardStats";
 import InboxSection from "@/components/InboxSection";
+import AggregatedInboxSection from "@/components/AggregatedInboxSection";
 import Logo from "@/components/Logo";
 import SetupChecklist from "@/components/SetupChecklist";
 import DashboardOnboardingFlag from "@/components/DashboardOnboardingFlag";
 import PlanBadge from "@/components/PlanBadge";
+import LocationSwitcher from "@/components/LocationSwitcher";
+import LocationCard from "@/components/LocationCard";
+import NotificationBell from "@/components/NotificationBell";
 import { Suspense } from "react";
 import type { LucideIcon } from "lucide-react";
+import { getOrganization, getOrgLocations } from "@/lib/organizations";
+import type { Business } from "@/lib/supabase";
 
-export default async function DashboardPage() {
+type SearchParams = Promise<Record<string, string | undefined>>;
+
+export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const { userId } = await auth();
+  const params = await searchParams;
 
-  // Get this user's business
+  // Get this user's primary business
   const { data: business } = await supabaseAdmin
     .from("businesses")
     .select("*")
@@ -41,7 +56,29 @@ export default async function DashboardPage() {
 
   if (!business) redirect("/onboarding");
 
-  // Get recent conversations + all dashboard metrics in parallel.
+  // Multi-practice: load org + all locations
+  let org = null;
+  let locations: Business[] = [];
+  if (business.plan === "multi") {
+    org = await getOrganization(userId!);
+    if (org) locations = await getOrgLocations(org.id);
+  }
+
+  // Determine which location is selected
+  const locationParam = params.location;
+  const isMulti = business.plan === "multi" && org && locations.length > 0;
+  const showAll = isMulti && (!locationParam || locationParam === "all");
+
+  // Determine which businessId to show stats for (per-location view)
+  let activeBusiness = business;
+  if (isMulti && locationParam && locationParam !== "all") {
+    const found = locations.find((l) => l.id === locationParam);
+    if (found) activeBusiness = found as typeof business;
+  }
+
+  const locationIds = locations.map((l) => l.id);
+
+  // Fetch dashboard data for the active view
   const [
     { data: feedConversations },
     { data: allConversations },
@@ -55,20 +92,20 @@ export default async function DashboardPage() {
     supabaseAdmin
       .from("conversations")
       .select("id, channel, status, created_at, ended_at")
-      .eq("business_id", business.id)
+      .eq("business_id", showAll ? business.id : activeBusiness.id)
       .order("created_at", { ascending: false })
       .limit(5),
     supabaseAdmin
       .from("conversations")
       .select("id, channel, created_at")
-      .eq("business_id", business.id)
+      .eq("business_id", showAll ? business.id : activeBusiness.id)
       .order("created_at", { ascending: false }),
-    getAppointmentStats(business.id),
-    getCallVolumeSeries(business.id),
-    getAfterHoursCount(business.id),
-    getUrgencyBreakdown(business.id),
-    getPeakContactHours(business.id),
-    getEmergencyFlagCount(business.id),
+    showAll ? getOrgAppointmentStats(locationIds) : getAppointmentStats(activeBusiness.id),
+    showAll ? getOrgCallVolumeSeries(locationIds) : getCallVolumeSeries(activeBusiness.id),
+    showAll ? getOrgAfterHoursCount(locationIds) : getAfterHoursCount(activeBusiness.id),
+    showAll ? getOrgUrgencyBreakdown(locationIds) : getUrgencyBreakdown(activeBusiness.id),
+    getPeakContactHours(activeBusiness.id),
+    showAll ? getOrgEmergencyFlagCount(locationIds) : getEmergencyFlagCount(activeBusiness.id),
   ]);
 
   const appointmentTrend =
@@ -88,25 +125,45 @@ export default async function DashboardPage() {
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <span className="text-gray-900 border-b-2 border-gray-900 pb-1">Overview</span>
             <Link href="/settings" className="text-gray-500 hover:text-gray-900 flex items-center gap-1.5"><Settings size={16}/> Settings</Link>
+            {isMulti && (
+              <Link href="/dashboard/locations" className="text-gray-500 hover:text-gray-900 flex items-center gap-1.5">
+                <MapPin size={16}/> Locations
+              </Link>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-600">
+          {isMulti && (
+            <LocationSwitcher
+              locations={locations.map((l) => ({ id: l.id, name: l.name, location_display_name: l.location_display_name }))}
+              currentLocationId={locationParam ?? "all"}
+            />
+          )}
+          {isMulti && org && (
+            <NotificationBell orgId={org.id} locationIds={locationIds} />
+          )}
           <PlanBadge plan={business.plan ?? "free"} planStatus={business.plan_status} />
-          <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">{business.name}</span>
+          <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
+            {isMulti && !showAll ? (activeBusiness.location_display_name ?? activeBusiness.name) : business.name}
+          </span>
           <SignOutButton />
         </div>
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
 
-        {/* Setup checklist — compact full-width bar */}
-        <SetupChecklist business={business} />
+        {/* Setup checklist — only in single or per-location view */}
+        {!showAll && <SetupChecklist business={activeBusiness} />}
 
-        {/* Realtime Agent Status Banner */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 mb-1 tracking-tight">Intelligence Center</h1>
-            <p className="text-sm text-gray-500">Welcome back. Your AI agent is answering calls and chats right now.</p>
+            <p className="text-sm text-gray-500">
+              {showAll
+                ? `${locations.length} locations active — aggregated view`
+                : "Your AI agent is answering calls and chats right now."}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-xl text-sm font-semibold">
@@ -116,27 +173,35 @@ export default async function DashboardPage() {
               </span>
               Agent Active
             </div>
-            {(business.plan === "pro" || business.plan === "multi") && (
+            {(activeBusiness.plan === "pro" || activeBusiness.plan === "multi") && !showAll && (
               <div className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-sm text-gray-700 shadow-sm">
                 <span className="text-gray-400 mr-2">Forwarding to:</span>
-                <span className="font-mono">{business.twilio_sid || "Pending..."}</span>
+                <span className="font-mono">{activeBusiness.twilio_sid || "Pending..."}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Action Required Inbox */}
-        <InboxSection opendentalConnected={!!business.opendental_api_key} />
+        {/* Inbox — aggregated for "all", single-business for per-location */}
+        {showAll && org ? (
+          <AggregatedInboxSection
+            orgId={org.id}
+            locationIds={locationIds}
+            opendentalConnected={!!activeBusiness.opendental_api_key}
+          />
+        ) : (
+          <InboxSection opendentalConnected={!!activeBusiness.opendental_api_key} />
+        )}
 
-        {/* Stats Row with date filter */}
+        {/* Stats Row */}
         <DashboardStats
           allConversations={allConversations ?? []}
-          totalInteractions={business.interaction_count ?? 0}
+          totalInteractions={activeBusiness.interaction_count ?? 0}
           appointmentsTotal={appointments.total}
           appointmentTrend={appointmentTrend}
         />
 
-        {/* Secondary Stat Row — after-hours + emergency */}
+        {/* Secondary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <StatWidget
             icon={Moon}
@@ -149,23 +214,38 @@ export default async function DashboardPage() {
             icon={AlertTriangle}
             label="Emergency Flags"
             value={emergencyFlags.count}
-            trend="Last 30 days"
+            trend={showAll ? `All locations · Last 30 days` : "Last 30 days"}
             color={emergencyFlags.count > 0 ? "red" : "gray"}
           />
         </div>
 
-        {/* Recharts Inject */}
+        {/* Charts */}
         <DashboardCharts
           callVolumeData={callVolume}
           urgencyData={urgency}
           peakHoursData={peakHours}
         />
 
+        {/* Location Cards (aggregated view only) */}
+        {showAll && locations.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-black text-gray-900 mb-4 tracking-tight">Locations</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {locations.map((loc) => (
+                <LocationCard
+                  key={loc.id}
+                  businessId={loc.id}
+                  name={loc.name}
+                  displayName={loc.location_display_name}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Feed / Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            
-            {/* Live Call/Chat Feed */}
+            {/* Recent Activity Feed */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-lg font-black text-gray-900 tracking-tight">Recent Activity Stream</h2>
@@ -188,7 +268,7 @@ export default async function DashboardPage() {
                           <div className="font-medium text-gray-900 capitalize flex items-center gap-2">
                             {conv.channel} Inquiry
                             <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md ${
-                              conv.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                              conv.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
                             }`}>{conv.status}</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-0.5">
@@ -202,14 +282,11 @@ export default async function DashboardPage() {
                 )}
               </ul>
             </div>
-            
           </div>
 
           {/* Right Sidebar */}
           <div className="space-y-6">
-
-            {/* Quick Actions / Upgrades */}
-            {business.plan === "free" && (
+            {activeBusiness.plan === "free" && (
               <div className="bg-gray-900 rounded-3xl border border-gray-800 p-8 text-white shadow-2xl relative overflow-hidden group">
                 <div className="absolute -top-10 -right-10 w-48 h-48 bg-blue-600 rounded-full opacity-30 blur-3xl group-hover:opacity-40 transition-opacity"></div>
                 <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center mb-5 border border-blue-500/30">
@@ -219,24 +296,22 @@ export default async function DashboardPage() {
                 <p className="text-blue-100/70 text-sm mb-6 leading-relaxed">
                   Start answering calls 24/7. Upgrade to Pro to enable your Voice Agent and OpenDental sync.
                 </p>
-                <div className="flex flex-col gap-3">
-                  <Link href="/pricing" className="w-full text-sm bg-white hover:bg-gray-100 text-gray-900 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex justify-center items-center gap-2">
-                    View Plans →
-                  </Link>
-                </div>
+                <Link href="/pricing" className="w-full text-sm bg-white hover:bg-gray-100 text-gray-900 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex justify-center items-center gap-2">
+                  View Plans →
+                </Link>
               </div>
             )}
-            
-            {business.plan === "pro" && !business.opendental_api_key && (
-               <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-                 <h3 className="font-bold text-blue-900 text-sm mb-2">Connect OpenDental</h3>
-                 <p className="text-blue-700/80 text-xs mb-4">
-                   Your AI agent cannot book appointments yet. Connect your PMS to enable live calendar sync.
-                 </p>
-                 <Link href="/settings#practice-management" className="text-xs font-bold bg-white text-blue-600 px-4 py-2 rounded-lg shadow-sm block text-center">
-                   Connect Now
-                 </Link>
-               </div>
+
+            {activeBusiness.plan === "pro" && !activeBusiness.opendental_api_key && (
+              <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
+                <h3 className="font-bold text-blue-900 text-sm mb-2">Connect OpenDental</h3>
+                <p className="text-blue-700/80 text-xs mb-4">
+                  Your AI agent cannot book appointments yet. Connect your PMS to enable live calendar sync.
+                </p>
+                <Link href="/settings#practice-management" className="text-xs font-bold bg-white text-blue-600 px-4 py-2 rounded-lg shadow-sm block text-center">
+                  Connect Now
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -263,7 +338,6 @@ const colorMap: Record<StatWidgetProps["color"], string> = {
 };
 
 function StatWidget({ icon: Icon, label, value, trend, color }: StatWidgetProps) {
-  
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
       <div className="flex justify-between items-start mb-4">

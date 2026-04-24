@@ -28,7 +28,20 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-24, updated for custom checkout):
+**Latest completed work** (as of 2026-04-24, Multi-Practice dashboard complete):
+- **Multi-Practice dashboard + real-time notifications** (2026-04-24): Full multi-location feature for the Multi tier ($849–$1,049/mo):
+  - DB migration: `organizations` table (billing anchor), `organization_id`/`is_primary_location`/`location_display_name` on `businesses`, `location_name` on `conversations` (denormalized for Realtime payloads)
+  - `lib/organizations.ts`: full org data access layer — `getOrganization`, `getOrgLocations`, `createLocation` (max-5 guard), `deleteLocation` (blocks primary), `promoteToOrganization` (idempotent), `verifyLocationOwnership` (parallelized with Promise.all)
+  - `lib/inbox-utils.ts`: canonical shared utilities — `InboxItem` type, `timeAgo`, `callerLabel`, `sortByPriority`, `getLocationColor` (module-level Map cache for stable color assignment)
+  - Aggregated dashboard: `?location=all` shows `AggregatedInboxSection` (cross-location Realtime) + `LocationCard` grid; `?location={id}` shows per-location single view
+  - `LocationSwitcher`: URL-driven (`?location=`) — server components fetch correct data before hydration, no React context needed
+  - Real-time notifications: `NotificationBell` (badge + `org-bell-{orgId}` Realtime channel), `NotificationPanel` (slide-out), `NotificationToast` (fixed overlay for emergencies), `NotificationContext` (6s auto-dismiss)
+  - API: `GET/POST /api/locations`, `DELETE /api/locations/[id]`; inbox route uses `.in("business_id", locationIds)` for cross-location queries; settings route accepts `businessId` override via `verifyLocationOwnership`
+  - Stripe webhook: auto-calls `promoteToOrganization` on multi upgrade; syncs plan_status to both `businesses` and `organizations` on subscription changes
+  - Location management page at `/dashboard/locations` (list, add, delete with primary protection)
+  - All paths gated behind `plan === "multi"` — zero regressions for Basic/Pro/Growth
+
+- **Full Stripe payment flow hardened**: 6 fixes across the checkout pipeline:
 - **Full Stripe payment flow hardened**: 6 fixes across the checkout pipeline:
   1. `NEXT_PUBLIC_APP_URL` missing → Stripe rejected success/cancel URLs (no scheme)
   2. Clerk session lost after Stripe cross-domain redirect → created public `/payment-success` page that waits for Clerk client-side, then verifies session and routes to dashboard
@@ -56,23 +69,21 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 **Blocking go-live**:
 - Stripe price IDs: need to create 8 IDs in Stripe dashboard + add to `.env`
-- Supabase migration: run `supabase migration up`
-- Multi-Practice dashboard: not built (2–3 day task, blocks Multi tier sales)
+- Supabase migration: run `supabase migration up` (20260424_multi_practice.sql already applied to linked project)
 
-**Active blockers** (pre-pricing):
+**Active blockers**:
 - Anthropic credits exhausted; using Groq LLM (`llama-3.3-70b-versatile`)
 - Twilio trial watermark (needs paid upgrade)
 - Voice booking validation needs ngrok tunnel for local testing
 - SocialProof component gated until real customer reviews collected
 - ElevenLabs Creator plan ($22/mo): Sufficient for 1-2 Pro customers; upgrade strategy needed as customer base grows
 
-**Next priorities** (post-pricing):
+**Next priorities**:
 - ✋ **PAUSE**: Complete ACTION_LIST.md steps before building new features (Stripe setup, migration, testing)
 - Voice selector dropdown in Settings (use multiple pre-built ElevenLabs voices) — tie to Pro plan
 - Item 23 (voice UX): Microphone permission UI + end-to-end Open Dental booking validation
-- Item 24: Real-time dashboard notifications (Supabase WebSocket)
 - Item 26: Enable social proof (pending customer reviews)
-- Multi-Practice dashboard: location switcher UI + aggregated stats (2–3 days, blocks Multi tier)
+- Multi-Practice: manual QA pass (single-practice regression + multi full flow) before launching Multi tier sales
 
 **Quick references**:
 - Test guide: `TEST_AUTOMATION.md` (phase-based testing strategy)

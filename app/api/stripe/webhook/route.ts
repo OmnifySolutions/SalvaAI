@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import Stripe from "stripe";
 import { stripe, planFromPriceId, planStatusFromStripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
+import { promoteToOrganization } from "@/lib/organizations";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
         const priceId = subscription.items.data[0].price.id;
         const plan    = planFromPriceId(priceId);
 
-        const { error: dbErr } = await supabaseAdmin
+        const { data: updatedBiz, error: dbErr } = await supabaseAdmin
           .from("businesses")
           .update({
             stripe_customer_id:      session.customer as string,
@@ -44,8 +45,25 @@ export async function POST(req: NextRequest) {
             billing_cycle: billingCycle,
             plan_status: planStatusFromStripe(subscription.status),
           })
-          .eq("id", businessId);
+          .eq("id", businessId)
+          .select("id, name, clerk_user_id, stripe_customer_id, stripe_subscription_id")
+          .single();
         if (dbErr) throw new Error(`DB update failed: ${dbErr.message}`);
+
+        // Auto-create org for multi-practice upgrades (idempotent)
+        if (plan === "multi" && updatedBiz) {
+          try {
+            await promoteToOrganization(updatedBiz.clerk_user_id, {
+              id: updatedBiz.id,
+              name: updatedBiz.name,
+              stripe_customer_id: updatedBiz.stripe_customer_id,
+              stripe_subscription_id: updatedBiz.stripe_subscription_id,
+              billing_cycle: billingCycle,
+            });
+          } catch (orgErr) {
+            console.error("Failed to promote to organization:", orgErr);
+          }
+        }
         break;
       }
 
@@ -53,27 +71,34 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as Stripe.Subscription;
         const priceId = sub.items.data[0].price.id;
         const plan    = planFromPriceId(priceId);
+        const planStatus = planStatusFromStripe(sub.status);
 
-        await supabaseAdmin
-          .from("businesses")
-          .update({
-            plan,
-            plan_status: planStatusFromStripe(sub.status),
-          })
-          .eq("stripe_customer_id", sub.customer as string);
+        await Promise.all([
+          supabaseAdmin
+            .from("businesses")
+            .update({ plan, plan_status: planStatus })
+            .eq("stripe_customer_id", sub.customer as string),
+          // Sync status to org row if it exists
+          supabaseAdmin
+            .from("organizations")
+            .update({ plan_status: planStatus })
+            .eq("stripe_customer_id", sub.customer as string),
+        ]);
         break;
       }
 
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        await supabaseAdmin
-          .from("businesses")
-          .update({
-            plan:                    "free",
-            plan_status:             "active",
-            stripe_subscription_id:  null,
-          })
-          .eq("stripe_customer_id", sub.customer as string);
+        await Promise.all([
+          supabaseAdmin
+            .from("businesses")
+            .update({ plan: "free", plan_status: "active", stripe_subscription_id: null })
+            .eq("stripe_customer_id", sub.customer as string),
+          supabaseAdmin
+            .from("organizations")
+            .update({ plan_status: "canceled" })
+            .eq("stripe_customer_id", sub.customer as string),
+        ]);
         break;
       }
 

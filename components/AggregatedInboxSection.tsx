@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { AlertTriangle, Calendar, Phone, MessageSquare, PhoneCall, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { type InboxItem, timeAgo, callerLabel } from "@/lib/inbox-utils";
+import { type InboxItem, timeAgo, callerLabel, getLocationColor } from "@/lib/inbox-utils";
 
 type Tab = "emergencies" | "bookings" | "callbacks";
 
-export default function InboxSection({ opendentalConnected = true }: { opendentalConnected?: boolean }) {
+type Props = {
+  orgId: string;
+  locationIds: string[];
+  opendentalConnected?: boolean;
+};
+
+export default function AggregatedInboxSection({ orgId, locationIds, opendentalConnected = true }: Props) {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("emergencies");
@@ -16,6 +22,7 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastHeartbeatRef = useRef<number>(Date.now());
+  const locationIdsKey = useMemo(() => locationIds.join(","), [locationIds]);
 
   async function fetchInbox() {
     try {
@@ -24,7 +31,7 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
       setItems(json.items ?? []);
       lastHeartbeatRef.current = Date.now();
     } catch {
-      // silently fail — dashboard still works
+      // silently fail
     } finally {
       setLoading(false);
     }
@@ -35,15 +42,35 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    try {
-      channel = supabase
-        .channel("conversations", { config: { broadcast: { self: true } } })
-        .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => {
-          fetchInbox();
-        })
-        .subscribe();
-    } catch (e) {
-      console.warn("Realtime unavailable, using polling fallback", e);
+    if (locationIds.length > 0) {
+      try {
+        // Use Postgres Changes with business_id IN filter for cross-location realtime
+        channel = supabase
+          .channel(`org-inbox-${orgId}`, { config: { broadcast: { self: true } } })
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "conversations",
+              filter: `business_id=in.(${locationIdsKey})`,
+            },
+            () => fetchInbox()
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "conversations",
+              filter: `business_id=in.(${locationIdsKey})`,
+            },
+            () => fetchInbox()
+          )
+          .subscribe();
+      } catch (e) {
+        console.warn("Realtime unavailable, using polling fallback", e);
+      }
     }
 
     pollIntervalRef.current = setInterval(() => {
@@ -55,19 +82,17 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
       if (channel) channel.unsubscribe();
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
-  }, []);
+  }, [orgId, locationIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isRotating) return;
-
     rotationIntervalRef.current = setInterval(() => {
       setActiveTab((prev) => {
         const tabs: Tab[] = ["emergencies", "bookings", "callbacks"];
-        const currentIndex = tabs.indexOf(prev);
-        return tabs[(currentIndex + 1) % tabs.length];
+        const idx = tabs.indexOf(prev);
+        return tabs[(idx + 1) % tabs.length];
       });
     }, 10000);
-
     return () => {
       if (rotationIntervalRef.current) clearInterval(rotationIntervalRef.current);
     };
@@ -88,8 +113,12 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
   }
 
   const emergencies = items.filter((i) => i.urgency === "emergency");
-  const bookings = items.filter((i) => i.appointment_requested && i.appointment_booked_status !== "confirmed" && i.urgency !== "emergency");
-  const callbacks = items.filter((i) => i.callback_requested && i.urgency !== "emergency" && !i.appointment_requested);
+  const bookings = items.filter(
+    (i) => i.appointment_requested && i.appointment_booked_status !== "confirmed" && i.urgency !== "emergency"
+  );
+  const callbacks = items.filter(
+    (i) => i.callback_requested && i.urgency !== "emergency" && !i.appointment_requested
+  );
 
   const tabs: { id: Tab; label: string; count: number; icon: React.ReactNode; color: string }[] = [
     { id: "emergencies", label: "Emergencies", count: emergencies.length, icon: <AlertTriangle size={16} />, color: "red" },
@@ -98,11 +127,11 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
   ];
 
   const totalUnresolved = items.length;
-  const activeItems = activeTab === "emergencies" ? emergencies : activeTab === "bookings" ? bookings : callbacks;
+  const activeItems =
+    activeTab === "emergencies" ? emergencies : activeTab === "bookings" ? bookings : callbacks;
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-8 mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all">
-      {/* Header */}
+    <div className="bg-white rounded-3xl border border-gray-100 p-8 mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -113,29 +142,21 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-400 font-medium mt-1">Review and resolve incoming requests</p>
+          <p className="text-sm text-gray-400 font-medium mt-1">All locations · Review and resolve incoming requests</p>
         </div>
         <div className="text-[10px] bg-gray-900 text-white font-black px-2 py-1 rounded-md uppercase tracking-[0.2em] shadow-lg flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
-          {loading ? (
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse border border-blue-200" />
-          ) : (
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
-          )}
-          Auto-syncing
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+          Live · All Locations
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex flex-wrap gap-3 mb-10">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setIsRotating(false);
-              }}
+              onClick={() => { setActiveTab(tab.id); setIsRotating(false); }}
               className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-[13px] font-bold transition-all ${
                 isActive
                   ? tab.color === "red"
@@ -148,11 +169,7 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
             >
               {tab.icon} {tab.label}
               {tab.count > 0 && (
-                <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-black ${
-                  isActive
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-200 text-gray-600"
-                }`}>
+                <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-black ${isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"}`}>
                   {tab.count}
                 </span>
               )}
@@ -164,17 +181,10 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
       {activeTab === "bookings" && !opendentalConnected && bookings.length > 0 && (
         <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 flex items-start gap-3">
           <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm font-bold text-amber-900">Connect Open Dental to auto-confirm bookings</p>
-            <p className="text-xs text-amber-700 mt-0.5">Your AI is collecting these — but can&apos;t write them into your calendar yet.</p>
-          </div>
-          <a href="/settings#integrations" className="text-xs font-bold bg-amber-600 text-white px-3 py-1.5 rounded-full hover:bg-amber-700 transition-colors shrink-0">
-            Connect →
-          </a>
+          <p className="text-sm font-bold text-amber-900">Connect Open Dental to auto-confirm bookings</p>
         </div>
       )}
 
-      {/* Items list */}
       <ul className="space-y-4">
         {loading ? (
           <li className="px-6 py-12 text-center text-gray-400 text-sm font-medium">Refreshing...</li>
@@ -187,18 +197,8 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
           activeItems.map((item) => {
             const isRed = item.urgency === "emergency";
             const isBlue = item.appointment_requested;
-            
-            const colorBlock = isRed
-              ? "bg-red-100 text-red-600"
-              : isBlue
-              ? "bg-blue-100 text-blue-600"
-              : "bg-orange-100 text-orange-600";
-              
-            const btnColor = isRed
-              ? "bg-red-600 shadow-red-600/20 hover:bg-red-700"
-              : isBlue
-              ? "bg-blue-600 shadow-blue-600/20 hover:bg-blue-700"
-              : "bg-orange-600 shadow-orange-600/20 hover:bg-orange-700";
+            const colorBlock = isRed ? "bg-red-100 text-red-600" : isBlue ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600";
+            const btnColor = isRed ? "bg-red-600 shadow-red-600/20 hover:bg-red-700" : isBlue ? "bg-blue-600 shadow-blue-600/20 hover:bg-blue-700" : "bg-orange-600 shadow-orange-600/20 hover:bg-orange-700";
 
             return (
               <li key={item.id} className="flex items-center justify-between p-5 bg-gray-50/50 border border-gray-100 rounded-[24px] hover:bg-white hover:shadow-xl transition-all group list-none">
@@ -207,12 +207,17 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
                     {item.channel === "voice" ? <PhoneCall size={18} /> : <MessageSquare size={18} />}
                   </div>
                   <div className="min-w-0 pr-4">
-                    <p className="text-[15px] font-black text-gray-900 tracking-tight truncate flex items-center gap-2">
-                       {callerLabel(item)}
-                       {isRed && <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md uppercase tracking-wide">Critical</span>}
+                    <p className="text-[15px] font-black text-gray-900 tracking-tight truncate flex items-center gap-2 flex-wrap">
+                      {callerLabel(item)}
+                      {isRed && <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md uppercase tracking-wide">Critical</span>}
+                      {item.location_name && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${getLocationColor(item.location_name)}`}>
+                          {item.location_name}
+                        </span>
+                      )}
                     </p>
                     <p className="text-[12px] text-gray-400 font-bold uppercase tracking-wider truncate mt-0.5">
-                      {item.channel} • {timeAgo(item.created_at)}
+                      {item.channel} · {timeAgo(item.created_at)}
                     </p>
                     {(item.summary || item.appointment_notes) && (
                       <p className="text-[13px] text-gray-500 mt-1.5 leading-relaxed line-clamp-2">
@@ -225,7 +230,7 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
                   <button
                     onClick={() => resolve(item.id)}
                     disabled={resolving === item.id}
-                    className={`text-[11px] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${btnColor}`}
+                    className={`text-[11px] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 ${btnColor}`}
                   >
                     {resolving === item.id ? "Resolving..." : "Resolve"}
                   </button>

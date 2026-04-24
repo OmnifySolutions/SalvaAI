@@ -95,7 +95,7 @@ const TABS = [
   { id: "integrations",  label: "Integrations",       icon: Zap },
 ];
 
-export default function SettingsForm({ business }: { business: Business }) {
+export default function SettingsForm({ business, forLocationId }: { business: Business; forLocationId?: string }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("profile");
   const [saving, setSaving] = useState(false);
@@ -217,6 +217,7 @@ export default function SettingsForm({ business }: { business: Business }) {
           notifyOnCallback: notifySettings.callback.enabled,
           voiceEnabled, voiceTone, voiceEmergencyNumber: voiceEmergencyNumber || null, voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics, voiceScenarios, openDentalServerUrl: odServerUrl || null, openDentalApiKey: odApiKey || null,
+          ...(forLocationId ? { businessId: forLocationId } : {}),
         }),
       });
       if (!res.ok) throw new Error("Failed to save");

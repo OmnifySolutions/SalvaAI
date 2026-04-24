@@ -238,3 +238,73 @@ export async function getEmergencyFlagCount(
   }
   return { count, recent };
 }
+
+export async function getOrgAppointmentStats(
+  businessIds: string[]
+): Promise<{ total: number; thisMonth: number; lastMonthDelta: number }> {
+  if (businessIds.length === 0) return { total: 0, thisMonth: 0, lastMonthDelta: 0 };
+  const results = await Promise.all(businessIds.map(getAppointmentStats));
+  return results.reduce(
+    (acc, r) => ({
+      total: acc.total + r.total,
+      thisMonth: acc.thisMonth + r.thisMonth,
+      lastMonthDelta: acc.lastMonthDelta + r.lastMonthDelta,
+    }),
+    { total: 0, thisMonth: 0, lastMonthDelta: 0 }
+  );
+}
+
+export async function getOrgCallVolumeSeries(
+  businessIds: string[]
+): Promise<Array<{ name: string; calls: number; handled: number }>> {
+  if (businessIds.length === 0) return [];
+  const allSeries = await Promise.all(businessIds.map(getCallVolumeSeries));
+  return allSeries[0].map((day, i) => {
+    const { calls, handled } = allSeries.reduce(
+      (acc, s) => {
+        const v = s[i] ?? { calls: 0, handled: 0 };
+        return { calls: acc.calls + v.calls, handled: acc.handled + v.handled };
+      },
+      { calls: 0, handled: 0 }
+    );
+    return { name: day.name, calls, handled };
+  });
+}
+
+export async function getOrgAfterHoursCount(
+  businessIds: string[]
+): Promise<{ count: number; pct: number }> {
+  if (businessIds.length === 0) return { count: 0, pct: 0 };
+  const results = await Promise.all(businessIds.map(getAfterHoursCount));
+  const count = results.reduce((sum, r) => sum + r.count, 0);
+  const avgPct = results.length > 0 ? Math.round(results.reduce((sum, r) => sum + r.pct, 0) / results.length) : 0;
+  return { count, pct: avgPct };
+}
+
+export async function getOrgEmergencyFlagCount(
+  businessIds: string[]
+): Promise<{ count: number; recent: Array<{ id: string; created_at: string; channel: string }> }> {
+  if (businessIds.length === 0) return { count: 0, recent: [] };
+  const results = await Promise.all(businessIds.map(getEmergencyFlagCount));
+  const count = results.reduce((sum, r) => sum + r.count, 0);
+  const recent = results
+    .flatMap((r) => r.recent)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 3);
+  return { count, recent };
+}
+
+export async function getOrgUrgencyBreakdown(
+  businessIds: string[]
+): Promise<{ emergency: number; urgent: number; routine: number }> {
+  if (businessIds.length === 0) return { emergency: 0, urgent: 0, routine: 0 };
+  const results = await Promise.all(businessIds.map(getUrgencyBreakdown));
+  return results.reduce(
+    (acc, r) => ({
+      emergency: acc.emergency + r.emergency,
+      urgent: acc.urgent + r.urgent,
+      routine: acc.routine + r.routine,
+    }),
+    { emergency: 0, urgent: 0, routine: 0 }
+  );
+}
