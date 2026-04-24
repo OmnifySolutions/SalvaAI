@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         metadata: { businessId: business.id, plan, billingCycle },
       },
       payment_method_collection: "always",
-      success_url: `${appUrl}/payment-success`,
+      success_url: `${appUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/pricing`,
       metadata: { businessId: business.id, plan, billingCycle },
     });

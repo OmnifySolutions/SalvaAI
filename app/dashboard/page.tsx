@@ -25,6 +25,7 @@ import InboxSection from "@/components/InboxSection";
 import Logo from "@/components/Logo";
 import SetupChecklist from "@/components/SetupChecklist";
 import DashboardOnboardingFlag from "@/components/DashboardOnboardingFlag";
+import PlanBadge from "@/components/PlanBadge";
 import { Suspense } from "react";
 import type { LucideIcon } from "lucide-react";
 
@@ -90,6 +91,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-600">
+          <PlanBadge plan={business.plan ?? "free"} planStatus={business.plan_status} />
           <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">{business.name}</span>
           <SignOutButton />
         </div>

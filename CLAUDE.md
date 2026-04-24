@@ -29,7 +29,7 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 ## Current State
 
 **Latest completed work** (as of 2026-04-24): 
-- **Stripe post-payment redirect fix**: Clerk session was being lost during cross-domain Stripe redirect. Created public `/payment-success` page that waits for Clerk auth to load client-side, then routes to `/dashboard` if signed in or `/sign-in` if not. Updated checkout success_url to point there. Added `/payment-success` to proxy.ts public routes.
+- **Stripe plan activation fix**: Webhook unreliability bypassed — payment-success page now reads `session_id` from Stripe redirect URL, calls `/api/stripe/verify-session` to update Supabase directly (no webhook required). Created `PlanBadge` component showing plan tier + trial status in dashboard nav.
 - **Checkout bug fix**: Added error handling to `/api/stripe/checkout` endpoint — was returning generic 500 without logging actual errors
 - **PRICING OVERHAUL (7 of 8 tasks)**: Complete redesign from Free/$69/$219/$749 to Basic/$65-79 | Pro/$249-309 | Growth/$449-559 | Multi/$849-1049 with annual/monthly toggle
   - Pricing page refactor with 4 tiers, expanded feature lists (8+ per tier), new hero "Transparent pricing. No contracts."
