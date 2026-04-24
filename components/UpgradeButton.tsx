@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   plan?: "basic" | "pro" | "growth" | "multi";
@@ -18,9 +19,12 @@ export default function UpgradeButton({
   children,
 }: Props) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function handleClick() {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(
         mode === "portal" ? "/api/stripe/portal" : "/api/stripe/checkout",
@@ -30,21 +34,38 @@ export default function UpgradeButton({
           body: JSON.stringify(mode === "checkout" ? { plan, billingCycle } : {}),
         }
       );
+
+      if (res.status === 401) {
+        router.push(`/sign-in?redirect_url=/pricing`);
+        return;
+      }
+
+      if (res.status === 404) {
+        router.push("/onboarding");
+        return;
+      }
+
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error("Stripe redirect error:", data.error);
+        setError(data.error ?? "Something went wrong. Please try again.");
         setLoading(false);
       }
     } catch {
+      setError("Network error. Please try again.");
       setLoading(false);
     }
   }
 
   return (
-    <button onClick={handleClick} disabled={loading} className={className}>
-      {loading ? "Loading…" : children}
-    </button>
+    <div className="flex flex-col items-center gap-1">
+      <button onClick={handleClick} disabled={loading} className={className}>
+        {loading ? "Loading…" : children}
+      </button>
+      {error && (
+        <p className="text-red-500 text-xs text-center max-w-xs">{error}</p>
+      )}
+    </div>
   );
 }
