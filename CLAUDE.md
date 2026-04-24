@@ -28,7 +28,7 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-24):
+**Latest completed work** (as of 2026-04-24, updated for custom checkout):
 - **Full Stripe payment flow hardened**: 6 fixes across the checkout pipeline:
   1. `NEXT_PUBLIC_APP_URL` missing → Stripe rejected success/cancel URLs (no scheme)
   2. Clerk session lost after Stripe cross-domain redirect → created public `/payment-success` page that waits for Clerk client-side, then verifies session and routes to dashboard
@@ -38,6 +38,13 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
   6. `UpgradeButton` silently swallowed errors → now shows visible error, redirects to /sign-in (401) or /onboarding (404)
 - **PlanBadge** component in dashboard nav: shows active plan tier with "Trial" label, Upgrade link for free users
 - **Checkout bug fix**: Added error handling to `/api/stripe/checkout` endpoint — was returning generic 500 without logging actual errors
+- **Custom Checkout Page** (2026-04-24): Built branded two-column `/checkout?plan=X&billing=Y` page using Stripe Payment Element:
+  - Left: Plan summary (dark gray-900 card, features, trial callout, pricing)
+  - Right: Stripe Payment Element (embedded card form, brand-blue CTA button)
+  - Flow: logged-in free users on pricing → `/checkout` → creates SetupIntent → confirms payment → `/payment-success?subscription_id=` → activates plan
+  - New endpoints: `POST /api/stripe/create-subscription-intent` (creates subscription with trial, returns clientSecret), `POST /api/stripe/verify-subscription` (public, activates plan in DB)
+  - Replaced hosted Stripe Checkout redirect with in-app flow for brand continuity
+  - Code quality fixes: URL encoding bug in auth redirect, AbortController for fetch, parallel auth() calls, merged state objects, extracted duplicate CTA logic
 - **PRICING OVERHAUL (7 of 8 tasks)**: Complete redesign from Free/$69/$219/$749 to Basic/$65-79 | Pro/$249-309 | Growth/$449-559 | Multi/$849-1049 with annual/monthly toggle
   - Pricing page refactor with 4 tiers, expanded feature lists (8+ per tier), new hero "Transparent pricing. No contracts."
   - Database migration: added `billing_cycle`, `minutes_used_this_period`, `minutes_limit_monthly` columns

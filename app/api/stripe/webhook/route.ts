@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         const priceId = subscription.items.data[0].price.id;
         const plan    = planFromPriceId(priceId);
 
-        await supabaseAdmin
+        const { error: dbErr } = await supabaseAdmin
           .from("businesses")
           .update({
             stripe_customer_id:      session.customer as string,
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
             plan_status: planStatusFromStripe(subscription.status),
           })
           .eq("id", businessId);
+        if (dbErr) throw new Error(`DB update failed: ${dbErr.message}`);
         break;
       }
 

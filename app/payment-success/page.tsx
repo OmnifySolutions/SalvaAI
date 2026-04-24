@@ -53,8 +53,24 @@ function PaymentSuccessInner() {
   async function finalize() {
     setFailed(false);
     const sessionId = params.get("session_id");
+    const subscriptionId = params.get("subscription_id");
 
-    if (sessionId) {
+    if (subscriptionId) {
+      try {
+        const res = await fetch("/api/stripe/verify-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscriptionId }),
+        });
+        if (!res.ok) {
+          setFailed(true);
+          return;
+        }
+      } catch {
+        setFailed(true);
+        return;
+      }
+    } else if (sessionId) {
       try {
         const res = await fetch("/api/stripe/verify-session", {
           method: "POST",

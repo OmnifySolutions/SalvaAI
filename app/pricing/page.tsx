@@ -6,121 +6,12 @@ import { Check, X } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import UpgradeButton from "@/components/UpgradeButton";
 import Logo from "@/components/Logo";
+import { PLANS } from "@/lib/plans";
+import type { PlanKey } from "@/lib/plans";
 
 // Metadata is now in layout.tsx since this is a client component
 
-type PlanType = "basic" | "pro" | "growth" | "multi";
-
-interface Plan {
-  name: string;
-  planKey: PlanType;
-  annualPrice: string;
-  monthlyPrice: string;
-  period: string;
-  description: string;
-  features: string[];
-  cta: string;
-  ctaLoggedIn: string;
-  href: string;
-  hrefLoggedIn: string;
-  highlight: boolean;
-  badge: string | null;
-}
-
-const plans: Plan[] = [
-  {
-    name: "Basic",
-    planKey: "basic",
-    annualPrice: "$65",
-    monthlyPrice: "$79",
-    period: "/ month",
-    description: "Website AI chat for growing practices.",
-    features: [
-      "Unlimited AI chat on your website",
-      "Trained on your FAQs, hours & services",
-      "24/7 coverage — never sleeps",
-      "Custom AI name & greeting",
-      "Zero SalvaAI branding on your widget",
-      "Do's & Don'ts behavior controls",
-      "Conversation history & transcripts",
-      "HIPAA-safe — no PHI stored",
-      "Email support",
-    ],
-    cta: "Start 14-day free trial",
-    ctaLoggedIn: "Upgrade to this plan",
-    href: "/sign-up?plan=basic",
-    hrefLoggedIn: "/dashboard?upgrade=basic",
-    highlight: false,
-    badge: null,
-  },
-  {
-    name: "Pro",
-    planKey: "pro",
-    annualPrice: "$249",
-    monthlyPrice: "$309",
-    period: "/ month",
-    description: "Never miss a patient call with 24/7 AI voice answering.",
-    features: [
-      "24/7 AI voice phone answering",
-      "750 voice minutes / month (≈250 calls at 3 min average)",
-      "Custom AI voice selection",
-      "8 AI behavior toggles (instant booking, after-hours, insurance, emergency, pricing, payment plans)",
-      "Missed-call inbox — emergencies, bookings, callbacks",
-      "Real-time dashboard notifications",
-      "Multi-channel alerts — SMS, email, WhatsApp",
-      "Open Dental integration",
-      "Priority support",
-    ],
-    cta: "Start 14-day free trial",
-    ctaLoggedIn: "Upgrade to this plan",
-    href: "/sign-up?plan=pro",
-    hrefLoggedIn: "/dashboard?upgrade=pro",
-    highlight: true,
-    badge: "Most popular",
-  },
-  {
-    name: "Growth",
-    planKey: "growth",
-    annualPrice: "$449",
-    monthlyPrice: "$559",
-    period: "/ month",
-    description: "For high-volume single practices that scale fast.",
-    features: [
-      "Everything in Pro",
-      "2,000 voice minutes / month (≈650 calls at 3 min average)",
-      "Dedicated onboarding call",
-      "Priority email support",
-    ],
-    cta: "Start 14-day free trial",
-    ctaLoggedIn: "Upgrade to this plan",
-    href: "/sign-up?plan=growth",
-    hrefLoggedIn: "/dashboard?upgrade=growth",
-    highlight: false,
-    badge: null,
-  },
-  {
-    name: "Multi-Practice",
-    planKey: "multi",
-    annualPrice: "$849",
-    monthlyPrice: "$1,049",
-    period: "/ month",
-    description: "All locations, one platform — 57% cheaper per location than competitors.",
-    features: [
-      "Everything in Growth",
-      "Up to 5 practice locations",
-      "750 voice minutes per location (3,750 total)",
-      "Centralized multi-location dashboard",
-      "Per-location AI configuration",
-      "Consolidated billing",
-    ],
-    cta: "Start 14-day free trial",
-    ctaLoggedIn: "Upgrade to this plan",
-    href: "/sign-up?plan=multi",
-    hrefLoggedIn: "/dashboard?upgrade=multi",
-    highlight: false,
-    badge: "Best value",
-  },
-];
+type PlanType = PlanKey;
 
 const comparison = [
   {
@@ -207,6 +98,26 @@ const planTiers: Record<PlanType | "free", number> = {
   growth: 3,
   multi: 4,
 };
+
+function computePlanCTA(
+  planKey: PlanType,
+  currentPlan: PlanType | "free",
+  isLoggedIn: boolean,
+  isLoaded: boolean,
+  planCta: string,
+  planCtaLoggedIn: string,
+) {
+  const isCurrent = isLoaded && isLoggedIn && currentPlan === planKey;
+  const isDowngrade = isLoaded && isLoggedIn && planTiers[planKey] < planTiers[currentPlan];
+  const useUpgrade = isLoaded && isLoggedIn && !isCurrent && currentPlan !== "free";
+  const useCheckout = isLoaded && isLoggedIn && !isCurrent && currentPlan === "free";
+  let cta = planCta;
+  if (isCurrent) cta = "Current plan";
+  else if (isLoggedIn && currentPlan !== "free") {
+    cta = isDowngrade ? "Downgrade to this plan" : planCtaLoggedIn;
+  }
+  return { isCurrent, isDowngrade, useUpgrade, useCheckout, cta };
+}
 
 export default function PricingPage() {
   const { userId } = useAuth();
@@ -334,19 +245,12 @@ export default function PricingPage() {
 
         {/* Plans — Basic / Pro / Growth row (3 columns) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
-          {plans.slice(0, 3).map((plan) => {
-            const isCurrent = isLoaded && isLoggedIn && currentPlan === plan.planKey;
-            const currentTier = planTiers[currentPlan];
-            const planTier = planTiers[plan.planKey];
-            const isDowngrade = isLoaded && isLoggedIn && planTier < currentTier;
-            const useUpgrade = isLoaded && isLoggedIn && !isCurrent;
-            let cta = plan.cta;
-            if (isCurrent) cta = "Current plan";
-            else if (isLoggedIn && currentPlan !== "free") {
-              cta = isDowngrade ? "Downgrade to this plan" : plan.ctaLoggedIn;
-            }
+          {PLANS.slice(0, 3).map((plan) => {
+            const { isCurrent, useUpgrade, useCheckout, cta } = computePlanCTA(
+              plan.planKey, currentPlan, isLoggedIn, isLoaded, plan.cta, plan.ctaLoggedIn,
+            );
             const href = isLoggedIn
-              ? plan.hrefLoggedIn
+              ? `/checkout?plan=${plan.planKey}&billing=${billingCycle}`
               : `/sign-up?plan=${plan.planKey}&billing=${billingCycle}`;
             const displayPrice = billingCycle === "annual" ? plan.annualPrice : plan.monthlyPrice;
 
@@ -407,6 +311,17 @@ export default function PricingPage() {
                     >
                       {cta}
                     </UpgradeButton>
+                  ) : useCheckout ? (
+                    <Link
+                      href={`/checkout?plan=${plan.planKey}&billing=${billingCycle}`}
+                      className={`block text-center py-4 rounded-xl text-sm font-bold transition-colors shadow-lg ${
+                        plan.highlight
+                          ? "bg-white text-gray-900 hover:bg-gray-100 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                          : "bg-gray-900 text-white hover:bg-gray-700"
+                      }`}
+                    >
+                      {plan.cta}
+                    </Link>
                   ) : (
                     <Link
                       href={href}
@@ -436,19 +351,12 @@ export default function PricingPage() {
 
         {/* Multi-Practice — full-width horizontal card */}
         {(() => {
-          const multiPlan = plans[3]; // Multi plan
-          const multiIsCurrent = isLoaded && isLoggedIn && currentPlan === multiPlan.planKey;
-          const currentTier = planTiers[currentPlan];
-          const multiTier = planTiers[multiPlan.planKey];
-          const multiIsDowngrade = isLoaded && isLoggedIn && multiTier < currentTier;
-          const multiUseUpgrade = isLoaded && isLoggedIn && !multiIsCurrent;
-          let multiCta = multiPlan.cta;
-          if (multiIsCurrent) multiCta = "Current plan";
-          else if (isLoggedIn && currentPlan !== "free") {
-            multiCta = multiIsDowngrade ? "Downgrade to this plan" : multiPlan.ctaLoggedIn;
-          }
+          const multiPlan = PLANS[3];
+          const { isCurrent: multiIsCurrent, useUpgrade: multiUseUpgrade, useCheckout: multiUseCheckout, cta: multiCta } = computePlanCTA(
+            multiPlan.planKey, currentPlan, isLoggedIn, isLoaded, multiPlan.cta, multiPlan.ctaLoggedIn,
+          );
           const multiHref = isLoggedIn
-            ? multiPlan.hrefLoggedIn
+            ? `/checkout?plan=multi&billing=${billingCycle}`
             : `/sign-up?plan=multi&billing=${billingCycle}`;
           const displayPrice = billingCycle === "annual" ? multiPlan.annualPrice : multiPlan.monthlyPrice;
 
@@ -491,6 +399,13 @@ export default function PricingPage() {
                   >
                     {multiCta}
                   </UpgradeButton>
+                ) : multiUseCheckout ? (
+                  <Link
+                    href={`/checkout?plan=multi&billing=${billingCycle}`}
+                    className="px-8 py-4 rounded-xl text-sm font-bold text-center bg-white text-gray-900 hover:bg-gray-100 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                  >
+                    {multiPlan.cta}
+                  </Link>
                 ) : (
                   <Link
                     href={multiHref}
