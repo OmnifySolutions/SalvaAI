@@ -67,7 +67,8 @@
       "WebFetch(domain:www.dentalbase.ai)",
       "Bash(scoop install *)",
       "Bash(choco install *)",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "PowerShell(git *)"
     ]
   }
 }
