@@ -30,7 +30,6 @@ import type { LucideIcon } from "lucide-react";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
 
   // Get this user's business
   const { data: business } = await supabaseAdmin
