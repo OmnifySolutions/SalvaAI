@@ -29,7 +29,7 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 ## Current State
 
 **Latest completed work** (as of 2026-04-24): 
-- **Stripe redirect loop fix**: Added Clerk middleware (`middleware.ts`) to protect `/dashboard` and `/settings` routes. Users were being redirected to login after Stripe checkout due to missing auth middleware. Now Clerk validates session at middleware level before page render, fixing the redirect loop.
+- **Stripe post-payment redirect fix**: Clerk session was being lost during cross-domain Stripe redirect. Created public `/payment-success` page that waits for Clerk auth to load client-side, then routes to `/dashboard` if signed in or `/sign-in` if not. Updated checkout success_url to point there. Added `/payment-success` to proxy.ts public routes.
 - **Checkout bug fix**: Added error handling to `/api/stripe/checkout` endpoint — was returning generic 500 without logging actual errors
 - **PRICING OVERHAUL (7 of 8 tasks)**: Complete redesign from Free/$69/$219/$749 to Basic/$65-79 | Pro/$249-309 | Growth/$449-559 | Multi/$849-1049 with annual/monthly toggle
   - Pricing page refactor with 4 tiers, expanded feature lists (8+ per tier), new hero "Transparent pricing. No contracts."

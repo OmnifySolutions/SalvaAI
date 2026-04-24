@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         .from("businesses")
         .update({ plan, billing_cycle: billingCycle })
         .eq("id", business.id);
-      return Response.json({ url: `${appUrl}/dashboard?upgraded=true` });
+      return Response.json({ url: `${appUrl}/payment-success` });
     }
 
     // ── New subscription via Stripe Checkout ─────────────────────────────────
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         metadata: { businessId: business.id, plan, billingCycle },
       },
       payment_method_collection: "always",
-      success_url: `${appUrl}/dashboard?upgraded=true`,
+      success_url: `${appUrl}/payment-success`,
       cancel_url: `${appUrl}/pricing`,
       metadata: { businessId: business.id, plan, billingCycle },
     });
