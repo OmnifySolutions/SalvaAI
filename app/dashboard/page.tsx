@@ -36,10 +36,12 @@ import PlanBadge from "@/components/PlanBadge";
 import LocationSwitcher from "@/components/LocationSwitcher";
 import LocationCard from "@/components/LocationCard";
 import NotificationBell from "@/components/NotificationBell";
+import MinuteUsageCard from "@/components/MinuteUsageCard";
 import { Suspense } from "react";
 import type { LucideIcon } from "lucide-react";
 import { getOrganization, getOrgLocations } from "@/lib/organizations";
 import type { Business } from "@/lib/supabase";
+import { ArrowRight } from "lucide-react";
 
 type SearchParams = Promise<Record<string, string | undefined>>;
 
@@ -55,6 +57,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     .single();
 
   if (!business) redirect("/onboarding");
+
+  // Get billing period end from database
+  const billingPeriodEnd = business.current_period_end ? new Date(business.current_period_end).toISOString() : null;
 
   // Multi-practice: load org + all locations
   let org = null;
@@ -193,6 +198,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           <InboxSection opendentalConnected={!!activeBusiness.opendental_api_key} />
         )}
 
+        {/* Voice Minutes Usage — page-wide, sleek card */}
+        {activeBusiness.plan !== "basic" && (
+          <div className="mb-8">
+            <MinuteUsageCard businessId={activeBusiness.id} billingPeriodEnd={billingPeriodEnd} />
+          </div>
+        )}
+
         {/* Stats Row */}
         <DashboardStats
           allConversations={allConversations ?? []}
@@ -243,77 +255,104 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            {/* Recent Activity Feed */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">Recent Activity Stream</h2>
-              </div>
-              <ul className="divide-y divide-gray-50">
-                {!feedConversations || feedConversations.length === 0 ? (
-                  <li className="px-6 py-10 text-center text-gray-400 text-sm">
-                    No conversations yet. Your feed will populate automatically.
-                  </li>
-                ) : (
-                  feedConversations.map((conv) => (
-                    <li key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors cursor-pointer">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          conv.channel === "voice" ? "bg-orange-50 text-orange-600" : "bg-blue-50 text-blue-600"
-                        }`}>
-                          {conv.channel === "voice" ? <PhoneCall size={18} /> : <MessageSquare size={18} />}
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900 capitalize flex items-center gap-2">
-                            {conv.channel} Inquiry
-                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md ${
-                              conv.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                            }`}>{conv.status}</span>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            {new Date(conv.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-400">View →</div>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
+        {/* Recent Activity Feed */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+          <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="text-lg font-black text-gray-900 tracking-tight">Recent Activity Stream</h2>
           </div>
+          <ul className="divide-y divide-gray-50">
+            {!feedConversations || feedConversations.length === 0 ? (
+              <li className="px-6 py-10 text-center text-gray-400 text-sm">
+                No conversations yet. Your feed will populate automatically.
+              </li>
+            ) : (
+              feedConversations.map((conv) => (
+                <li key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      conv.channel === "voice" ? "bg-orange-50 text-orange-600" : "bg-blue-50 text-blue-600"
+                    }`}>
+                      {conv.channel === "voice" ? <PhoneCall size={18} /> : <MessageSquare size={18} />}
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900 capitalize flex items-center gap-2">
+                        {conv.channel} Inquiry
+                        <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md ${
+                          conv.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                        }`}>{conv.status}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {new Date(conv.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-400">View →</div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
 
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {activeBusiness.plan === "free" && (
-              <div className="bg-gray-900 rounded-3xl border border-gray-800 p-8 text-white shadow-2xl relative overflow-hidden group">
-                <div className="absolute -top-10 -right-10 w-48 h-48 bg-blue-600 rounded-full opacity-30 blur-3xl group-hover:opacity-40 transition-opacity"></div>
-                <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center mb-5 border border-blue-500/30">
-                  <PhoneCall size={24} />
+        {/* Bottom CTA Cards — Clean Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {activeBusiness.plan === "free" && (
+            <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8 text-white shadow-xl relative overflow-hidden group">
+              <div className="absolute -top-10 -right-10 w-48 h-48 bg-blue-600 rounded-full opacity-30 blur-3xl group-hover:opacity-40 transition-opacity"></div>
+              <div className="relative flex items-start justify-between">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                    <PhoneCall size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-2xl mb-2 tracking-tight">Unlock Voice AI</h3>
+                    <p className="text-blue-100/70 text-sm leading-relaxed">
+                      Start answering calls 24/7. Upgrade to Pro to enable your Voice Agent and OpenDental sync.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-black text-2xl mb-3 tracking-tight">Unlock Voice AI</h3>
-                <p className="text-blue-100/70 text-sm mb-6 leading-relaxed">
-                  Start answering calls 24/7. Upgrade to Pro to enable your Voice Agent and OpenDental sync.
-                </p>
-                <Link href="/pricing" className="w-full text-sm bg-white hover:bg-gray-100 text-gray-900 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex justify-center items-center gap-2">
+                <Link href="/pricing" className="flex-shrink-0 ml-4 text-sm bg-white hover:bg-gray-100 text-gray-900 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap">
                   View Plans →
                 </Link>
               </div>
-            )}
+            </div>
+          )}
 
-            {activeBusiness.plan === "pro" && !activeBusiness.opendental_api_key && (
-              <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-                <h3 className="font-bold text-blue-900 text-sm mb-2">Connect OpenDental</h3>
-                <p className="text-blue-700/80 text-xs mb-4">
+          {activeBusiness.plan !== "free" && activeBusiness.plan !== "multi" && (
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 p-6 shadow-md hover:shadow-lg transition-shadow flex flex-col">
+              <div className="mb-4 flex-1">
+                <h3 className="text-lg font-black text-orange-900 tracking-tight mb-1">Ready to scale?</h3>
+                <p className="text-orange-700/80 text-sm">
+                  {activeBusiness.plan === "basic" && "Unlock voice answering with Pro. Start at $249/mo."}
+                  {activeBusiness.plan === "pro" && "Handle 2,700+ more minutes with Growth. Start at $449/mo."}
+                  {activeBusiness.plan === "growth" && "Manage 5 locations with Multi-Practice. Start at $849/mo."}
+                </p>
+              </div>
+              <Link href="/pricing" className="w-full text-sm bg-orange-600 hover:bg-orange-700 text-white py-2.5 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
+                Explore Plans <ArrowRight size={14} />
+              </Link>
+            </div>
+          )}
+
+          {activeBusiness.plan === "pro" && !activeBusiness.opendental_api_key && (
+            <div className="bg-gradient-to-br from-blue-50 to-blue-50/30 rounded-2xl border border-blue-100 p-6 relative overflow-hidden group flex flex-col">
+              {/* OpenDental branding background */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-3xl -mr-12 -mt-12 group-hover:bg-blue-500/10 transition-colors" />
+              <div className="absolute -bottom-6 -left-6 opacity-5 text-6xl font-black text-blue-600">◆</div>
+
+              <div className="relative flex-1 flex flex-col">
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-lg font-black text-blue-900 tracking-tight">Connect OpenDental</h3>
+                  <span className="text-[11px] font-bold text-blue-600 bg-blue-100/60 px-2.5 py-1 rounded-full">OpenDental</span>
+                </div>
+                <p className="text-blue-700/80 text-xs mb-4 flex-1">
                   Your AI agent cannot book appointments yet. Connect your PMS to enable live calendar sync.
                 </p>
-                <Link href="/settings#practice-management" className="text-xs font-bold bg-white text-blue-600 px-4 py-2 rounded-lg shadow-sm block text-center">
-                  Connect Now
+                <Link href="/settings#practice-management" className="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold transition-colors flex justify-center items-center gap-2">
+                  Connect Now <ArrowRight size={14} />
                 </Link>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

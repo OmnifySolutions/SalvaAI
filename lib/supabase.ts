@@ -48,6 +48,7 @@ export type Business = {
   ai_features: string[] | null;
   voice_enabled: boolean;
   twilio_sid: string | null;
+  current_period_end: string | null;
   // Multi-practice fields
   organization_id: string | null;
   is_primary_location: boolean;

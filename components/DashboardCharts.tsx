@@ -146,7 +146,7 @@ function ChartPanel({ title, subtitle, badge, children }: ChartPanelProps) {
     <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-lg font-black text-gray-900 tracking-tight">{title}</h3>
           {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
         {badge && <span className="text-xs text-gray-400">{badge}</span>}
