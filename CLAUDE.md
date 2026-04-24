@@ -28,8 +28,15 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-24): 
-- **Stripe plan activation fix**: Webhook unreliability bypassed — payment-success page now reads `session_id` from Stripe redirect URL, calls `/api/stripe/verify-session` to update Supabase directly (no webhook required). Created `PlanBadge` component showing plan tier + trial status in dashboard nav.
+**Latest completed work** (as of 2026-04-24):
+- **Full Stripe payment flow hardened**: 6 fixes across the checkout pipeline:
+  1. `NEXT_PUBLIC_APP_URL` missing → Stripe rejected success/cancel URLs (no scheme)
+  2. Clerk session lost after Stripe cross-domain redirect → created public `/payment-success` page that waits for Clerk client-side, then verifies session and routes to dashboard
+  3. `verify-session` was Clerk-gated → removed auth, route made public; businessId in session metadata is sufficient proof
+  4. `payment-success` ignored verify-session failures → now shows retry/error UI if activation fails
+  5. Stale live-mode Stripe IDs in Supabase → checkout now validates customer/subscription IDs against current Stripe mode, auto-resets if wrong mode
+  6. `UpgradeButton` silently swallowed errors → now shows visible error, redirects to /sign-in (401) or /onboarding (404)
+- **PlanBadge** component in dashboard nav: shows active plan tier with "Trial" label, Upgrade link for free users
 - **Checkout bug fix**: Added error handling to `/api/stripe/checkout` endpoint — was returning generic 500 without logging actual errors
 - **PRICING OVERHAUL (7 of 8 tasks)**: Complete redesign from Free/$69/$219/$749 to Basic/$65-79 | Pro/$249-309 | Growth/$449-559 | Multi/$849-1049 with annual/monthly toggle
   - Pricing page refactor with 4 tiers, expanded feature lists (8+ per tier), new hero "Transparent pricing. No contracts."
