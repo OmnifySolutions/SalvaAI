@@ -40,7 +40,7 @@ export default async function MinuteUsageCard({ businessId, billingPeriodEnd }: 
   }
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 mb-6">
+    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 mb-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-start gap-3">

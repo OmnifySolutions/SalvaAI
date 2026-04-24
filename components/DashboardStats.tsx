@@ -64,13 +64,13 @@ function StatCard({
   color: keyof typeof colorMap;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
       <div className="flex justify-between items-start mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[color]}`}>
           <Icon size={20} strokeWidth={2} />
         </div>
       </div>
-      <div className="text-3xl font-bold text-gray-900 tracking-tight">{value}</div>
+      <div className="text-3xl font-black text-gray-900 tracking-tight">{value}</div>
       <div className="text-sm font-medium text-gray-500 mt-1">{label}</div>
       <div className="mt-4 text-xs font-semibold text-gray-400 border-t border-gray-50 pt-3">
         {trend}

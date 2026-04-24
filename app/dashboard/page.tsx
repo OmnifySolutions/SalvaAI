@@ -256,7 +256,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         )}
 
         {/* Recent Activity Feed */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8 hover:shadow-md hover:-translate-y-1 transition-all duration-200">
           <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-black text-gray-900 tracking-tight">Recent Activity Stream</h2>
           </div>
@@ -296,7 +296,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         {/* Bottom CTA Cards — Clean Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {activeBusiness.plan === "free" && (
-            <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8 text-white shadow-xl relative overflow-hidden group">
+            <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8 text-white shadow-xl relative overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-200">
               <div className="absolute -top-10 -right-10 w-48 h-48 bg-blue-600 rounded-full opacity-30 blur-3xl group-hover:opacity-40 transition-opacity"></div>
               <div className="relative flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1">
@@ -318,7 +318,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           )}
 
           {activeBusiness.plan !== "free" && activeBusiness.plan !== "multi" && (
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 p-6 shadow-md hover:shadow-lg transition-shadow flex flex-col">
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 p-6 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col">
               <div className="mb-4 flex-1">
                 <h3 className="text-lg font-black text-orange-900 tracking-tight mb-1">Ready to scale?</h3>
                 <p className="text-orange-700/80 text-sm">
@@ -334,7 +334,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           )}
 
           {activeBusiness.plan === "pro" && !activeBusiness.opendental_api_key && (
-            <div className="bg-gradient-to-br from-blue-50 to-blue-50/30 rounded-2xl border border-blue-100 p-6 relative overflow-hidden group flex flex-col">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-50/30 rounded-2xl border border-blue-100 p-6 relative overflow-hidden group flex flex-col hover:shadow-md hover:-translate-y-1 transition-all duration-200">
               {/* OpenDental branding background */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-3xl -mr-12 -mt-12 group-hover:bg-blue-500/10 transition-colors" />
               <div className="absolute -bottom-6 -left-6 opacity-5 text-6xl font-black text-blue-600">◆</div>
@@ -378,13 +378,13 @@ const colorMap: Record<StatWidgetProps["color"], string> = {
 
 function StatWidget({ icon: Icon, label, value, trend, color }: StatWidgetProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
       <div className="flex justify-between items-start mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[color]}`}>
           <Icon size={20} strokeWidth={2} />
         </div>
       </div>
-      <div className="text-3xl font-bold text-gray-900 tracking-tight">{value}</div>
+      <div className="text-3xl font-black text-gray-900 tracking-tight">{value}</div>
       <div className="text-sm font-medium text-gray-500 mt-1">{label}</div>
       <div className="mt-4 text-xs font-semibold text-gray-400 border-t border-gray-50 pt-3">
         {trend}

@@ -68,7 +68,8 @@
       "Bash(scoop install *)",
       "Bash(choco install *)",
       "Bash(npx supabase *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "Bash(supabase migration *)"
     ]
   }
 }

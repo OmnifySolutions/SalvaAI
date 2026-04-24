@@ -143,7 +143,7 @@ type ChartPanelProps = {
 
 function ChartPanel({ title, subtitle, badge, children }: ChartPanelProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-lg font-black text-gray-900 tracking-tight">{title}</h3>

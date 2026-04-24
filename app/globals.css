@@ -115,3 +115,12 @@ body {
   animation: soft-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   display: inline-flex;
 }
+
+@keyframes soft-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-soft-flicker {
+  animation: soft-flicker 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

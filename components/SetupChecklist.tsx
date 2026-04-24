@@ -84,7 +84,7 @@ export default function SetupChecklist({ business }: Props) {
   if (allDone || dismissed) return null;
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-5 py-4 flex items-center gap-6 mb-6">
+    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-5 py-4 flex items-center gap-6 mb-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200">
       {/* Label + progress */}
       <div className="flex items-center gap-3 shrink-0">
         <div className="flex flex-col gap-1">

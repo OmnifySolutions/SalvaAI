@@ -101,7 +101,7 @@ export default function InboxSection({ opendentalConnected = true }: { opendenta
   const activeItems = activeTab === "emergencies" ? emergencies : activeTab === "bookings" ? bookings : callbacks;
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-8 mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all">
+    <div className="bg-white rounded-3xl border border-gray-100 p-8 mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.05)] hover:-translate-y-1 transition-all duration-200">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>

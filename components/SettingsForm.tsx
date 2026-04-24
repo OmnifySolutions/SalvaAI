@@ -89,9 +89,9 @@ const TABS = [
   { id: "services",      label: "Services",           icon: LayoutList },
   { id: "ai",           label: "AI Configuration",   icon: Bot },
   { id: "features",     label: "Features",            icon: Sparkles },
-  { id: "notifications", label: "Notifications",      icon: Bell },
   { id: "voice",        label: "Voice Settings",      icon: PhoneCall },
   { id: "dos_donts",    label: "Do's & Don'ts",       icon: ToggleLeft },
+  { id: "notifications", label: "Notifications",      icon: Bell },
   { id: "integrations",  label: "Integrations",       icon: Zap },
 ];
 
@@ -259,7 +259,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         {/* PROFILE TAB */}
         <div className={activeTab === "profile" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5">
-            <h2 className="text-2xl font-bold text-gray-900">Practice Profile</h2>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Practice Profile</h2>
             <p className="text-gray-500 text-sm mt-1">General information about your office.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
@@ -288,7 +288,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         <div className={activeTab === "services" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5 flex justify-between items-end">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Services</h2>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Services</h2>
               <p className="text-gray-500 text-sm mt-1">Define the treatments you offer and how long each one takes. Duration is used to book the right time slot in Open Dental.</p>
             </div>
             <button
@@ -371,12 +371,12 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         {/* AI CONFIG TAB */}
         <div className={activeTab === "ai" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5">
-            <h2 className="text-2xl font-bold text-gray-900">AI Personality</h2>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">AI Personality</h2>
             <p className="text-gray-500 text-sm mt-1">Define how your agent responds and answers FAQs.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-               <Field fixedHintHeight label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+               <Field label="Agent Name"><input type="text" value={aiName} onChange={e => setAiName(e.target.value)} className={inputCls} /></Field>
                <Field label="Custom Greeting"><input type="text" value={aiGreeting} onChange={e => setAiGreeting(e.target.value)} className={inputCls} placeholder={buildDefaultGreeting(aiName, name)} /></Field>
             </div>
             <Field label="System Prompt" hint="Direct operating instructions for the LLM">
@@ -385,7 +385,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
 
             <div className="pt-6 mt-6 border-t border-gray-100">
                <div className="flex justify-between items-center mb-2">
-                 <h3 className="font-semibold text-gray-900">Patient FAQs</h3>
+                 <h3 className="text-sm font-bold text-gray-700">Patient FAQs</h3>
                  <button type="button" onClick={addFaq} className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold">+ Add FAQ</button>
                </div>
                <p className="text-sm text-gray-500 mb-4">Add your practice&apos;s most common questions and answers below. Your AI will use these to respond accurately to patients.</p>
@@ -406,16 +406,18 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         <div className={activeTab === "voice" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5 flex justify-between items-end">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Voice Calling</h2>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Voice Calling</h2>
               <p className="text-gray-500 text-sm mt-1">Configure your telephone and routing.</p>
             </div>
             {hasVoice && (
-              <label className="flex items-center gap-3 cursor-pointer">
-                <span className="text-sm font-medium text-gray-700">Accept Calls</span>
-                <div className={`relative w-12 h-6 rounded-full transition-colors ${voiceEnabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                  <input type="checkbox" className="sr-only" checked={voiceEnabled} onChange={() => setVoiceEnabled(!voiceEnabled)} />
-                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-sm ${voiceEnabled ? 'left-7' : 'left-1'}`} />
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="sr-only" checked={voiceEnabled} onChange={() => setVoiceEnabled(!voiceEnabled)} />
+                <div className={`relative w-14 h-7 rounded-full transition-all duration-200 shadow-inner ${voiceEnabled ? 'bg-blue-600 shadow-blue-200' : 'bg-gray-200'}`}>
+                  <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-200 shadow-md ${voiceEnabled ? 'left-8' : 'left-1'}`} />
                 </div>
+                <span className={`text-xs font-black tracking-tight transition-colors ${voiceEnabled ? 'text-blue-600 animate-soft-flicker' : 'text-gray-400'}`}>
+                  {voiceEnabled ? 'LIVE' : 'OFF'}
+                </span>
               </label>
             )}
           </div>
@@ -438,23 +440,42 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
               </div>
 
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Acoustic Tone</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <h3 className="text-sm font-bold text-gray-700 mb-3">Acoustic Tone</h3>
+                <div className="space-y-3">
                   {TONES.map(t => (
-                    <div key={t.key} onClick={() => setVoiceTone(t.key)} className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${voiceTone === t.key ? 'border-blue-600 bg-blue-50/50' : 'border-gray-100 hover:border-gray-200'}`}>
-                       <p className={`font-bold text-sm ${voiceTone === t.key ? 'text-blue-800' : 'text-gray-900'}`}>{t.label}</p>
-                       <p className="text-xs text-gray-500 mt-1">{t.subtitle}</p>
+                    <div
+                      key={t.key}
+                      onClick={() => setVoiceTone(t.key)}
+                      className={`cursor-pointer w-full flex items-center gap-5 px-5 py-4 rounded-2xl border-2 transition-all duration-200 select-none ${
+                        voiceTone === t.key
+                          ? 'border-blue-600 bg-blue-50 shadow-md shadow-blue-100'
+                          : 'border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${voiceTone === t.key ? 'bg-blue-600' : 'bg-gray-100'}`}>
+                        <PhoneCall size={17} className={voiceTone === t.key ? 'text-white' : 'text-gray-400'} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-black text-sm tracking-tight ${voiceTone === t.key ? 'text-blue-900' : 'text-gray-900'}`}>{t.label}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{t.subtitle}</p>
+                      </div>
+                      {voiceTone === t.key && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Active</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="pt-6 border-t border-gray-100">
-                 <h3 className="font-semibold text-gray-900 mb-4">Smart Handoffs — transfer complex calls to your team</h3>
+                 <h3 className="text-sm font-bold text-gray-700 mb-4">Smart Handoffs — transfer complex calls to your team</h3>
                  <div className="space-y-3">
                    {DEFLECT_PRESETS.map(p => (
                       <label key={p.key} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100">
-                         <input type="checkbox" checked={voiceDeflectTopics.includes(p.key)} onChange={() => toggleDeflect(p.key)} className="w-4 h-4 text-blue-600 rounded" />
+                         <input type="checkbox" checked={voiceDeflectTopics.includes(p.key)} onChange={() => toggleDeflect(p.key)} className="w-4 h-4 accent-blue-600 rounded cursor-pointer" />
                          <span className="text-sm font-medium text-gray-800">{p.label} - <span className="text-gray-500 font-normal">Transfers to desk instead of answering</span></span>
                       </label>
                    ))}
@@ -467,7 +488,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         {/* FEATURES TAB */}
         <div className={activeTab === "features" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5">
-            <h2 className="text-2xl font-bold text-gray-900">AI Features</h2>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">AI Features</h2>
             <p className="text-gray-500 text-sm mt-1">Toggle capabilities on or off. Active features are applied to both chat and voice interactions.</p>
           </div>
           <div className="max-w-2xl">
@@ -524,7 +545,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         {/* NOTIFICATIONS TAB */}
         <div className={activeTab === "notifications" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5">
-            <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Notifications</h2>
             <p className="text-gray-500 text-sm mt-1">Get alerted when your AI handles important situations. All flagged items also appear in your dashboard inbox.</p>
           </div>
           <div className="max-w-2xl space-y-4">
@@ -604,7 +625,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         {/* DO'S & DON'TS TAB */}
         <div className={activeTab === "dos_donts" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5">
-            <h2 className="text-2xl font-bold text-gray-900">Do&apos;s &amp; Don&apos;ts</h2>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Do&apos;s &amp; Don&apos;ts</h2>
             <p className="text-gray-500 text-sm mt-1">Control exactly what your AI will and won&apos;t say. These rules are applied on every conversation.</p>
           </div>
           <div className="space-y-6 max-w-2xl">
@@ -651,35 +672,82 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
 
         {/* INTEGRATIONS TAB */}
         <div className={activeTab === "integrations" ? "block" : "hidden"}>
-          <div className="mb-8 border-b border-gray-100 pb-5 flex justify-between items-end">
-             <div>
-               <h2 className="text-2xl font-bold text-gray-900">App Integrations</h2>
-               <p className="text-gray-500 text-sm mt-1">Connect your existing tools to Salva AI.</p>
-             </div>
+          <div className="mb-8 border-b border-gray-100 pb-5">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">App Integrations</h2>
+            <p className="text-gray-500 text-sm mt-1">Connect your practice management system to enable live scheduling and patient record sync.</p>
           </div>
-          
-          <div className={`p-6 rounded-2xl border-2 ${isOdConnected ? 'border-green-500 bg-green-50/30' : 'border-gray-200 bg-white shadow-sm'}`}>
-            <div className="flex justify-between items-center mb-6">
-               <div className="flex items-center space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-gray-900">Open Dental</span>
-                    {isOdConnected && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Connected</span>}
+
+          <div className="max-w-2xl space-y-4">
+            {/* OpenDental Card */}
+            <div className={`rounded-2xl border-2 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${isOdConnected ? 'border-green-400 shadow-md shadow-green-50' : 'border-gray-200 shadow-sm hover:border-gray-300'}`}>
+              {/* Card Header */}
+              <div className={`px-6 py-5 flex items-center justify-between ${isOdConnected ? 'bg-green-50/60' : 'bg-gray-50/50'}`}>
+                <div className="flex items-center gap-4">
+                  {/* OpenDental Logo Block */}
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${isOdConnected ? 'bg-green-600 border-green-700' : 'bg-gray-900 border-gray-800'}`}>
+                    <span className="text-white font-black text-xs tracking-tight leading-none text-center">
+                      Open<br/>Dental
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-500">Live scheduling and patient record sync</p>
-               </div>
-               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 font-bold text-xs uppercase">PMS</div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-gray-900 tracking-tight">OpenDental</h3>
+                      <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full uppercase tracking-wider">PMS</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">Live calendar sync · Autonomous booking · Patient records</p>
+                  </div>
+                </div>
+                {isOdConnected ? (
+                  <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-lg">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Connected</span>
+                  </div>
+                ) : (
+                  <div className="text-xs font-semibold text-gray-400 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">Not connected</div>
+                )}
+              </div>
+
+              {/* Capability Badges */}
+              <div className="px-6 py-3 bg-white border-t border-gray-100 flex flex-wrap gap-2">
+                {['Real-time scheduling', 'Auto-confirm bookings', 'Patient record lookup', 'Availability sync'].map(cap => (
+                  <span key={cap} className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${isOdConnected ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
+                    {isOdConnected ? '✓ ' : ''}{cap}
+                  </span>
+                ))}
+              </div>
+
+              {/* Credentials Form */}
+              <div className="px-6 py-5 bg-white border-t border-gray-100 space-y-4">
+                <Field label="Server Endpoint URL">
+                  <input type="url" value={odServerUrl} onChange={e => setOdServerUrl(e.target.value)} className={inputCls} placeholder="https://api.opendental.com" />
+                </Field>
+                <Field label="Developer API Key">
+                  <div className="flex gap-2">
+                    <input type="password" value={odApiKey} onChange={e => setOdApiKey(e.target.value)} className={inputCls} placeholder="sk_live_..." />
+                    <button type="button" onClick={handleTestConnection} className="bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors shrink-0 whitespace-nowrap">Test Sync</button>
+                  </div>
+                </Field>
+                {odTestStatus === "ok" && (
+                  <div className="flex items-center gap-2 text-xs text-green-700 font-bold bg-green-50 border border-green-200 px-4 py-2.5 rounded-xl">
+                    <Check size={14} className="shrink-0" /> Valid connection — live scheduling is active
+                  </div>
+                )}
+                {odTestStatus === "error" && (
+                  <div className="flex items-center gap-2 text-xs text-red-600 font-bold bg-red-50 border border-red-200 px-4 py-2.5 rounded-xl">
+                    <AlertCircle size={14} className="shrink-0" /> Invalid credentials — check your API key and server URL
+                  </div>
+                )}
+                <p className="text-[11px] text-gray-400 pt-1">
+                  Your API key is stored encrypted and only used to communicate with your OpenDental server.
+                  <a href="https://www.opendental.com/manual/apideveloper.html" target="_blank" rel="noopener noreferrer" className="ml-1 text-blue-500 hover:underline font-semibold">How to find your key →</a>
+                </p>
+              </div>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-gray-100 space-y-4 shadow-sm">
-               <Field label="Server Endpoint URL"><input type="url" value={odServerUrl} onChange={e => setOdServerUrl(e.target.value)} className={inputCls} placeholder="https://api.opendental.com" /></Field>
-               <Field label="Developer API Key">
-                 <div className="flex gap-2">
-                   <input type="password" value={odApiKey} onChange={e => setOdApiKey(e.target.value)} className={inputCls} placeholder="sk_live_..." />
-                   <button type="button" onClick={handleTestConnection} className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors shrink-0">Test Sync</button>
-                 </div>
-               </Field>
-               {odTestStatus === "ok" && <p className="text-xs text-green-600 font-bold bg-green-50 p-2 rounded flex items-center gap-2"><Check size={14}/> Valid connection established</p>}
-               {odTestStatus === "error" && <p className="text-xs text-red-600 font-bold bg-red-50 p-2 rounded flex items-center gap-2"><AlertCircle size={14}/> Invalid credentials</p>}
+            {/* More integrations coming soon */}
+            <div className="rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center">
+              <p className="text-sm font-bold text-gray-400">More integrations coming soon</p>
+              <p className="text-xs text-gray-400 mt-1">Eaglesoft, Dentrix, and more on the roadmap.</p>
             </div>
           </div>
         </div>
