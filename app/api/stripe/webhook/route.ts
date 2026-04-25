@@ -108,7 +108,17 @@ export async function POST(req: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice;
         await supabaseAdmin
           .from("businesses")
-          .update({ plan_status: "past_due" })
+          .update({ plan_status: "past_due", payment_failed_at: new Date().toISOString() })
+          .eq("stripe_customer_id", invoice.customer as string);
+        break;
+      }
+
+      case "invoice.payment_succeeded": {
+        const invoice = event.data.object as Stripe.Invoice;
+        // Clear failure state when Stripe successfully retries payment
+        await supabaseAdmin
+          .from("businesses")
+          .update({ plan_status: "active", payment_failed_at: null })
           .eq("stripe_customer_id", invoice.customer as string);
         break;
       }

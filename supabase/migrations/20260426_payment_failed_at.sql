@@ -1,0 +1,2 @@
+ALTER TABLE businesses
+  ADD COLUMN IF NOT EXISTS payment_failed_at TIMESTAMPTZ;
