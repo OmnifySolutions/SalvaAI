@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AlertTriangle, ExternalLink, X } from "lucide-react";
 
-const LOCK_AFTER_DAYS = 14;
+const LOCK_AFTER_DAYS = 7;
 
 function daysRemaining(paymentFailedAt: string): number {
   const failedMs = new Date(paymentFailedAt).getTime();
