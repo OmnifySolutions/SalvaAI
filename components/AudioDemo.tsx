@@ -1,35 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { AudioDemoPlayer } from "./AudioDemoPlayer";
+import VoiceCard from "./VoiceCard";
 
-const scenarios = [
-  {
-    id: "new-patient",
-    label: "New Patient Booking",
-    duration: "0:45",
-    src: "/audio/demo-new-patient.mp3",
-    description: "Listen to the AI gather patient details, check availability, and schedule a new patient appointment.",
-  },
-  {
-    id: "insurance",
-    label: "Insurance Verification",
-    duration: "0:32",
-    src: "/audio/demo-insurance.mp3",
-    description: "The AI safely routes complex insurance queries to the billing team while collecting callback information.",
-  },
-  {
-    id: "after-hours",
-    label: "After-Hours Emergency",
-    duration: "0:28",
-    src: "/audio/demo-after-hours.mp3",
-    description: "Hear how the AI handles urgent after-hours calls, providing emergency instructions immediately.",
-  },
+type VoiceTone = "sarah" | "emma" | "james" | "marcus";
+
+const VOICES: { key: VoiceTone; name: string; gender: "Female" | "Male"; tone: string; desc: string }[] = [
+  { key: "sarah",  name: "Sarah",  gender: "Female", tone: "Warm & Friendly",          desc: "Approachable and caring. Perfect for pediatric and family dental." },
+  { key: "emma",   name: "Emma",   gender: "Female", tone: "Clinical & Precise",        desc: "Clear and efficient. Ideal for oral surgery and specialist practices." },
+  { key: "james",  name: "James",  gender: "Male",   tone: "Professional & Efficient",  desc: "Confident and direct. Great for busy front desk energy." },
+  { key: "marcus", name: "Marcus", gender: "Male",   tone: "Warm & Approachable",       desc: "Friendly and calm. Builds strong patient rapport." },
 ];
 
 export default function AudioDemo() {
-  const [playingId, setPlayingId] = useState<string | null>(null);
-
   return (
     <div className="max-w-6xl mx-auto px-6 py-24 border-t border-gray-100">
       <div className="text-center mb-16">
@@ -44,14 +26,9 @@ export default function AudioDemo() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {scenarios.map((s) => (
-          <AudioDemoPlayer
-            key={s.id}
-            s={s}
-            playing={playingId}
-            setPlaying={setPlayingId}
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+        {VOICES.map((voice) => (
+          <VoiceCard key={voice.key} voice={voice} />
         ))}
       </div>
     </div>

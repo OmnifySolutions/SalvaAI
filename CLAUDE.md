@@ -28,7 +28,19 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-24, voice selector UI + settings overhaul):
+**Latest completed work** (as of 2026-04-25, pricing revisit + homepage voice demo):
+- **Pricing revisit** (2026-04-25): Market research vs. competitors (Arini $300-500/loc, DentalAI Assist $299-$899, Weave $250-500+setup):
+  - Pro: minutes 750 → **1,000/mo** (≈333 calls). Price unchanged ($249/$309).
+  - Growth: no change ($449/$559, 2,000 min).
+  - Multi: annual $849 → **$1,049/mo**, monthly $1,049 → **$1,299/mo**, minutes 750/loc (3,750) → **1,000/loc (5,000)**. Description: "$210/location vs. $249 buying Pro plans individually."
+  - Files changed: `lib/plans.ts`, `lib/minute-enforcement.ts`, `app/pricing/page.tsx`
+  - **Stripe action required**: Create new Multi price IDs at $1,049/mo annual + $1,299/mo monthly; replace old $849/$1,049 IDs in `.env`
+
+- **Homepage voice demo** (2026-04-25):
+  - New `components/VoiceCard.tsx`: slim play/preview card (h-[96px]), waveform animation on preview, audio from `/public/voices/{key}.mp3`
+  - `components/AudioDemo.tsx`: refactored from scenario-based player to 4-voice grid using VoiceCard (Sarah, Emma, James, Marcus)
+  - `public/voices/`: 4 mp3 files added (sarah, emma, james, marcus)
+
 - **Voice Selector Feature** (2026-04-24):
   - Replaced Acoustic Tone selector with 4 voice options: Sarah (warm & friendly), Emma (clinical & precise), James (professional & efficient), Marcus (warm & approachable)
   - Voice card UI: horizontal layout with [Play button] [Name/Gender/Tone] [Active selection badge], no card enlargement on selection
@@ -85,8 +97,8 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
   - Created `PRICING_ROLLOUT.md` (implementation guide) + `ACTION_LIST.md` (next steps)
 
 **Blocking go-live**:
-- Stripe price IDs: need to create 8 IDs in Stripe dashboard + add to `.env`
-- Supabase migration: run `supabase migration up` (20260424_multi_practice.sql already applied to linked project)
+- Stripe: Create 2 new Multi price IDs ($1,049/mo annual + $1,299/mo monthly) in Stripe dashboard → update `.env`. All other 6 price IDs already set.
+- Supabase migration: already applied to linked project ✅
 
 **Active blockers**:
 - Anthropic credits exhausted; using Groq LLM (`llama-3.3-70b-versatile`)
@@ -96,8 +108,7 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 - ElevenLabs Creator plan ($22/mo): Sufficient for 1-2 Pro customers; upgrade strategy needed as customer base grows
 
 **Next priorities**:
-- ✋ **PAUSE**: Complete ACTION_LIST.md steps before building new features (Stripe setup, migration, testing)
-- Voice selector dropdown in Settings (use multiple pre-built ElevenLabs voices) — tie to Pro plan
+- ✋ Update Multi Stripe price IDs ($1,049 annual + $1,299 monthly) in Stripe dashboard + `.env` before launch
 - Item 23 (voice UX): Microphone permission UI + end-to-end Open Dental booking validation
 - Item 26: Enable social proof (pending customer reviews)
 - Multi-Practice: manual QA pass (single-practice regression + multi full flow) before launching Multi tier sales

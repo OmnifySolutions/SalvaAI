@@ -2,16 +2,16 @@ import { supabaseAdmin } from "./supabase";
 
 export type PlanMinuteLimits = {
   basic: 0; // chat-only
-  pro: 750;
+  pro: 1000;
   growth: 2000;
-  multi: 3750; // 750 × 5 locations
+  multi: 5000; // 1,000 × 5 locations
 };
 
 export const PLAN_MINUTE_LIMITS: PlanMinuteLimits = {
   basic: 0,
-  pro: 750,
+  pro: 1000,
   growth: 2000,
-  multi: 3750,
+  multi: 5000,
 };
 
 /**

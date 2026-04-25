@@ -69,7 +69,8 @@
       "Bash(choco install *)",
       "Bash(npx supabase *)",
       "PowerShell(git *)",
-      "Bash(supabase migration *)"
+      "Bash(supabase migration *)",
+      "WebFetch(domain:localhost)"
     ]
   }
 }

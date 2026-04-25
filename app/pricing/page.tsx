@@ -28,7 +28,7 @@ const comparison = [
   },
   {
     feature: "Voice minutes at entry",
-    salvai: "750 min / mo",
+    salvai: "1,000 min / mo",
     dentina: "Unlimited",
     dentalaiassist: "600 min / mo",
   },
@@ -40,13 +40,13 @@ const comparison = [
   },
   {
     feature: "Multi-location pricing",
-    salvai: "$849 / mo (5 locs)",
+    salvai: "$1,049 / mo (5 locs)",
     dentina: "$2,000+ / mo (5 locs)",
     dentalaiassist: "Custom",
   },
   {
     feature: "Per-location minute limit",
-    salvai: "750 min each",
+    salvai: "1,000 min each",
     dentina: false,
     dentalaiassist: false,
   },
