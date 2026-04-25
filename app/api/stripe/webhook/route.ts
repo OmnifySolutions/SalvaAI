@@ -89,10 +89,12 @@ export async function POST(req: NextRequest) {
 
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
+        // Keep `plan` intact so win-back messaging can reference what they had.
+        // Access is gated by plan_status === "canceled", not by plan value.
         await Promise.all([
           supabaseAdmin
             .from("businesses")
-            .update({ plan: "free", plan_status: "active", stripe_subscription_id: null })
+            .update({ plan_status: "canceled", stripe_subscription_id: null })
             .eq("stripe_customer_id", sub.customer as string),
           supabaseAdmin
             .from("organizations")

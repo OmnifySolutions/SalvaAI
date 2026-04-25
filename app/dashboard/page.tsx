@@ -37,6 +37,7 @@ import LocationSwitcher from "@/components/LocationSwitcher";
 import LocationCard from "@/components/LocationCard";
 import NotificationBell from "@/components/NotificationBell";
 import MinuteUsageCard from "@/components/MinuteUsageCard";
+import SubscriptionWall from "@/components/SubscriptionWall";
 import { Suspense } from "react";
 import type { LucideIcon } from "lucide-react";
 import { getOrganization, getOrgLocations } from "@/lib/organizations";
@@ -155,6 +156,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         </div>
       </nav>
 
+      {/* Subscription wall — shown when plan is canceled or past_due */}
+      {(business.plan_status === "canceled" || business.plan_status === "past_due") ? (
+        <SubscriptionWall
+          plan={business.plan ?? "basic"}
+          planStatus={business.plan_status}
+          stripeCustomerId={business.stripe_customer_id ?? null}
+        />
+      ) : (
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         {/* Setup checklist — only in single or per-location view */}
@@ -355,6 +364,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
