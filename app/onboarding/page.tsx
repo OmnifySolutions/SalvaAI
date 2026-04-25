@@ -142,16 +142,8 @@ function OnboardingContent() {
       if (!res.ok) throw new Error(data.error ?? "Failed");
 
       if (plan && plan !== "free") {
-        const checkoutRes = await fetch("/api/stripe/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan, billingCycle: billing }),
-        });
-        const checkoutData = await checkoutRes.json();
-        if (checkoutData.url) {
-          window.location.href = checkoutData.url;
-          return;
-        }
+        router.push(`/checkout?plan=${plan}&billing=${billing}`);
+        return;
       }
 
       router.push("/dashboard?onboarded=1");
