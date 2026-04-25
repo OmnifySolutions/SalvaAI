@@ -28,7 +28,19 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-25, pricing revisit + homepage voice demo):
+**Latest completed work** (as of 2026-04-26, account management + billing portal fix):
+- **Account tab in Settings** (2026-04-26): New "Account" tab at bottom of settings sidebar (orange, separated by divider):
+  - Billing section: shows plan name, billing cycle badge, status dot, renewal date; "Manage Subscription" button opens Stripe billing portal in new tab (via existing `/api/stripe/portal`)
+  - Danger Zone (orange border): "Delete Account" button → type `DELETE` confirmation → sends branded Resend email with 24h confirmation link → "Check your email" state
+  - Delete flow: `POST /api/account/request-deletion` (1hr throttle, generates token, sends email); `POST /api/account/confirm-deletion` (validates token, cancels Stripe subscription, soft-deletes business row, deletes Clerk user)
+  - Soft-delete: sets `deleted_at`, clears token, downgrades plan to free/canceled — Clerk deletion is last step (non-fatal if fails)
+  - Confirmation landing page: `app/account/confirm-deletion/page.tsx` (public, spinner→success→auto signout+redirect)
+  - Migration: `supabase/migrations/20260426_account_deletion.sql` — adds `deletion_token`, `deletion_requested_at`, `deleted_at` to `businesses` table
+  - **Action required**: Apply migration in Supabase SQL editor
+
+- **Stripe portal PM fix** (2026-04-26): `verify-subscription` now copies subscription `default_payment_method` to customer's `invoice_settings.default_payment_method` so it shows in billing portal. Root cause: `save_default_payment_method: "on_subscription"` saves to sub only, portal reads customer-level PM.
+
+**Previous completed work** (as of 2026-04-25, pricing revisit + homepage voice demo):
 - **Pricing revisit** (2026-04-25): Market research vs. competitors (Arini $300-500/loc, DentalAI Assist $299-$899, Weave $250-500+setup):
   - Pro: minutes 750 → **1,000/mo** (≈333 calls). Price unchanged ($249/$309).
   - Growth: no change ($449/$559, 2,000 min).

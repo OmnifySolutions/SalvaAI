@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell, Play, Square } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell, Play, Square, UserCircle2, Trash2, ExternalLink } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 import { FEATURE_DEFINITIONS, GROUP_LABELS, type FeatureDefinition } from "@/lib/ai-features";
 import { getServiceDefaults, buildDefaultGreeting } from "@/lib/service-defaults";
@@ -33,6 +33,10 @@ type Business = {
   custom_prompt: string | null;
   faqs: FAQ[];
   plan: string;
+  plan_status: string | null;
+  stripe_customer_id: string | null;
+  current_period_end: string | null;
+  billing_cycle: "monthly" | "annual" | null;
   voice_enabled: boolean;
   twilio_sid: string | null;
   voice_tone: VoiceTone | null;
@@ -94,6 +98,14 @@ const TABS = [
   { id: "notifications", label: "Notifications",      icon: Bell },
   { id: "integrations",  label: "Integrations",       icon: Zap },
 ];
+
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  basic: "Basic",
+  pro: "Pro",
+  growth: "Growth",
+  multi: "Multi-Practice",
+};
 
 export default function SettingsForm({ business, forLocationId }: { business: Business; forLocationId?: string }) {
   const router = useRouter();
@@ -170,6 +182,36 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
   const isOdConnected = !!business.opendental_api_key;
 
   const hasVoice = business.plan === "pro" || business.plan === "multi";
+
+  // Account tab state
+  const [deleteStep, setDeleteStep] = useState<"idle" | "confirm" | "email_sent">("idle");
+  const [deleteInput, setDeleteInput] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  async function handleOpenPortal() {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.open(data.url, "_blank", "noopener");
+      else setError("Could not open billing portal. Please try again.");
+    } catch { setError("Could not open billing portal."); }
+    finally { setPortalLoading(false); }
+  }
+
+  async function handleRequestDeletion() {
+    if (deleteInput !== "DELETE") return;
+    setDeleteLoading(true); setDeleteError("");
+    try {
+      const res = await fetch("/api/account/request-deletion", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to send deletion email");
+      setDeleteStep("email_sent");
+    } catch (e) { setDeleteError(e instanceof Error ? e.message : "Something went wrong"); }
+    finally { setDeleteLoading(false); }
+  }
 
   useEffect(() => {
     return () => {
@@ -263,17 +305,17 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
   return (
     <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-8 bg-[#fafafa] rounded-3xl min-h-[600px] border border-gray-200 overflow-hidden shadow-2xl">
       {/* Sidebar Navigation */}
-      <div className="w-full md:w-64 bg-gray-50/50 p-6 border-r border-gray-200 hidden md:block">
+      <div className="w-full md:w-64 bg-gray-50/50 p-6 border-r border-gray-200 hidden md:block flex flex-col">
         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Settings</h3>
-        <ul className="space-y-2">
+        <ul className="space-y-2 flex-1">
           {TABS.map(tab => (
             <li key={tab.id}>
               <button
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                  activeTab === tab.id 
-                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-gray-900/5" 
+                  activeTab === tab.id
+                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-gray-900/5"
                   : "text-gray-600 hover:bg-gray-100/50 hover:text-gray-900"
                 }`}
               >
@@ -283,6 +325,22 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
             </li>
           ))}
         </ul>
+
+        {/* Account tab — separated at bottom */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={() => setActiveTab("account")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "account"
+              ? "bg-orange-50 text-orange-600 shadow-sm ring-1 ring-orange-200"
+              : "text-orange-500 hover:bg-orange-50/60 hover:text-orange-600"
+            }`}
+          >
+            <UserCircle2 size={18} className={activeTab === "account" ? "text-orange-600" : "text-orange-400"} />
+            Account
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -813,8 +871,177 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
           </div>
         </div>
 
-        {/* Action Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
+        {/* ACCOUNT TAB */}
+        <div className={activeTab === "account" ? "block" : "hidden"}>
+          <div className="mb-8 border-b border-gray-100 pb-5">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Account</h2>
+            <p className="text-gray-500 text-sm mt-1">Manage your subscription and account settings.</p>
+          </div>
+
+          <div className="space-y-6 max-w-2xl">
+            {/* Billing section */}
+            <div className="rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 bg-white">
+                <h3 className="text-sm font-bold text-gray-900 mb-4">Subscription</h3>
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-black text-gray-900 tracking-tight">
+                          {PLAN_LABELS[business.plan] ?? business.plan}
+                        </span>
+                        {business.billing_cycle && (
+                          <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full capitalize">
+                            {business.billing_cycle}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${business.plan_status === "active" || business.plan_status === "trialing" ? "bg-green-500" : "bg-gray-400"}`} />
+                        <span className="text-xs text-gray-500 font-medium capitalize">
+                          {business.plan_status === "trialing" ? "Free trial" : business.plan_status ?? "Free"}
+                        </span>
+                        {business.current_period_end && (
+                          <span className="text-xs text-gray-400">
+                            · renews {new Date(business.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {business.stripe_customer_id ? (
+                    <button
+                      type="button"
+                      onClick={handleOpenPortal}
+                      disabled={portalLoading}
+                      className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-60"
+                    >
+                      {portalLoading ? (
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <ExternalLink size={15} />
+                      )}
+                      Manage Subscription
+                    </button>
+                  ) : (
+                    <a
+                      href="/pricing"
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors"
+                    >
+                      Upgrade Plan
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+                <p className="text-xs text-gray-400">
+                  Billing is managed through Stripe. Click &quot;Manage Subscription&quot; to update your payment method, download invoices, or cancel your plan.
+                </p>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="rounded-2xl border border-orange-200 bg-orange-50/30 overflow-hidden">
+              <div className="px-6 py-4 border-b border-orange-100 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-orange-400" />
+                <h3 className="text-sm font-black text-orange-700 uppercase tracking-wider">Danger Zone</h3>
+              </div>
+
+              <div className="px-6 py-5">
+                {deleteStep === "idle" && (
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 mb-1">Delete this account</p>
+                      <p className="text-xs text-gray-500 max-w-sm">
+                        Permanently deletes all settings, conversations, and your subscription. This action cannot be undone.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteStep("confirm")}
+                      className="flex items-center gap-2 bg-white border border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0"
+                    >
+                      <Trash2 size={15} />
+                      Delete Account
+                    </button>
+                  </div>
+                )}
+
+                {deleteStep === "confirm" && (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 mb-1">Are you sure?</p>
+                      <p className="text-xs text-gray-500 mb-3">
+                        This will delete all data for <strong>{business.name}</strong>, cancel your subscription, and permanently remove your account. A confirmation email will be sent to your address.
+                      </p>
+                      <p className="text-xs font-bold text-gray-700 mb-1.5">
+                        Type <span className="font-black text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded">DELETE</span> to confirm
+                      </p>
+                      <input
+                        type="text"
+                        value={deleteInput}
+                        onChange={e => setDeleteInput(e.target.value)}
+                        placeholder="DELETE"
+                        className="w-full max-w-xs border border-orange-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 bg-white font-mono tracking-wider"
+                        autoComplete="off"
+                      />
+                    </div>
+                    {deleteError && (
+                      <p className="text-xs text-red-600 font-semibold bg-red-50 border border-red-200 px-3 py-2 rounded-lg">{deleteError}</p>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleRequestDeletion}
+                        disabled={deleteInput !== "DELETE" || deleteLoading}
+                        className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all"
+                      >
+                        {deleteLoading ? (
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 size={15} />
+                        )}
+                        Send Confirmation Email
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setDeleteStep("idle"); setDeleteInput(""); setDeleteError(""); }}
+                        className="text-gray-500 hover:text-gray-700 text-sm font-medium px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {deleteStep === "email_sent" && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                      <Check size={16} className="text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 mb-1">Check your email</p>
+                      <p className="text-xs text-gray-500">
+                        We sent a confirmation link to your email address. Click it to permanently delete your account. The link expires in 24 hours.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => { setDeleteStep("idle"); setDeleteInput(""); setDeleteError(""); }}
+                        className="text-xs text-orange-500 hover:text-orange-600 font-semibold mt-2 underline underline-offset-2"
+                      >
+                        Cancel deletion
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Footer — hidden on Account tab */}
+        <div className={`mt-8 pt-6 border-t border-gray-100 flex items-center justify-between ${activeTab === "account" ? "hidden" : ""}`}>
           <div>
              {error && <span className="text-sm text-red-500 font-medium bg-red-50 px-3 py-1 rounded-lg">{error}</span>}
              {saved && <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-lg">All changes saved!</span>}

@@ -19,6 +19,8 @@ const isPublicRoute = createRouteMatcher([
   "/setup(.*)",
   "/payment-success(.*)",
   "/api/stripe/verify-session",
+  "/api/account/confirm-deletion",
+  "/account/confirm-deletion(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

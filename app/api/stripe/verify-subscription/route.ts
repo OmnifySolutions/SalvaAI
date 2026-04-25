@@ -33,6 +33,19 @@ export async function POST(req: NextRequest) {
   const billingCycle = (subscription.metadata?.billingCycle || "annual") as "annual" | "monthly";
   const customer = subscription.customer as import("stripe").Stripe.Customer;
 
+  // Promote the subscription's default PM to the customer level so the
+  // billing portal shows it under "Payment method" (portal reads customer default, not subscription default).
+  const subPm = subscription.default_payment_method;
+  if (subPm && typeof subPm === "string") {
+    try {
+      await stripe.customers.update(customer.id, {
+        invoice_settings: { default_payment_method: subPm },
+      });
+    } catch (e) {
+      console.error("Failed to set customer default PM:", e);
+    }
+  }
+
   const { error: dbError } = await supabaseAdmin
     .from("businesses")
     .update({
