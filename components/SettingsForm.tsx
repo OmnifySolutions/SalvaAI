@@ -977,7 +977,13 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                               fd.append('file', file);
                               const res = await fetch('/api/widget/upload-logo', { method: 'POST', body: fd });
                               const data = await res.json();
-                              if (data.url) setWidgetLogoUrl(data.url);
+                              if (data.url) {
+                                setWidgetLogoUrl(data.url);
+                              } else {
+                                setError(data.error ?? 'Logo upload failed. Please try again.');
+                              }
+                            } catch {
+                              setError('Logo upload failed. Please check your connection and try again.');
                             } finally {
                               setWidgetLogoUploading(false);
                             }

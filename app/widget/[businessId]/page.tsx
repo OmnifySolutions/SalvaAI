@@ -11,18 +11,24 @@ export default async function WidgetPage({
 
   const { data: business } = await supabaseAdmin
     .from("businesses")
-    .select("id, name, widget_config")
+    .select("id, name, plan, widget_config")
     .eq("id", businessId)
     .single();
 
   if (!business) notFound();
+
+  const BRANDING_ALLOWED_PLANS = ["pro", "growth", "multi"];
+  const widgetConfig = { ...(business.widget_config ?? {}) };
+  if (!BRANDING_ALLOWED_PLANS.includes(business.plan ?? "")) {
+    widgetConfig.show_branding = true;
+  }
 
   return (
     <div className="h-screen w-screen">
       <ChatWidget
         businessId={business.id}
         businessName={business.name}
-        widgetConfig={business.widget_config ?? undefined}
+        widgetConfig={widgetConfig}
       />
     </div>
   );

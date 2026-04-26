@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     const ext = EXT_MAP[file.type];
-    const path = `${business.id}/${Date.now()}.${ext}`;
+    const path = `${business.id}/logo.${ext}`;
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await supabaseAdmin.storage
