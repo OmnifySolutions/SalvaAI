@@ -28,7 +28,24 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-26, onboarding intro + free plan removal):
+**Latest completed work** (as of 2026-04-27, widget customization):
+
+- **Widget customization feature** (2026-04-27):
+  - New "Widget" tab in Settings (between Features and Voice Settings)
+  - Two-column layout: color/logo/text controls on left, live preview on right
+  - **Customization options**: Primary color, patient message color, AI message color, logo (upload or URL), header title, button label, greeting bubble toggle + text
+  - **Plan gating**: Basic tier keeps "Powered by SalvaAI" branding visible (locked UI). Pro+ can toggle branding off for white-label.
+  - **Logo upload**: POST `/api/widget/upload-logo` validates file type (PNG/JPG/SVG), size (≤2MB), uploads to Supabase Storage bucket `widget-logos`, returns public URL
+  - **Dynamic widget rendering**: ChatWidget and FloatingChatWidget accept `widgetConfig` props, apply colors/logo/title/greeting dynamically via inline styles
+  - **Embed script injection**: `/api/widget/embed/route.ts` fetches primary_color from DB, injects into hardcoded JS (with XSS validation)
+  - **Branding enforcement**: Enforced at render time in `/app/widget/[businessId]/page.tsx` — if plan is Basic/Free, `show_branding` forced to `true` regardless of DB value
+  - **Security hardened**: All color values validated against `/^#[0-9a-fA-F]{3,8}$/` regex before DB write and embed injection. Plan enforcement allowlist on API + render time.
+  - **Error handling**: Logo upload failures surface to user via form `setError`. Network errors caught and reported.
+  - **Database**: New `widget_config` JSONB column on `businesses` table with 9 fields (primary_color, user/ai bubble colors, logo_url, header_title, button_label, greeting_enabled/text, show_branding)
+  - ⚠️ **Manual setup required**: Run migration `20260426_widget_config.sql` in Supabase SQL editor. Create `widget-logos` storage bucket (public read).
+  - **Tests**: 154/154 passing. All existing tests still pass.
+
+**Previous completed work** (as of 2026-04-26, onboarding intro + free plan removal):
 
 - **Onboarding intro screen overhaul** (2026-04-26):
   - Audio: plays `/public/audio/onboarding/ai-intro.mp3` on user click (browser autoplay policy requires gesture); falls back to SpeechSynthesis if MP3 fails
