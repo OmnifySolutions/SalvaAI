@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell, Play, Square, UserCircle2, Trash2, ExternalLink } from "lucide-react";
+import { Check, X, User, Bot, PhoneCall, Zap, Save, AlertCircle, ChevronDown, LayoutList, Clock, ToggleLeft, Sparkles, CalendarCheck, Moon, ListOrdered, Siren, ShieldCheck, UserPlus, DollarSign, CreditCard, Bell, Play, Square, UserCircle2, Trash2, ExternalLink, Layout } from "lucide-react";
 import HoursPicker, { type WeeklyHours, parseHours } from "@/components/HoursPicker";
 import { FEATURE_DEFINITIONS, GROUP_LABELS, type FeatureDefinition } from "@/lib/ai-features";
 import { getServiceDefaults, buildDefaultGreeting } from "@/lib/service-defaults";
@@ -24,6 +24,7 @@ function useArrayState<T>(initial: T[], emptyItem: T) {
 }
 
 type Business = {
+  id?: string;
   name: string;
   business_type: string;
   hours: unknown;
@@ -51,6 +52,17 @@ type Business = {
   ai_dos: string | null;
   ai_donts: string | null;
   ai_features: string[] | null;
+  widget_config?: {
+    primary_color?: string;
+    user_bubble_color?: string;
+    ai_bubble_color?: string;
+    logo_url?: string | null;
+    header_title?: string;
+    button_label?: string;
+    greeting_enabled?: boolean;
+    greeting_text?: string;
+    show_branding?: boolean;
+  } | null;
   notify_on_emergency: boolean | null;
   notify_emergency_phone: string | null;
   notify_emergency_email: string | null;
@@ -93,6 +105,7 @@ const TABS = [
   { id: "services",      label: "Services",           icon: LayoutList },
   { id: "ai",           label: "AI Configuration",   icon: Bot },
   { id: "features",     label: "Features",            icon: Sparkles },
+  { id: "widget",       label: "Widget",              icon: Layout },
   { id: "voice",        label: "Voice Settings",      icon: PhoneCall },
   { id: "dos_donts",    label: "Do's & Don'ts",       icon: ToggleLeft },
   { id: "notifications", label: "Notifications",      icon: Bell },
@@ -146,6 +159,17 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
   const [aiDos, setAiDos] = useState(business.ai_dos ?? "");
   const [aiDonts, setAiDonts] = useState(business.ai_donts ?? "");
   const [aiFeatures, setAiFeatures] = useState<string[]>(business.ai_features ?? []);
+
+  const [widgetPrimaryColor, setWidgetPrimaryColor] = useState(business.widget_config?.primary_color ?? '#2563eb');
+  const [widgetUserBubbleColor, setWidgetUserBubbleColor] = useState(business.widget_config?.user_bubble_color ?? '#2563eb');
+  const [widgetAiBubbleColor, setWidgetAiBubbleColor] = useState(business.widget_config?.ai_bubble_color ?? '#f3f4f6');
+  const [widgetLogoUrl, setWidgetLogoUrl] = useState(business.widget_config?.logo_url ?? '');
+  const [widgetHeaderTitle, setWidgetHeaderTitle] = useState(business.widget_config?.header_title ?? '');
+  const [widgetButtonLabel, setWidgetButtonLabel] = useState(business.widget_config?.button_label ?? '');
+  const [widgetGreetingEnabled, setWidgetGreetingEnabled] = useState(business.widget_config?.greeting_enabled ?? false);
+  const [widgetGreetingText, setWidgetGreetingText] = useState(business.widget_config?.greeting_text ?? '');
+  const [widgetShowBranding, setWidgetShowBranding] = useState(business.widget_config?.show_branding ?? true);
+  const [widgetLogoUploading, setWidgetLogoUploading] = useState(false);
 
   const [notifySettings, setNotifySettings] = useState({
     emergency: {
@@ -291,6 +315,17 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
           notifyOnCallback: notifySettings.callback.enabled,
           voiceEnabled, voiceTone, voiceEmergencyNumber: voiceEmergencyNumber || null, voiceEmergencyMessage: voiceEmergencyMessage || null,
           voiceDeflectTopics, voiceScenarios, openDentalServerUrl: odServerUrl || null, openDentalApiKey: odApiKey || null,
+          widget_config: {
+            primary_color: widgetPrimaryColor,
+            user_bubble_color: widgetUserBubbleColor,
+            ai_bubble_color: widgetAiBubbleColor,
+            logo_url: widgetLogoUrl || null,
+            header_title: widgetHeaderTitle,
+            button_label: widgetButtonLabel,
+            greeting_enabled: widgetGreetingEnabled,
+            greeting_text: widgetGreetingText,
+            show_branding: widgetShowBranding,
+          },
           ...(forLocationId ? { businessId: forLocationId } : {}),
         }),
       });
@@ -871,6 +906,265 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
           </div>
         </div>
 
+        {/* WIDGET TAB */}
+        {activeTab === 'widget' && (
+          <div>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-6">Widget Customization</h2>
+
+            <div className="flex gap-8">
+              {/* Left: Controls */}
+              <div className="flex-1 space-y-6">
+
+                {/* Colors section */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">Colors</h3>
+                  <div className="space-y-4">
+
+                    {/* Primary Color */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Primary Color</p>
+                      <div className="flex items-center gap-3">
+                        <input type="color" value={widgetPrimaryColor} onChange={e => setWidgetPrimaryColor(e.target.value)}
+                          className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
+                        <input type="text" value={widgetPrimaryColor} onChange={e => setWidgetPrimaryColor(e.target.value)}
+                          className="w-28 text-sm font-mono bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1" />
+                        <span className="text-xs text-gray-400">Header, button &amp; accents</span>
+                      </div>
+                    </div>
+
+                    {/* Patient Message Color */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Patient Message Color</p>
+                      <div className="flex items-center gap-3">
+                        <input type="color" value={widgetUserBubbleColor} onChange={e => setWidgetUserBubbleColor(e.target.value)}
+                          className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
+                        <input type="text" value={widgetUserBubbleColor} onChange={e => setWidgetUserBubbleColor(e.target.value)}
+                          className="w-28 text-sm font-mono bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1" />
+                        <span className="text-xs text-gray-400">Visitor&apos;s chat bubbles</span>
+                      </div>
+                    </div>
+
+                    {/* AI Message Color */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">AI Message Color</p>
+                      <div className="flex items-center gap-3">
+                        <input type="color" value={widgetAiBubbleColor} onChange={e => setWidgetAiBubbleColor(e.target.value)}
+                          className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
+                        <input type="text" value={widgetAiBubbleColor} onChange={e => setWidgetAiBubbleColor(e.target.value)}
+                          className="w-28 text-sm font-mono bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1" />
+                        <span className="text-xs text-gray-400">AI response bubbles</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Branding section */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">Branding</h3>
+                  <div className="space-y-4">
+
+                    {/* Logo */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Practice Logo</p>
+                      <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center hover:border-blue-300 transition-all">
+                        <input type="file" accept="image/png,image/jpeg,image/jpg,image/svg+xml" className="hidden" id="logo-upload"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setWidgetLogoUploading(true);
+                            try {
+                              const fd = new FormData();
+                              fd.append('file', file);
+                              const res = await fetch('/api/widget/upload-logo', { method: 'POST', body: fd });
+                              const data = await res.json();
+                              if (data.url) setWidgetLogoUrl(data.url);
+                            } finally {
+                              setWidgetLogoUploading(false);
+                            }
+                          }}
+                        />
+                        <label htmlFor="logo-upload" className="cursor-pointer text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition-colors inline-block">
+                          {widgetLogoUploading ? 'Uploading...' : '↑ Upload image'}
+                        </label>
+                        <p className="text-xs text-gray-400 my-2">— or paste a URL —</p>
+                        <input type="text" value={widgetLogoUrl} onChange={e => setWidgetLogoUrl(e.target.value)}
+                          placeholder="https://yourpractice.com/logo.png"
+                          className="w-full text-sm bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 text-center" />
+                        <p className="text-xs text-gray-400 mt-2">PNG, JPG or SVG · Max 2MB · Appears in chat header</p>
+                      </div>
+                    </div>
+
+                    {/* Header Title */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Widget Header Title</p>
+                      <input type="text" value={widgetHeaderTitle} onChange={e => setWidgetHeaderTitle(e.target.value)}
+                        placeholder={`AI receptionist for ${business.name}`}
+                        className="w-full text-sm font-medium bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors" />
+                      <p className="text-xs text-gray-400 mt-1.5">Shown at the top of the chat window</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Chat Button section */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">Chat Button</h3>
+                  <div className="space-y-4">
+
+                    {/* Button Label */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Button Label</p>
+                      <input type="text" value={widgetButtonLabel} onChange={e => setWidgetButtonLabel(e.target.value)}
+                        placeholder="e.g. Chat with us"
+                        className="w-full text-sm font-medium bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors" />
+                      <p className="text-xs text-gray-400 mt-1.5">Optional text next to the button. Leave blank for icon only.</p>
+                    </div>
+
+                    {/* Greeting Bubble */}
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Greeting Bubble</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Show a message above the chat button</p>
+                        </div>
+                        <button type="button" onClick={() => setWidgetGreetingEnabled(!widgetGreetingEnabled)}
+                          className={`relative w-14 h-7 rounded-full transition-all duration-200 shadow-inner ${widgetGreetingEnabled ? 'bg-blue-600 shadow-blue-200' : 'bg-gray-200'}`}>
+                          <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-200 shadow-md ${widgetGreetingEnabled ? 'left-8' : 'left-1'}`} />
+                        </button>
+                      </div>
+                      {widgetGreetingEnabled && (
+                        <input type="text" value={widgetGreetingText} onChange={e => setWidgetGreetingText(e.target.value)}
+                          placeholder="Hi! How can we help you today?"
+                          className="w-full text-sm font-medium bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors mb-3" />
+                      )}
+                      <div className="bg-blue-50 rounded-xl px-3 py-2">
+                        <p className="text-xs text-blue-700">
+                          <strong>This floats above the closed chat button</strong> — visible before anyone clicks.
+                          It is <strong>not</strong> the AI&apos;s first message. To edit what the AI says when the chat opens, go to the <strong>AI Config</strong> tab.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Powered by SalvaAI */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-700 mb-4">Powered by SalvaAI</h3>
+                  {business.plan === 'basic' ? (
+                    <div className="bg-gray-900 text-white rounded-2xl p-5 flex items-start gap-4">
+                      <Zap size={20} className="text-blue-400 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded">PRO</span>
+                          <span className="text-sm font-bold">Remove SalvaAI branding</span>
+                        </div>
+                        <p className="text-xs text-gray-400">Upgrade to Pro to remove the &quot;Powered by SalvaAI&quot; footer from your widget and give patients a fully branded experience.</p>
+                        <button type="button" onClick={() => router.push('/pricing')} className="mt-3 bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors">View Plans</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Show &quot;Powered by SalvaAI&quot; in widget footer</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Turn off to give patients a fully branded experience</p>
+                        </div>
+                        <button type="button" onClick={() => setWidgetShowBranding(!widgetShowBranding)}
+                          className={`relative w-14 h-7 rounded-full transition-all duration-200 shadow-inner ${widgetShowBranding ? 'bg-blue-600 shadow-blue-200' : 'bg-gray-200'}`}>
+                          <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-200 shadow-md ${widgetShowBranding ? 'left-8' : 'left-1'}`} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Live Preview */}
+              <div className="w-64 shrink-0">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Live Preview</p>
+
+                {/* Widget open state */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden mb-4" style={{ transform: 'scale(0.9)', transformOrigin: 'top right' }}>
+                  {/* Header */}
+                  <div className="p-3 flex items-center gap-2" style={{ background: widgetPrimaryColor }}>
+                    {widgetLogoUrl ? (
+                      <img src={widgetLogoUrl} alt="logo" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs font-bold truncate">{widgetHeaderTitle || `AI receptionist for ${business.name}`}</p>
+                      <p className="text-white/70 text-[10px]">Online</p>
+                    </div>
+                  </div>
+                  {/* Messages */}
+                  <div className="p-3 bg-gray-50 space-y-2">
+                    <div className="flex justify-start">
+                      <div className="text-xs px-3 py-1.5 rounded-2xl rounded-tl-sm max-w-[80%]" style={{ background: widgetAiBubbleColor, color: '#1f2937' }}>
+                        Hi! How can I help you today? 😊
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <div className="text-white text-xs px-3 py-1.5 rounded-2xl rounded-tr-sm max-w-[80%]" style={{ background: widgetUserBubbleColor }}>
+                        Do you accept new patients?
+                      </div>
+                    </div>
+                    <div className="flex justify-start">
+                      <div className="text-xs px-3 py-1.5 rounded-2xl rounded-tl-sm max-w-[80%]" style={{ background: widgetAiBubbleColor, color: '#1f2937' }}>
+                        Yes! We&apos;re welcoming new patients.
+                      </div>
+                    </div>
+                  </div>
+                  {/* Footer */}
+                  {(widgetShowBranding || business.plan === 'basic') && (
+                    <div className="py-1.5 text-center text-[9px] text-gray-400 border-t border-gray-100 bg-white">
+                      Powered by SalvaAI
+                    </div>
+                  )}
+                </div>
+
+                {/* Widget closed state */}
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Closed State</p>
+                <div className="flex flex-col items-end gap-2">
+                  {widgetGreetingEnabled && widgetGreetingText && (
+                    <div className="bg-white border border-gray-200 rounded-2xl rounded-br-sm shadow-md px-3 py-2 text-xs text-gray-700 max-w-[180px]">
+                      {widgetGreetingText}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 justify-end">
+                    {widgetButtonLabel && (
+                      <span className="text-white text-xs font-semibold px-3 py-2 rounded-full" style={{ background: widgetPrimaryColor }}>
+                        {widgetButtonLabel}
+                      </span>
+                    )}
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg" style={{ background: widgetPrimaryColor }}>
+                      <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Embed Code Section */}
+            <div className="border-t border-gray-200 pt-6 mt-8">
+              <h3 className="text-sm font-bold text-gray-700 mb-4">Add Widget to Your Website</h3>
+              <div className="space-y-3 mb-4">
+                {[
+                  { n: 1, text: <>Copy the code snippet below.</> },
+                  { n: 2, text: <>Open your website&apos;s HTML and paste it just <strong>before the closing <code className="bg-gray-100 px-1 rounded text-xs">&lt;/body&gt;</code> tag</strong> on every page where you want the chat to appear.</> },
+                  { n: 3, text: <>Save and publish your site. <strong>The widget appears immediately.</strong> Any changes you make here update automatically — no need to re-paste the code.</> },
+                ].map(({ n, text }) => (
+                  <div key={n} className="flex gap-3 items-start">
+                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{n}</div>
+                    <p className="text-sm text-gray-600">{text}</p>
+                  </div>
+                ))}
+              </div>
+              <EmbedCodeBlock businessId={business.id ?? ''} />
+              <p className="text-xs text-gray-400 mt-2">Using WordPress, Wix, or Squarespace? <a href="/faq" className="text-blue-600 hover:underline">See our FAQ →</a></p>
+            </div>
+          </div>
+        )}
+
         {/* ACCOUNT TAB */}
         <div className={activeTab === "account" ? "block" : "hidden"}>
           <div className="mb-8 border-b border-gray-100 pb-5">
@@ -1098,6 +1392,23 @@ function VoiceWaveform({ name }: { name: string }) {
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function EmbedCodeBlock({ businessId }: { businessId: string }) {
+  const [copied, setCopied] = useState(false);
+  const code = `<script src="https://app.getsalvaai.com/api/widget/embed?id=${businessId}"></script>`;
+  return (
+    <div className="relative bg-gray-50 border border-gray-200 rounded-xl p-4 font-mono text-sm text-blue-700 overflow-x-auto">
+      {code}
+      <button
+        type="button"
+        onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+        className="absolute top-3 right-3 text-xs bg-white border border-gray-200 rounded-lg px-3 py-1.5 font-semibold hover:bg-gray-50 transition-colors text-gray-600"
+      >
+        {copied ? 'Copied!' : 'Copy'}
+      </button>
     </div>
   );
 }
