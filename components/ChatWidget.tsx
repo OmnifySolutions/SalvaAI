@@ -5,12 +5,26 @@ import Logo from "./Logo";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+export type WidgetConfig = {
+  primary_color?: string;
+  user_bubble_color?: string;
+  ai_bubble_color?: string;
+  logo_url?: string | null;
+  header_title?: string;
+  button_label?: string;
+  greeting_enabled?: boolean;
+  greeting_text?: string;
+  show_branding?: boolean;
+};
+
 export default function ChatWidget({
   businessId,
   businessName,
+  widgetConfig,
 }: {
   businessId: string;
   businessName: string;
+  widgetConfig?: WidgetConfig;
 }) {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -64,12 +78,29 @@ export default function ChatWidget({
   return (
     <div className="flex flex-col h-full bg-white font-sans">
       {/* Header */}
-      <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-2 shrink-0">
-        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold" role="img" aria-label="AI receptionist">
-          AI
-        </div>
+      <div
+        className="text-white px-4 py-3 flex items-center gap-2 shrink-0"
+        style={{ background: widgetConfig?.primary_color ?? "#2563eb" }}
+      >
+        {widgetConfig?.logo_url ? (
+          <img
+            src={widgetConfig.logo_url}
+            alt="logo"
+            className="w-7 h-7 rounded-full object-cover"
+          />
+        ) : (
+          <div
+            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold"
+            role="img"
+            aria-label="AI receptionist"
+          >
+            AI
+          </div>
+        )}
         <div>
-          <div className="font-semibold text-sm">{businessName}</div>
+          <div className="font-semibold text-sm">
+            {widgetConfig?.header_title || businessName}
+          </div>
           <div className="text-xs text-blue-100">AI Receptionist • Online</div>
         </div>
       </div>
@@ -81,15 +112,24 @@ export default function ChatWidget({
             key={i}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            <div
-              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-blue-600 text-white rounded-br-sm"
-                  : "bg-gray-100 text-gray-800 rounded-bl-sm"
-              }`}
-            >
-              {msg.content}
-            </div>
+            {msg.role === "user" ? (
+              <div
+                className="max-w-[80%] px-3 py-2 rounded-2xl rounded-br-sm text-sm leading-relaxed text-white"
+                style={{ background: widgetConfig?.user_bubble_color ?? "#2563eb" }}
+              >
+                {msg.content}
+              </div>
+            ) : (
+              <div
+                className="max-w-[80%] px-3 py-2 rounded-2xl rounded-bl-sm text-sm leading-relaxed"
+                style={{
+                  background: widgetConfig?.ai_bubble_color ?? "#f3f4f6",
+                  color: "#1f2937",
+                }}
+              >
+                {msg.content}
+              </div>
+            )}
           </div>
         ))}
         {loading && (
@@ -129,10 +169,12 @@ export default function ChatWidget({
       </form>
 
       {/* Powered by */}
-      <div className="flex items-center justify-center gap-1 text-center text-xs text-gray-400 pb-2">
-        <span>Powered by</span>
-        <Logo width={60} height={16} />
-      </div>
+      {(widgetConfig?.show_branding ?? true) && (
+        <div className="flex items-center justify-center gap-1 text-center text-xs text-gray-400 pb-2">
+          <span>Powered by</span>
+          <Logo width={60} height={16} />
+        </div>
+      )}
     </div>
   );
 }
