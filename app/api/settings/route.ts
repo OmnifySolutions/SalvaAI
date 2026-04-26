@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     openDentalServerUrl, openDentalApiKey, openDentalBookingWindow,
     notifyOnEmergency, notifyEmergencyPhone, notifyEmergencyEmail, notifyEmergencyWhatsapp,
     notifyOnNewBooking, notifyOnCallback,
+    widget_config,
     businessId: targetBusinessId,
   } = body;
 
@@ -29,6 +30,17 @@ export async function POST(req: NextRequest) {
     ? aiFeatures.filter((k: string) => VALID_FEATURE_KEYS.has(k))
     : [];
   const bookingMode = safeFeatures.includes('instant_booking') ? 'autonomous' : 'pending';
+
+  if (widget_config?.show_branding === false) {
+    const { data: biz } = await supabaseAdmin
+      .from("businesses")
+      .select("plan")
+      .eq(targetBusinessId ? "id" : "clerk_user_id", targetBusinessId ?? userId)
+      .single();
+    if (biz?.plan === "basic") {
+      return Response.json({ error: "Removing SalvaAI branding requires a Pro plan or higher." }, { status: 403 });
+    }
+  }
 
   if (!name?.trim()) return Response.json({ error: "Business name required" }, { status: 400 });
 
@@ -69,6 +81,7 @@ export async function POST(req: NextRequest) {
       notify_emergency_whatsapp: notifyEmergencyWhatsapp?.trim() || null,
       notify_on_new_booking: notifyOnNewBooking ?? false,
       notify_on_callback: notifyOnCallback ?? false,
+      ...(widget_config !== undefined && { widget_config }),
     })
     .eq(updateById !== null ? "id" : "clerk_user_id", updateById ?? userId);
 
