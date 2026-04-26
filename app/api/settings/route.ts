@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
       .select("plan")
       .eq(targetBusinessId ? "id" : "clerk_user_id", targetBusinessId ?? userId)
       .single();
-    if (biz?.plan === "basic") {
+    const BRANDING_ALLOWED_PLANS = ["pro", "growth", "multi"];
+    if (!BRANDING_ALLOWED_PLANS.includes(biz?.plan ?? "")) {
       return Response.json({ error: "Removing SalvaAI branding requires a Pro plan or higher." }, { status: 403 });
     }
   }

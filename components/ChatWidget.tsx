@@ -159,7 +159,8 @@ export default function ChatWidget({
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="bg-blue-600 text-white rounded-full w-9 h-9 flex items-center justify-center shrink-0 disabled:opacity-40 hover:bg-blue-700 transition-colors"
+          className="text-white rounded-full w-9 h-9 flex items-center justify-center shrink-0 disabled:opacity-40 hover:opacity-90 transition-opacity"
+          style={{ background: widgetConfig?.primary_color ?? '#2563eb' }}
           aria-label="Send"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">

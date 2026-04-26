@@ -1050,16 +1050,14 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                 <div>
                   <h3 className="text-sm font-bold text-gray-700 mb-4">Powered by SalvaAI</h3>
                   {business.plan === 'basic' ? (
-                    <div className="bg-gray-900 text-white rounded-2xl p-5 flex items-start gap-4">
-                      <Zap size={20} className="text-blue-400 shrink-0 mt-0.5" />
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded">PRO</span>
-                          <span className="text-sm font-bold">Remove SalvaAI branding</span>
-                        </div>
-                        <p className="text-xs text-gray-400">Upgrade to Pro to remove the &quot;Powered by SalvaAI&quot; footer from your widget and give patients a fully branded experience.</p>
-                        <button type="button" onClick={() => router.push('/pricing')} className="mt-3 bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors">View Plans</button>
+                    <div className="bg-gray-900 text-white rounded-2xl p-8 text-center">
+                      <Zap size={20} className="text-blue-400 mx-auto mb-3" />
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <span className="bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded">PRO</span>
+                        <span className="text-sm font-bold">Remove SalvaAI branding</span>
                       </div>
+                      <p className="text-xs text-gray-400 mb-3">Upgrade to Pro to remove the &quot;Powered by SalvaAI&quot; footer from your widget.</p>
+                      <button type="button" onClick={() => router.push('/pricing')} className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors">View Plans</button>
                     </div>
                   ) : (
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
