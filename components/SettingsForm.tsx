@@ -897,11 +897,27 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={`w-1.5 h-1.5 rounded-full ${business.plan_status === "active" || business.plan_status === "trialing" ? "bg-green-500" : "bg-gray-400"}`} />
-                        <span className="text-xs text-gray-500 font-medium capitalize">
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          business.plan_status === "active" || business.plan_status === "trialing"
+                            ? "bg-green-500"
+                            : business.plan_status === "canceled"
+                            ? "bg-red-500"
+                            : business.plan_status === "past_due"
+                            ? "bg-orange-500"
+                            : "bg-gray-400"
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          business.plan_status === "active" || business.plan_status === "trialing"
+                            ? "text-gray-700"
+                            : business.plan_status === "canceled"
+                            ? "text-red-600"
+                            : business.plan_status === "past_due"
+                            ? "text-orange-600"
+                            : "text-gray-500"
+                        } capitalize`}>
                           {business.plan_status === "trialing" ? "Free trial" : business.plan_status ?? "Free"}
                         </span>
-                        {business.current_period_end && (
+                        {business.current_period_end && business.plan_status !== "canceled" && (
                           <span className="text-xs text-gray-400">
                             · renews {new Date(business.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </span>
@@ -983,19 +999,19 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                         value={deleteInput}
                         onChange={e => setDeleteInput(e.target.value)}
                         placeholder="DELETE"
-                        className="w-full max-w-xs border border-orange-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 bg-white font-mono tracking-wider"
+                        className="w-full border border-orange-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 bg-white font-mono tracking-wider"
                         autoComplete="off"
                       />
                     </div>
                     {deleteError && (
                       <p className="text-xs text-red-600 font-semibold bg-red-50 border border-red-200 px-3 py-2 rounded-lg">{deleteError}</p>
                     )}
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-2">
                       <button
                         type="button"
                         onClick={handleRequestDeletion}
                         disabled={deleteInput !== "DELETE" || deleteLoading}
-                        className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all"
+                        className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap"
                       >
                         {deleteLoading ? (
                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1007,7 +1023,7 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                       <button
                         type="button"
                         onClick={() => { setDeleteStep("idle"); setDeleteInput(""); setDeleteError(""); }}
-                        className="text-gray-500 hover:text-gray-700 text-sm font-medium px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                        className="w-full text-gray-700 hover:text-gray-900 hover:bg-gray-100 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
                       >
                         Cancel
                       </button>

@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         await Promise.all([
           supabaseAdmin
             .from("businesses")
-            .update({ plan_status: "canceled", stripe_subscription_id: null })
+            .update({ plan_status: "canceled", stripe_subscription_id: null, current_period_end: null })
             .eq("stripe_customer_id", sub.customer as string),
           supabaseAdmin
             .from("organizations")

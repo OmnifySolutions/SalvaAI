@@ -10,13 +10,16 @@ export async function POST() {
   const { userId } = await auth();
   if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: business, error } = await supabaseAdmin
+  const { data: businesses, error } = await supabaseAdmin
     .from("businesses")
-    .select("id, name, stripe_subscription_id, deletion_requested_at")
-    .eq("clerk_user_id", userId)
-    .single();
+    .select("id, name, stripe_subscription_id, deletion_requested_at, is_primary_location")
+    .eq("clerk_user_id", userId);
 
-  if (error || !business) return Response.json({ error: "Account not found" }, { status: 404 });
+  if (error || !businesses || businesses.length === 0) return Response.json({ error: "Account not found" }, { status: 404 });
+
+  // Get primary business (for multi-practice, is_primary_location=true; for single, it's the only one)
+  const business = businesses.find(b => b.is_primary_location) || businesses[0];
+  if (!business) return Response.json({ error: "Account not found" }, { status: 404 });
 
   // Throttle: one request per hour
   if (business.deletion_requested_at) {
