@@ -11,7 +11,7 @@ export default async function WidgetPage({
 
   const { data: business } = await supabaseAdmin
     .from("businesses")
-    .select("id, name")
+    .select("id, name, widget_config")
     .eq("id", businessId)
     .single();
 
@@ -19,7 +19,11 @@ export default async function WidgetPage({
 
   return (
     <div className="h-screen w-screen">
-      <ChatWidget businessId={business.id} businessName={business.name} />
+      <ChatWidget
+        businessId={business.id}
+        businessName={business.name}
+        widgetConfig={business.widget_config ?? undefined}
+      />
     </div>
   );
 }

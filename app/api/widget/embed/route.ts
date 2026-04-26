@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -11,6 +12,16 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  const { data: business } = await supabaseAdmin
+    .from("businesses")
+    .select("widget_config")
+    .eq("id", businessId)
+    .single();
+
+  const primaryColor: string =
+    (business?.widget_config as { primary_color?: string } | null)
+      ?.primary_color ?? "#2563eb";
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const widgetUrl = `${appUrl}/widget/${businessId}`;
 
@@ -21,7 +32,7 @@ export async function GET(req: NextRequest) {
 
   var btn = document.createElement('button');
   btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 0 0-1.032-.211 50.89 50.89 0 0 0-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 0 0 2.433 3.984L7.28 21.53A.75.75 0 0 1 6 21v-4.03a48.527 48.527 0 0 1-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979Z" /></svg>';
-  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#2563eb;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform 0.2s';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:${primaryColor};border:none;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform 0.2s';
   btn.onmouseenter = function() { btn.style.transform = 'scale(1.1)'; };
   btn.onmouseleave = function() { btn.style.transform = 'scale(1)'; };
 
