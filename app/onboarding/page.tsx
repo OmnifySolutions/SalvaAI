@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import HoursPicker, { type WeeklyHours, DEFAULT_HOURS } from "@/components/HoursPicker";
 import OnboardingIntro from "@/components/onboarding/OnboardingIntro";
@@ -29,9 +29,18 @@ export default function OnboardingPage() {
 function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plan = searchParams.get("plan") ?? "free";
+  const planParam = searchParams.get("plan");
+  const plan = planParam ?? "";
   const billing = (searchParams.get("billing") ?? "annual") as "annual" | "monthly";
   const isVoicePlan = plan === "pro" || plan === "multi";
+
+  // No plan selected — send to pricing first
+  useEffect(() => {
+    if (!planParam || planParam === "free") {
+      router.replace("/pricing");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [step, setStep] = useState(1);

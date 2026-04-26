@@ -28,6 +28,23 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
+**Latest completed work** (as of 2026-04-26, onboarding intro + free plan removal):
+
+- **Onboarding intro screen overhaul** (2026-04-26):
+  - Audio: plays `/public/audio/onboarding/ai-intro.mp3` on user click (browser autoplay policy requires gesture); falls back to SpeechSynthesis if MP3 fails
+  - Avatar: video element looping `/public/audio/onboarding/avatar-idle.mp4`; `avatar-speaking.mp4` removed (lip sync too complex, skipped)
+  - Start button: pulsing orange/rose glow rings (animate-ping-slow/slower); replaces "click anywhere" approach
+  - Background orbs: animated drift across screen (28s / 34s cycles via CSS keyframes in style jsx block)
+  - Typewriter: `WORDS` is module-level constant; `activeWordIdx` derived (not state); last word reverts to white after 1s via `highlightActive` boolean; `speechSynthesis.onvoiceschanged` cleaned up on unmount
+  - Label updated: "Your AI" → "Your AI Receptionist"
+  - **File needed**: `/public/audio/onboarding/avatar-idle.mp4` (D-ID or HeyGen: idle loop, blinking/breathing)
+
+- **Free plan killed everywhere** (2026-04-26):
+  - `app/page.tsx`: all CTAs → `/pricing` (not `/sign-up`); copy: "See Plans", "Start Your Trial", "14-day trial" (removed "Free to start")
+  - `app/onboarding/page.tsx`: redirects to `/pricing` if no `?plan` param or `plan=free` — users can't reach onboarding without a real plan
+  - `app/dashboard/page.tsx`: single guard `if (!business || !business.plan || business.plan === "free") redirect("/pricing")`
+  - New user flow: homepage CTA → `/pricing` → pick plan → sign up → onboard → checkout
+
 **Latest completed work** (as of 2026-04-26, subscription status visibility + deletion flow fixes):
 - **Subscription status visibility** (2026-04-26):
   - Added `plan_status` field to `businesses` table (was missing, only existed on `organizations`). Migration: `supabase/migrations/20260426_plan_status_on_businesses.sql` sets existing rows to 'active' if they have stripe_subscription_id, else 'free'

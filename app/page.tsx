@@ -87,7 +87,7 @@ export default async function HomePage() {
               Sign in
             </Link>
             <Link
-              href="/sign-up?plan=pro"
+              href="/pricing"
               className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
             >
               Start free trial
@@ -119,10 +119,10 @@ export default async function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
             <Link
-              href="/sign-up"
+              href="/pricing"
               className="bg-white text-gray-900 px-20 py-3.5 rounded-xl font-semibold shadow-sm active:scale-95 animate-soft-pulse"
             >
-              Start Free
+              See Plans
             </Link>
             <Link
               href="/how-it-works"
@@ -154,7 +154,7 @@ export default async function HomePage() {
             <div className="flex items-center gap-6 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">
               <span className="hidden sm:block h-px w-8 bg-gradient-to-r from-transparent to-gray-800" />
               <div className="flex items-center gap-4">
-                <span>Free to start</span>
+                <span>14-day trial</span>
                 <span className="w-1.5 h-1.5 bg-blue-500/40 rounded-full" />
                 <span>Live in minutes</span>
                 <span className="w-1.5 h-1.5 bg-blue-500/40 rounded-full" />
@@ -407,10 +407,10 @@ export default async function HomePage() {
             Salva AI answers 24/7 so you never lose another one.
           </p>
           <Link
-            href="/sign-up"
+            href="/pricing"
             className="inline-block bg-white text-gray-900 px-20 py-3.5 rounded-xl font-semibold shadow-sm active:scale-95 animate-soft-pulse"
           >
-            Get Started Free
+            Start Your Trial
           </Link>
         </div>
       </section>

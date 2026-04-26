@@ -58,7 +58,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     .eq("clerk_user_id", userId)
     .single();
 
-  if (!business) redirect("/onboarding");
+  if (!business || !business.plan || business.plan === "free") redirect("/pricing");
 
   // Get billing period end from database
   const billingPeriodEnd = business.current_period_end ? new Date(business.current_period_end).toISOString() : null;
