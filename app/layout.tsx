@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
 import SupportChat from "@/components/SupportChat";
 import { NotificationProvider } from "@/components/NotificationContext";
 import NotificationToast from "@/components/NotificationToast";
@@ -72,6 +73,7 @@ export default function RootLayout({
             <NotificationToast />
           </NotificationProvider>
           <SupportChat />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
