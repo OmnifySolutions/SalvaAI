@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as Stripe.Subscription;
         const priceId = sub.items.data[0].price.id;
         const plan    = planFromPriceId(priceId);
-        const planStatus = planStatusFromStripe(sub.status);
+        // Stripe uses cancel_at (not cancel_at_period_end) for trial cancellations — it sets
+        // cancel_at to the trial end date while status stays "trialing". Check both.
+        const isCanceling = sub.cancel_at_period_end || sub.cancel_at !== null;
+        const planStatus = isCanceling ? "canceled" : planStatusFromStripe(sub.status);
 
         await Promise.all([
           supabaseAdmin
