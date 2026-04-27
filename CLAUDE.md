@@ -28,7 +28,7 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
 
 ## Current State
 
-**Latest completed work** (as of 2026-04-27, widget customization):
+**Latest completed work** (as of 2026-04-27, widget tab UI redesign):
 
 - **Widget customization feature** (2026-04-27):
   - New "Widget" tab in Settings (between Features and Voice Settings)
@@ -44,6 +44,17 @@ When the user needs to do something manually (UI, console, etc.), provide **ever
   - **Database**: New `widget_config` JSONB column on `businesses` table with 9 fields (primary_color, user/ai bubble colors, logo_url, header_title, button_label, greeting_enabled/text, show_branding)
   - ⚠️ **Manual setup required**: Run migration `20260426_widget_config.sql` in Supabase SQL editor. Create `widget-logos` storage bucket (public read).
   - **Tests**: 154/154 passing. All existing tests still pass.
+
+- **Widget tab UI redesign** (2026-04-27):
+  - **Colors section**: 3 stacked gray cards → single grouped list with `divide-y` (compact, scannable, proper hierarchy)
+  - **Logo upload**: nested dashed-box-in-card removed → single-line `[↑ Upload] or [URL input]` with hint text (zero nesting bloat)
+  - **Toggles**: all standardized to `w-11 h-6` with `w-4 h-4` thumb, matching Features/Notifications tabs (consistency across settings)
+  - **Greeting & White Label**: converted to clickable card pattern (icon block + label/description + toggle), same as Features/Notifications
+  - **Preview**: removed `transform: scale(0.9)` hack → naturally sized at `w-60`, added input bar to chat mock, `sticky top-6` keeps visible while scrolling controls
+  - **Tab header**: added standard `border-b border-gray-100 pb-5` + description, matching every other tab pattern
+  - **Section labels**: switched to `text-xs font-bold text-gray-400 uppercase tracking-widest` pattern (established style)
+  - **Settings container**: `max-w-3xl` → `max-w-5xl` (256px extra breathing room, still centered + mobile-safe)
+  - **Result**: Premium, consistent, uncluttered look aligned with rest of dashboard
 
 **Previous completed work** (as of 2026-04-26, onboarding intro + free plan removal):
 
