@@ -909,65 +909,58 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
         {/* WIDGET TAB */}
         {activeTab === 'widget' && (
           <div>
-            <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-6">Widget Customization</h2>
+            <div className="mb-8 border-b border-gray-100 pb-5">
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Widget Customization</h2>
+              <p className="text-gray-500 text-sm mt-1">Control how your chat widget looks on your website.</p>
+            </div>
 
-            <div className="flex gap-8">
+            <div className="flex gap-10 items-start">
               {/* Left: Controls */}
-              <div className="flex-1 space-y-6">
+              <div className="flex-1 min-w-0 space-y-8">
 
-                {/* Colors section */}
+                {/* Colors */}
                 <div>
-                  <h3 className="text-sm font-bold text-gray-700 mb-4">Colors</h3>
-                  <div className="space-y-4">
-
-                    {/* Primary Color */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Primary Color</p>
-                      <div className="flex items-center gap-3">
-                        <input type="color" value={widgetPrimaryColor} onChange={e => setWidgetPrimaryColor(e.target.value)}
-                          className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
-                        <input type="text" value={widgetPrimaryColor} onChange={e => setWidgetPrimaryColor(e.target.value)}
-                          className="w-28 text-sm font-mono bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1" />
-                        <span className="text-xs text-gray-400">Header, button &amp; accents</span>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Colors</h3>
+                  <div className="rounded-2xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                    {([
+                      { label: 'Primary Color',      desc: 'Header, button & accents',  value: widgetPrimaryColor,    set: setWidgetPrimaryColor },
+                      { label: 'Patient Messages',   desc: "Visitor's chat bubbles",     value: widgetUserBubbleColor, set: setWidgetUserBubbleColor },
+                      { label: 'AI Responses',       desc: 'AI reply bubbles',           value: widgetAiBubbleColor,   set: setWidgetAiBubbleColor },
+                    ] as { label: string; desc: string; value: string; set: (v: string) => void }[]).map(({ label, desc, value, set }) => (
+                      <div key={label} className="flex items-center gap-4 px-4 py-3.5 bg-white hover:bg-gray-50/50 transition-colors">
+                        <input
+                          type="color"
+                          value={value}
+                          onChange={e => set(e.target.value)}
+                          className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800">{label}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                        </div>
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={e => set(e.target.value)}
+                          className="w-24 text-sm font-mono text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-center"
+                        />
                       </div>
-                    </div>
-
-                    {/* Patient Message Color */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Patient Message Color</p>
-                      <div className="flex items-center gap-3">
-                        <input type="color" value={widgetUserBubbleColor} onChange={e => setWidgetUserBubbleColor(e.target.value)}
-                          className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
-                        <input type="text" value={widgetUserBubbleColor} onChange={e => setWidgetUserBubbleColor(e.target.value)}
-                          className="w-28 text-sm font-mono bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1" />
-                        <span className="text-xs text-gray-400">Visitor&apos;s chat bubbles</span>
-                      </div>
-                    </div>
-
-                    {/* AI Message Color */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">AI Message Color</p>
-                      <div className="flex items-center gap-3">
-                        <input type="color" value={widgetAiBubbleColor} onChange={e => setWidgetAiBubbleColor(e.target.value)}
-                          className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
-                        <input type="text" value={widgetAiBubbleColor} onChange={e => setWidgetAiBubbleColor(e.target.value)}
-                          className="w-28 text-sm font-mono bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1" />
-                        <span className="text-xs text-gray-400">AI response bubbles</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Branding section */}
+                {/* Branding */}
                 <div>
-                  <h3 className="text-sm font-bold text-gray-700 mb-4">Branding</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Branding</h3>
                   <div className="space-y-4">
-
-                    {/* Logo */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Practice Logo</p>
-                      <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center hover:border-blue-300 transition-all">
-                        <input type="file" accept="image/png,image/jpeg,image/jpg,image/svg+xml" className="hidden" id="logo-upload"
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Practice Logo</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                          className="hidden"
+                          id="logo-upload"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
@@ -977,11 +970,8 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                               fd.append('file', file);
                               const res = await fetch('/api/widget/upload-logo', { method: 'POST', body: fd });
                               const data = await res.json();
-                              if (data.url) {
-                                setWidgetLogoUrl(data.url);
-                              } else {
-                                setError(data.error ?? 'Logo upload failed. Please try again.');
-                              }
+                              if (data.url) setWidgetLogoUrl(data.url);
+                              else setError(data.error ?? 'Logo upload failed. Please try again.');
                             } catch {
                               setError('Logo upload failed. Please check your connection and try again.');
                             } finally {
@@ -989,136 +979,181 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                             }
                           }}
                         />
-                        <label htmlFor="logo-upload" className="cursor-pointer text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition-colors inline-block">
-                          {widgetLogoUploading ? 'Uploading...' : '↑ Upload image'}
+                        <label
+                          htmlFor="logo-upload"
+                          className="shrink-0 cursor-pointer text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap"
+                        >
+                          {widgetLogoUploading ? 'Uploading…' : '↑ Upload'}
                         </label>
-                        <p className="text-xs text-gray-400 my-2">— or paste a URL —</p>
-                        <input type="text" value={widgetLogoUrl} onChange={e => setWidgetLogoUrl(e.target.value)}
+                        <input
+                          type="text"
+                          value={widgetLogoUrl}
+                          onChange={e => setWidgetLogoUrl(e.target.value)}
                           placeholder="https://yourpractice.com/logo.png"
-                          className="w-full text-sm bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 text-center" />
-                        <p className="text-xs text-gray-400 mt-2">PNG, JPG or SVG · Max 2MB · Appears in chat header</p>
+                          className={inputCls}
+                        />
                       </div>
+                      <p className="text-[11px] text-gray-400 mt-1.5">PNG, JPG, or SVG · Max 2MB · Appears in the chat header</p>
                     </div>
-
-                    {/* Header Title */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Widget Header Title</p>
-                      <input type="text" value={widgetHeaderTitle} onChange={e => setWidgetHeaderTitle(e.target.value)}
+                    <Field label="Widget Title">
+                      <input
+                        type="text"
+                        value={widgetHeaderTitle}
+                        onChange={e => setWidgetHeaderTitle(e.target.value)}
                         placeholder={`AI receptionist for ${business.name}`}
-                        className="w-full text-sm font-medium bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors" />
-                      <p className="text-xs text-gray-400 mt-1.5">Shown at the top of the chat window</p>
-                    </div>
+                        className={inputCls}
+                      />
+                    </Field>
                   </div>
                 </div>
 
-                {/* Chat Button section */}
+                {/* Chat Button */}
                 <div>
-                  <h3 className="text-sm font-bold text-gray-700 mb-4">Chat Button</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Chat Button</h3>
                   <div className="space-y-4">
-
-                    {/* Button Label */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Button Label</p>
-                      <input type="text" value={widgetButtonLabel} onChange={e => setWidgetButtonLabel(e.target.value)}
-                        placeholder="e.g. Chat with us"
-                        className="w-full text-sm font-medium bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors" />
-                      <p className="text-xs text-gray-400 mt-1.5">Optional text next to the button. Leave blank for icon only.</p>
+                    <div>
+                      <Field label="Button Label">
+                        <input
+                          type="text"
+                          value={widgetButtonLabel}
+                          onChange={e => setWidgetButtonLabel(e.target.value)}
+                          placeholder="e.g. Chat with us"
+                          className={inputCls}
+                        />
+                      </Field>
+                      <p className="text-[11px] text-gray-400 mt-1.5">Optional text beside the button. Leave blank for icon only.</p>
                     </div>
-
-                    {/* Greeting Bubble */}
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Greeting Bubble</p>
-                          <p className="text-xs text-gray-500 mt-0.5">Show a message above the chat button</p>
-                        </div>
-                        <button type="button" onClick={() => setWidgetGreetingEnabled(!widgetGreetingEnabled)}
-                          className={`relative w-14 h-7 rounded-full transition-all duration-200 shadow-inner ${widgetGreetingEnabled ? 'bg-blue-600 shadow-blue-200' : 'bg-gray-200'}`}>
-                          <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-200 shadow-md ${widgetGreetingEnabled ? 'left-8' : 'left-1'}`} />
-                        </button>
+                    <div
+                      onClick={() => setWidgetGreetingEnabled(!widgetGreetingEnabled)}
+                      className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${widgetGreetingEnabled ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${widgetGreetingEnabled ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                       </div>
-                      {widgetGreetingEnabled && (
-                        <input type="text" value={widgetGreetingText} onChange={e => setWidgetGreetingText(e.target.value)}
+                      <div className="flex-1">
+                        <p className={`font-semibold text-sm ${widgetGreetingEnabled ? 'text-gray-900' : 'text-gray-500'}`}>Greeting Bubble</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Show a message above the closed chat button</p>
+                      </div>
+                      <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${widgetGreetingEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${widgetGreetingEnabled ? 'left-6' : 'left-1'}`} />
+                      </div>
+                    </div>
+                    {widgetGreetingEnabled && (
+                      <div>
+                        <input
+                          type="text"
+                          value={widgetGreetingText}
+                          onChange={e => setWidgetGreetingText(e.target.value)}
                           placeholder="Hi! How can we help you today?"
-                          className="w-full text-sm font-medium bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none pb-1 placeholder-gray-300 transition-colors mb-3" />
-                      )}
-                      <div className="bg-blue-50 rounded-xl px-3 py-2">
-                        <p className="text-xs text-blue-700">
-                          <strong>This floats above the closed chat button</strong> — visible before anyone clicks.
-                          It is <strong>not</strong> the AI&apos;s first message. To edit what the AI says when the chat opens, go to the <strong>AI Config</strong> tab.
-                        </p>
+                          className={inputCls}
+                        />
+                        <p className="text-[11px] text-gray-400 mt-1.5">Floats above the closed button — not the AI&apos;s first message. Edit what the AI says in <strong>AI Config</strong>.</p>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Powered by SalvaAI */}
+                {/* White Label */}
                 <div>
-                  <h3 className="text-sm font-bold text-gray-700 mb-4">Powered by SalvaAI</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">White Label</h3>
                   {business.plan === 'basic' ? (
-                    <div className="bg-gray-900 text-white rounded-2xl p-8 text-center">
-                      <Zap size={20} className="text-blue-400 mx-auto mb-3" />
-                      <div className="flex items-center justify-center gap-2 mb-1">
-                        <span className="bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded">PRO</span>
-                        <span className="text-sm font-bold">Remove SalvaAI branding</span>
+                    <div className="bg-gray-900 text-white rounded-2xl p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                          <Zap size={18} className="text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="bg-amber-400 text-black text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">PRO</span>
+                            <span className="text-sm font-bold text-white">Remove SalvaAI branding</span>
+                          </div>
+                          <p className="text-xs text-gray-400 mb-3">Upgrade to Pro to hide the &quot;Powered by SalvaAI&quot; footer and give patients a fully branded experience.</p>
+                          <button type="button" onClick={() => router.push('/pricing')} className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors">View Plans</button>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-400 mb-3">Upgrade to Pro to remove the &quot;Powered by SalvaAI&quot; footer from your widget.</p>
-                      <button type="button" onClick={() => router.push('/pricing')} className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors">View Plans</button>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Show &quot;Powered by SalvaAI&quot; in widget footer</p>
-                          <p className="text-xs text-gray-400 mt-0.5">Turn off to give patients a fully branded experience</p>
-                        </div>
-                        <button type="button" onClick={() => setWidgetShowBranding(!widgetShowBranding)}
-                          className={`relative w-14 h-7 rounded-full transition-all duration-200 shadow-inner ${widgetShowBranding ? 'bg-blue-600 shadow-blue-200' : 'bg-gray-200'}`}>
-                          <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-200 shadow-md ${widgetShowBranding ? 'left-8' : 'left-1'}`} />
-                        </button>
+                    <div
+                      onClick={() => setWidgetShowBranding(!widgetShowBranding)}
+                      className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${!widgetShowBranding ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${!widgetShowBranding ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                        <Zap size={18} />
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-semibold text-sm ${!widgetShowBranding ? 'text-gray-900' : 'text-gray-500'}`}>Remove SalvaAI branding</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Hides &quot;Powered by SalvaAI&quot; from the widget footer</p>
+                      </div>
+                      <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${!widgetShowBranding ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${!widgetShowBranding ? 'left-6' : 'left-1'}`} />
                       </div>
                     </div>
                   )}
                 </div>
+
+                {/* Install */}
+                <div className="border-t border-gray-100 pt-8">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Add to Your Website</h3>
+                  <div className="space-y-3 mb-4">
+                    {([
+                      { n: 1, text: <>Copy the snippet below.</> },
+                      { n: 2, text: <>Paste it just <strong>before the closing <code className="bg-gray-100 px-1 rounded text-xs">&lt;/body&gt;</code> tag</strong> on every page where you want the chat.</> },
+                      { n: 3, text: <><strong>That&apos;s it.</strong> Changes you make here update automatically — no need to re-paste.</> },
+                    ] as { n: number; text: React.ReactNode }[]).map(({ n, text }) => (
+                      <div key={n} className="flex gap-3 items-start">
+                        <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{n}</div>
+                        <p className="text-sm text-gray-600">{text}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <EmbedCodeBlock businessId={business.id ?? ''} />
+                  <p className="text-xs text-gray-400 mt-2">Using WordPress, Wix, or Squarespace? <a href="/faq" className="text-blue-600 hover:underline">See our FAQ →</a></p>
+                </div>
+
               </div>
 
               {/* Right: Live Preview */}
-              <div className="w-64 shrink-0">
+              <div className="w-60 shrink-0 sticky top-6">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Live Preview</p>
 
-                {/* Widget open state */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden mb-4" style={{ transform: 'scale(0.9)', transformOrigin: 'top right' }}>
-                  {/* Header */}
-                  <div className="p-3 flex items-center gap-2" style={{ background: widgetPrimaryColor }}>
+                {/* Open state */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden mb-5">
+                  <div className="px-3 py-2.5 flex items-center gap-2" style={{ background: widgetPrimaryColor }}>
                     {widgetLogoUrl ? (
-                      <img src={widgetLogoUrl} alt="logo" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                      <img src={widgetLogoUrl} alt="logo" className="w-6 h-6 rounded-full object-cover shrink-0" />
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white text-[10px] font-bold shrink-0">AI</div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-xs font-bold truncate">{widgetHeaderTitle || `AI receptionist for ${business.name}`}</p>
-                      <p className="text-white/70 text-[10px]">Online</p>
+                      <p className="text-white text-xs font-bold truncate leading-tight">{widgetHeaderTitle || `AI for ${business.name}`}</p>
+                      <p className="text-white/70 text-[9px] leading-tight">Online · typically replies instantly</p>
                     </div>
                   </div>
-                  {/* Messages */}
                   <div className="p-3 bg-gray-50 space-y-2">
                     <div className="flex justify-start">
-                      <div className="text-xs px-3 py-1.5 rounded-2xl rounded-tl-sm max-w-[80%]" style={{ background: widgetAiBubbleColor, color: '#1f2937' }}>
-                        Hi! How can I help you today? 😊
+                      <div className="text-[11px] px-2.5 py-1.5 rounded-2xl rounded-tl-sm max-w-[85%] leading-snug" style={{ background: widgetAiBubbleColor, color: '#1f2937' }}>
+                        Hi! How can I help you? 😊
                       </div>
                     </div>
                     <div className="flex justify-end">
-                      <div className="text-white text-xs px-3 py-1.5 rounded-2xl rounded-tr-sm max-w-[80%]" style={{ background: widgetUserBubbleColor }}>
+                      <div className="text-white text-[11px] px-2.5 py-1.5 rounded-2xl rounded-tr-sm max-w-[85%] leading-snug" style={{ background: widgetUserBubbleColor }}>
                         Do you accept new patients?
                       </div>
                     </div>
                     <div className="flex justify-start">
-                      <div className="text-xs px-3 py-1.5 rounded-2xl rounded-tl-sm max-w-[80%]" style={{ background: widgetAiBubbleColor, color: '#1f2937' }}>
+                      <div className="text-[11px] px-2.5 py-1.5 rounded-2xl rounded-tl-sm max-w-[85%] leading-snug" style={{ background: widgetAiBubbleColor, color: '#1f2937' }}>
                         Yes! We&apos;re welcoming new patients.
                       </div>
                     </div>
                   </div>
-                  {/* Footer */}
+                  <div className="px-2.5 py-2 border-t border-gray-100 bg-white flex items-center gap-1.5">
+                    <div className="flex-1 bg-gray-100 rounded-full h-7 px-3 flex items-center">
+                      <span className="text-[10px] text-gray-400">Type a message…</span>
+                    </div>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: widgetPrimaryColor }}>
+                      <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </div>
+                  </div>
                   {(widgetShowBranding || business.plan === 'basic') && (
                     <div className="py-1.5 text-center text-[9px] text-gray-400 border-t border-gray-100 bg-white">
                       Powered by SalvaAI
@@ -1126,17 +1161,17 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                   )}
                 </div>
 
-                {/* Widget closed state */}
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Closed State</p>
+                {/* Closed state */}
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2.5">Closed State</p>
                 <div className="flex flex-col items-end gap-2">
                   {widgetGreetingEnabled && widgetGreetingText && (
-                    <div className="bg-white border border-gray-200 rounded-2xl rounded-br-sm shadow-md px-3 py-2 text-xs text-gray-700 max-w-[180px]">
+                    <div className="bg-white border border-gray-200 rounded-2xl rounded-br-sm shadow-md px-3 py-2 text-xs text-gray-700 max-w-[160px]">
                       {widgetGreetingText}
                     </div>
                   )}
                   <div className="flex items-center gap-2 justify-end">
                     {widgetButtonLabel && (
-                      <span className="text-white text-xs font-semibold px-3 py-2 rounded-full" style={{ background: widgetPrimaryColor }}>
+                      <span className="text-white text-xs font-semibold px-3 py-2 rounded-full shadow-sm" style={{ background: widgetPrimaryColor }}>
                         {widgetButtonLabel}
                       </span>
                     )}
@@ -1146,25 +1181,6 @@ export default function SettingsForm({ business, forLocationId }: { business: Bu
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Embed Code Section */}
-            <div className="border-t border-gray-200 pt-6 mt-8">
-              <h3 className="text-sm font-bold text-gray-700 mb-4">Add Widget to Your Website</h3>
-              <div className="space-y-3 mb-4">
-                {[
-                  { n: 1, text: <>Copy the code snippet below.</> },
-                  { n: 2, text: <>Open your website&apos;s HTML and paste it just <strong>before the closing <code className="bg-gray-100 px-1 rounded text-xs">&lt;/body&gt;</code> tag</strong> on every page where you want the chat to appear.</> },
-                  { n: 3, text: <>Save and publish your site. <strong>The widget appears immediately.</strong> Any changes you make here update automatically — no need to re-paste the code.</> },
-                ].map(({ n, text }) => (
-                  <div key={n} className="flex gap-3 items-start">
-                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{n}</div>
-                    <p className="text-sm text-gray-600">{text}</p>
-                  </div>
-                ))}
-              </div>
-              <EmbedCodeBlock businessId={business.id ?? ''} />
-              <p className="text-xs text-gray-400 mt-2">Using WordPress, Wix, or Squarespace? <a href="/faq" className="text-blue-600 hover:underline">See our FAQ →</a></p>
             </div>
           </div>
         )}

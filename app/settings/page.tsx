@@ -56,7 +56,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
           Dashboard
         </Link>
       </nav>
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-6 py-8">
         <h1 className="text-3xl font-black text-gray-900 mb-1 tracking-tight">Settings</h1>
         <p className="text-sm text-gray-500 mb-6">Update your AI receptionist configuration.</p>
 
